@@ -4,6 +4,9 @@ from unittest import TestCase
 import copy
 import multiprocessing as mp
 from grape.general_graph import GeneralGraph
+from grape.parallel_general_graph import ParallelGeneralGraph
+from grape.fault_diagnosis import FaultDiagnosis
+
 
 class TestShortestPathGraph(TestCase):
     """
@@ -317,10 +320,10 @@ class TestShortestPathGraph(TestCase):
 		The following test checks the parallel SSSP algorithm based
 		on Dijkstra's method.
 		"""
-        g = GeneralGraph()
+        g = ParallelGeneralGraph()
         g.load("tests/TOY_graph.csv")
         g.num = mp.cpu_count()
-        g.parallel_wrapper_proc()
+        g.dijkstra_single_source_shortest_path()
 
         self.check_shortest_paths(self, self.initial, g)
 
@@ -328,10 +331,10 @@ class TestShortestPathGraph(TestCase):
         """
 		The following test checks the parallel Floyd Warshall's APSP algorithm.
 		"""
-        g = GeneralGraph()
+        g = ParallelGeneralGraph()
         g.load("tests/TOY_graph.csv")
         g.num = mp.cpu_count()
-        g.floyd_warshall_predecessor_and_distance_parallel()
+        g.floyd_warshall_predecessor_and_distance()
 
         self.check_shortest_paths(self, self.initial, g)
 
@@ -341,10 +344,8 @@ class TestShortestPathGraph(TestCase):
 		on Dijkstra's method.
 		"""
         g = GeneralGraph()
-        g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
-        g.num = mp.cpu_count()
-        g.single_source_shortest_path_serial()
+        g.dijkstra_single_source_shortest_path()
 
         self.check_shortest_paths(self, self.initial, g)
 
@@ -354,8 +355,7 @@ class TestShortestPathGraph(TestCase):
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
-        g.num = mp.cpu_count()
-        g.floyd_warshall_predecessor_and_distance_serial()
+        g.floyd_warshall_predecessor_and_distance()
 
         self.check_shortest_paths(self, self.initial, g)
 
@@ -365,11 +365,10 @@ class TestShortestPathGraph(TestCase):
         a perturbation. The perturbation here considered is the
         perturbation of element '1'.
 		"""
-        g = GeneralGraph()
-        g.load("tests/TOY_graph.csv")
-        g.simulate_element_perturbation(["1"])
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_element_perturbation(["1"])
 
-        self.check_shortest_paths(self, self.final_element_perturbation, g)
+        self.check_shortest_paths(self, self.final_element_perturbation, F.G)
 
     def test_single_area_perturbation(self):
         """
@@ -379,11 +378,10 @@ class TestShortestPathGraph(TestCase):
 		Shortest paths are going to be the same as in element perturbation
         because all nodes in area 1 but node '1' are perturbation resistant.
 		"""
-        g = GeneralGraph()
-        g.load("tests/TOY_graph.csv")
-        g.simulate_area_perturbation(['area1'])
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_area_perturbation(['area1'])
 
-        self.check_shortest_paths(self, self.final_element_perturbation, g)
+        self.check_shortest_paths(self, self.final_element_perturbation, F.G)
 
     def test_multi_area_perturbation(self):
         """
@@ -391,8 +389,7 @@ class TestShortestPathGraph(TestCase):
         a perturbation. The perturbation here considered is the
         perturbation in multiple areas.
 		"""
-        g = GeneralGraph()
-        g.load("tests/TOY_graph.csv")
-        g.simulate_area_perturbation(['area1', 'area2', 'area3'])
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_area_perturbation(['area1', 'area2', 'area3'])
 
-        self.check_shortest_paths(self, self.final_multi_area_perturbation, g)
+        self.check_shortest_paths(self, self.final_multi_area_perturbation, F.G)
