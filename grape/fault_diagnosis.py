@@ -1,6 +1,7 @@
 """FaultDiagnosis module"""
 
 import logging
+import sys
 import warnings
 import networkx as nx
 import pandas as pd
@@ -9,8 +10,7 @@ from .general_graph import GeneralGraph
 from .parallel_general_graph import ParallelGeneralGraph
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
-logging.basicConfig(
-    filename="general_code_output.log", level=logging.DEBUG, filemode='w')
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 class FaultDiagnosis():
@@ -38,6 +38,10 @@ class FaultDiagnosis():
         self.df, self.edges_df = self.G.load(filename)
 
         self.damaged_areas = set()
+
+        self.valv = {  "isolation_A" : { "0": "OPEN", "1": "CLOSED"},
+           "isolation_B" : { "0": "CLOSED", "1": "OPEN"},
+           "unknown" : { "0": "OFF", "1": "ON"} }
 
     def check_input_with_gephi(self):
         """
@@ -150,14 +154,14 @@ class FaultDiagnosis():
 
                     for node in set_sip:
 
-                        if self.G.Description[node] in self.G.valv:
+                        if self.G.Description[node] in self.valv:
 
                             if self.G.nodes[node]['IntermediateStatus'] == "1":
 
                                 logging.debug(
                                 "valve %s at node %s, state %s",
                                 self.G.Description[node], node,
-                                self.G.valv[self.G.Description[node]]["1"])
+                                self.valv[self.G.Description[node]]["1"])
 
                             elif self.G.nodes[node]['IntermediateStatus']== "0":
 
@@ -166,8 +170,8 @@ class FaultDiagnosis():
                                 logging.debug(
                                 "valve %s at node %s, from %s to %s",
                                 self.G.Description[node], node,
-                                self.G.valv[self.G.Description[node]]["0"],
-                                self.G.valv[self.G.Description[node]]["1"])
+                                self.valv[self.G.Description[node]]["0"],
+                                self.valv[self.G.Description[node]]["1"])
 
                             else:
 
@@ -176,7 +180,7 @@ class FaultDiagnosis():
                                     logging.debug(
                                     "valve %s at node %s, state %s",
                                     self.G.Description[node], node,
-                                    self.G.valv[self.G.Description[node]]["1"])
+                                    self.valv[self.G.Description[node]]["1"])
 
                                 elif self.G.status[node] == "0":
 
@@ -243,12 +247,12 @@ class FaultDiagnosis():
             logging.debug('Node %s visited, fault resistant node', node)
             return visited
 
-        if self.G.Description[node] in self.G.valv:
+        if self.G.Description[node] in self.valv:
 
             if self.G.status[node] == "0":
                 logging.debug('Valve %s at node %s, state %s',
                 self.G.Description[node], node,
-                self.G.valv[self.G.Description[node]]["0"])
+                self.valv[self.G.Description[node]]["0"])
 
             elif self.G.status[node] == "1":
 
@@ -257,8 +261,8 @@ class FaultDiagnosis():
                 logging.debug(
                 'Valve %s at node %s, from %s to %s',
                 self.G.Description[node], node,
-                self.G.valv[self.G.Description[node]]["1"],
-                self.G.valv[self.G.Description[node]]["0"])
+                self.valv[self.G.Description[node]]["1"],
+                self.valv[self.G.Description[node]]["0"])
 
             if len(visited) == 1:
                 self.broken.append(node)

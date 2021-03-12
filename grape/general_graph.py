@@ -88,9 +88,9 @@ class GeneralGraph(nx.DiGraph):
             elif Type == "USER":
                 self.USER.append(idx)
 
-        self.valv = {	"isolation_A" : { "0": "OPEN", "1": "CLOSED"},
-			"isolation_B" : { "0": "CLOSED", "1": "OPEN"},
-			"unknown" : { "0": "OFF", "1": "ON"} }
+        #self.valv = {	"isolation_A" : { "0": "OPEN", "1": "CLOSED"},
+		#	"isolation_B" : { "0": "CLOSED", "1": "OPEN"},
+		#	"unknown" : { "0": "OFF", "1": "ON"} }
 
         return graph_df, graph_edges_df
 
@@ -129,12 +129,12 @@ class GeneralGraph(nx.DiGraph):
 
         return path
 
-    def construct_path_kernel(self, nodi, pred):
+    def construct_path_kernel(self, nodes, pred):
         """
 
         Populate the dictionary of shortest paths.
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             shortest path between them and all the other nodes
         :param numpy.ndarray pred: matrix of predecessors,
             computed with Floyd Warshall APSP algorithm
@@ -147,7 +147,7 @@ class GeneralGraph(nx.DiGraph):
 
         paths = {}
 
-        for i in nodi:
+        for i in nodes:
             paths[self.ids[i]] = {
                 self.ids[j]: self.construct_path(i,j,pred)
                 for j in sorted(list(self.H))
@@ -155,14 +155,14 @@ class GeneralGraph(nx.DiGraph):
 
         return paths
 
-    def efficiency_kernel(self, nodi):
+    def efficiency_kernel(self, nodes):
         """
 
         Compute efficiency, starting from path length attribute.
         Efficiency is a measure of how good is the exchange of commodities
         flowing from one node to the others.
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
 
         :return: nested dictionary with key corresponding to
@@ -171,12 +171,15 @@ class GeneralGraph(nx.DiGraph):
         :rtype: dict
         """
 
+        if not nx.get_node_attributes(self, "shpath_length"):
+            raise ValueError("No shortest path length attribute in the graph.")
+
         dict_efficiency = {}
 
-        for n in nodi:
+        for n in nodes:
             dict_efficiency[n] = {}
             for key, length_path in self.nodes[n]["shpath_length"].items():
-                if length_path != 0 :
+                if length_path != 0:
                     efficiency = 1 / length_path
                     dict_efficiency[n].update({key: efficiency})
                 else:
@@ -204,7 +207,7 @@ class GeneralGraph(nx.DiGraph):
         self.ids = nx.get_node_attributes(self.H, 'Mark_ids')
         self.ids_reversed = { value: key for key, value in self.ids.items() }
 
-        dist = nx.to_numpy_matrix(self.H, nodelist=sorted(list(self.H)), \
+        dist = nx.to_numpy_matrix(self.H, nodelist=sorted(list(self.H)),
         nonedge=np.inf)
         np.fill_diagonal(dist, 0.)
 
@@ -304,12 +307,12 @@ class GeneralGraph(nx.DiGraph):
         eff_dicts = self.efficiency_kernel(list(self))
         nx.set_node_attributes(self, eff_dicts, name="efficiency")
 
-    def nodal_efficiency_kernel(self, nodi, g_len):
+    def nodal_efficiency_kernel(self, nodes, g_len):
         """
 
         Compute nodal efficiency, starting from efficiency attribute.
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
         :param int g_len: graph size
 
@@ -317,9 +320,12 @@ class GeneralGraph(nx.DiGraph):
         :rtype: dict
         """
 
+        if not nx.get_node_attributes(self, "efficiency"):
+            raise ValueError("No efficiency attribute in the graph.")
+
         dict_nodeff = {}
 
-        for n in nodi:
+        for n in nodes:
             sum_efficiencies = sum(self.nodes[n]["efficiency"].values())
             dict_nodeff[n] = sum_efficiencies / (g_len - 1)
 
@@ -342,21 +348,24 @@ class GeneralGraph(nx.DiGraph):
         nodeff = self.nodal_efficiency_kernel(list(self), g_len)
         nx.set_node_attributes(self, nodeff, name="nodal_eff")
 
-    def local_efficiency_kernel(self, nodi):
+    def local_efficiency_kernel(self, nodes):
         """
 
         Compute local efficiency, starting from nodal efficiency attribute.
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
 
         :return: local efficiency dictionary keyed by node
         :rtype: dict
         """
 
+        if not nx.get_node_attributes(self, "nodal_eff"):
+            raise ValueError("No nodal efficiency attribute in the graph.")
+
         dict_loceff = {}
 
-        for n in nodi:
+        for n in nodes:
             subgraph = list(self.successors(n))
             denom_subg = len(list(subgraph))
 
@@ -403,17 +412,20 @@ class GeneralGraph(nx.DiGraph):
         if g_len <= 1:
             raise ValueError("Graph size must equal or larger than 2.")
 
+        if not nx.get_node_attributes(self, "nodal_eff"):
+            raise ValueError("No nodal efficiency attribute in the graph.")
+
         nodeff = nx.get_node_attributes(self, 'nodal_eff')
         nodeff_values = list(nodeff.values())
         avg_eff = sum(nodeff_values) / g_len
         nx.set_node_attributes(self, avg_eff, name="avg_global_eff")
 
-    def shortest_path_list_kernel(self, nodi, tot_shortest_paths):
+    def shortest_path_list_kernel(self, nodes, tot_shortest_paths):
         """
 
         Collect the shortest paths that contain at least two nodes.
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             list of shortest paths
         :param tot_shortest_paths: nested dictionary with key corresponding to
             source, while as value a dictionary keyed by target and valued
@@ -425,7 +437,7 @@ class GeneralGraph(nx.DiGraph):
 
         tot_shortest_paths_list = list()
 
-        for n in nodi:
+        for n in nodes:
             node_tot_shortest_paths = tot_shortest_paths[n]
             for value in node_tot_shortest_paths.values():
                 if len(value) > 1:
@@ -433,12 +445,12 @@ class GeneralGraph(nx.DiGraph):
 
         return tot_shortest_paths_list
 
-    def betweenness_centrality_kernel(self, nodi, tot_shortest_paths_list):
+    def betweenness_centrality_kernel(self, nodes, tot_shortest_paths_list):
         """
 
         Compute betweenness centrality, from shortest path list. 
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
         :param tot_shortest_paths_list: list of shortest paths
             with at least two nodes
@@ -450,7 +462,7 @@ class GeneralGraph(nx.DiGraph):
 
         dict_betcen = {}
 
-        for n in nodi:
+        for n in nodes:
             sp_with_node = []
             for l in tot_shortest_paths_list:
                 if n in l and n != l[0] and n != l[-1]:
@@ -475,6 +487,9 @@ class GeneralGraph(nx.DiGraph):
             the network, because more information will pass through them.
         """
 
+        if not nx.get_node_attributes(self, "shortest_path"):
+            raise ValueError("No shortest path attribute in the graph.")
+
         tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
         tot_shortest_paths_list = self.shortest_path_list_kernel(list(self), \
         tot_shortest_paths)
@@ -483,12 +498,12 @@ class GeneralGraph(nx.DiGraph):
         tot_shortest_paths_list)
         nx.set_node_attributes(self, betcen, name="betweenness_centrality")
 
-    def closeness_centrality_kernel(self, nodi, tot_shortest_paths_list, g_len):
+    def closeness_centrality_kernel(self, nodes, tot_shortest_paths_list, g_len):
         """
 
         Compute betweenness centrality, from shortest path list. 
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
         :param tot_shortest_paths_list: list of shortest paths
             with at least two nodes
@@ -499,9 +514,12 @@ class GeneralGraph(nx.DiGraph):
         :rtype: dict
         """
 
+        if not nx.get_node_attributes(self, "shpath_length"):
+            raise ValueError("No shortest path length attribute in the graph.")
+
         dict_clocen = {}
 
-        for n in nodi:
+        for n in nodes:
             totsp = []
             sp_with_node = []
             for l in tot_shortest_paths_list:
@@ -533,6 +551,9 @@ class GeneralGraph(nx.DiGraph):
         if g_len <= 1:
             raise ValueError("Graph size must equal or larger than 2.")
 
+        if not nx.get_node_attributes(self, "shortest_path"):
+            raise ValueError("No shortest path attribute in the graph.")
+
         tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
         tot_shortest_paths_list = self.shortest_path_list_kernel(list(self), \
         tot_shortest_paths)
@@ -541,12 +562,12 @@ class GeneralGraph(nx.DiGraph):
         tot_shortest_paths_list, g_len)
         nx.set_node_attributes(self, clocen, name="closeness_centrality")
 
-    def degree_centrality_kernel(self, nodi, g_len):
+    def degree_centrality_kernel(self, nodes, g_len):
         """
 
         Compute degree centrality.
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
         :param int g_len: graph size
 
@@ -556,7 +577,7 @@ class GeneralGraph(nx.DiGraph):
 
         dict_deg_cen = {}
 
-        for n in nodi:
+        for n in nodes:
             num_neighbor_nodes = self.degree(n, weight = 'weight')
             dict_deg_cen[n] = num_neighbor_nodes / (g_len - 1)
 
@@ -583,12 +604,12 @@ class GeneralGraph(nx.DiGraph):
         deg_cen = self.degree_centrality_kernel(list(self), g_len)
         nx.set_node_attributes(self, deg_cen, name="degree_centrality")
 
-    def indegree_centrality_kernel(self, nodi, g_len):
+    def indegree_centrality_kernel(self, nodes, g_len):
         """
 
         Compute in-degree centrality.
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
         :param int g_len: graph size
 
@@ -598,7 +619,7 @@ class GeneralGraph(nx.DiGraph):
 
         dict_indeg_cen = {}
 
-        for n in nodi:
+        for n in nodes:
             num_incoming_nodes = self.in_degree(n, weight = 'weight')
             dict_indeg_cen[n] = num_incoming_nodes / (g_len - 1)
 
@@ -622,12 +643,12 @@ class GeneralGraph(nx.DiGraph):
         indeg_cen = self.indegree_centrality_kernel(list(self), g_len)
         nx.set_node_attributes(self, indeg_cen, name="indegree_centrality")
 
-    def outdegree_centrality_kernel(self, nodi, g_len):
+    def outdegree_centrality_kernel(self, nodes, g_len):
         """
 
         Compute out-degree centrality.
 
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
         :param int g_len: graph size
 
@@ -637,7 +658,7 @@ class GeneralGraph(nx.DiGraph):
 
         dict_outdeg_cen = {}
 
-        for n in nodi:
+        for n in nodes:
             num_outcoming_nodes = self.out_degree(n, weight = 'weight')
             dict_outdeg_cen[n] = num_outcoming_nodes / (g_len - 1)
 
@@ -695,6 +716,9 @@ class GeneralGraph(nx.DiGraph):
         :type graph: networkx.DiGraph
         :param str servicename: service to populate
         """
+
+        if not nx.get_node_attributes(self, "shortest_path"):
+            raise ValueError("No shortest path attribute in the graph.")
 
         users_per_node = {node: 0. for node in self}
         splitting = {edge: 0. for edge in self.edges()}
