@@ -35,29 +35,18 @@ class GeneralGraph(nx.DiGraph):
                 'PerturbationResistant':str, 'InitStatus':str}
         graph_df = pd.read_csv(filename, converters=conv, keep_default_na=False)
 
-        for index in graph_df.index.values.tolist():
-            if not graph_df.iloc[index]['Mark'] in self:
-                self.add_node(graph_df.iloc[index]['Mark'])
+        for index, row in graph_df.iterrows():
 
-            for key in ['Mark', 'Area', 'PerturbationResistant', 'InitStatus',
-                        'Description', 'Type', 'Father_mark']:
-                self.nodes[graph_df.iloc[index]['Mark']][key] = \
-                graph_df.iloc[index][key]
+            weight = row.pop('Weight')
+            father_mark = row['Father_mark']
+            father_cond = row['Father_cond']
 
-            self.nodes[graph_df.iloc[index]['Mark']]['Service'] = \
-            float(graph_df.iloc[index]['Service'])
+            self.add_node(row['Mark'], **row)
 
-            if graph_df.iloc[index]['Father_mark'] == 'NULL':
-                continue
-
-            if not graph_df.iloc[index]['Father_mark'] in self:
-                self.add_node(graph_df.iloc[index]['Father_mark'])
-
-            self.add_edge(
-                graph_df.iloc[index]['Father_mark'],
-                graph_df.iloc[index]['Mark'],
-                Father_cond = graph_df.iloc[index]['Father_cond'],
-                weight = float(graph_df.iloc[index]['Weight']))
+            if father_mark != 'NULL':
+                self.add_edge(
+                    father_mark, row['Mark'],
+                    Father_cond=father_cond, weight=weight)
 
         graph_edges_df = graph_df[['Mark', 'Father_mark']]
 
@@ -71,15 +60,6 @@ class GeneralGraph(nx.DiGraph):
         nx.set_node_attributes(self, 'AVAILABLE', 'Status_Area')
         nx.set_node_attributes(self, 'ACTIVE', 'Mark_Status')
 
-        self.area = nx.get_node_attributes(self, 'Area')
-        self.Fault_Resistant = nx.get_node_attributes(self, \
-        'PerturbationResistant')
-        self.Description = nx.get_node_attributes(self, 'Description')
-        self.status = nx.get_node_attributes(self, 'InitStatus')
-        self.condition = nx.get_edge_attributes(self, 'Father_cond')
-        self.Type = nx.get_node_attributes(self, 'Type')
-        self.Service = nx.get_node_attributes(self, 'Service')
-
         self.SOURCE = []
         self.USER = []
         for idx, Type in self.Type.items():
@@ -88,11 +68,35 @@ class GeneralGraph(nx.DiGraph):
             elif Type == "USER":
                 self.USER.append(idx)
 
-        #self.valv = {	"isolation_A" : { "0": "OPEN", "1": "CLOSED"},
-		#	"isolation_B" : { "0": "CLOSED", "1": "OPEN"},
-		#	"unknown" : { "0": "OFF", "1": "ON"} }
-
         return graph_df, graph_edges_df
+
+    @property
+    def area(self):
+        return nx.get_node_attributes(self, 'Area')
+
+    @property
+    def Fault_Resistant(self):
+        return nx.get_node_attributes(self, 'PerturbationResistant')
+
+    @property
+    def Description(self):
+        return nx.get_node_attributes(self, 'Description')
+
+    @property
+    def status(self):
+        return nx.get_node_attributes(self, 'InitStatus')
+
+    @property
+    def condition(self):
+        return nx.get_edge_attributes(self, 'Father_cond')
+
+    @property
+    def Type(self):
+        return nx.get_node_attributes(self, 'Type')
+
+    @property
+    def Service(self):
+        return nx.get_node_attributes(self, 'Service')
 
     def construct_path(self, source, target, pred):
         """
@@ -208,7 +212,7 @@ class GeneralGraph(nx.DiGraph):
         self.ids_reversed = { value: key for key, value in self.ids.items() }
 
         dist = nx.to_numpy_matrix(self.H, nodelist=sorted(list(self.H)),
-        nonedge=np.inf)
+            nonedge=np.inf)
         np.fill_diagonal(dist, 0.)
 
         pred = np.full((len(self.H), len(self.H)), np.inf)
@@ -491,21 +495,21 @@ class GeneralGraph(nx.DiGraph):
             raise ValueError("No shortest path attribute in the graph.")
 
         tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
-        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self), \
-        tot_shortest_paths)
+        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
+            tot_shortest_paths)
 
-        betcen = self.betweenness_centrality_kernel(list(self), \
-        tot_shortest_paths_list)
+        betcen = self.betweenness_centrality_kernel(list(self),
+            tot_shortest_paths_list)
         nx.set_node_attributes(self, betcen, name="betweenness_centrality")
 
-    def closeness_centrality_kernel(self, nodes, tot_shortest_paths_list, g_len):
+    def closeness_centrality_kernel(self, nodes, tot_shpaths_list, g_len):
         """
 
         Compute betweenness centrality, from shortest path list. 
 
         :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
-        :param tot_shortest_paths_list: list of shortest paths
+        :param tot_shpaths_list: list of shortest paths
             with at least two nodes
         :type tot_shortest_path_list: list or multiprocessing.managers.list
         :param int g_len: graph size
@@ -522,14 +526,17 @@ class GeneralGraph(nx.DiGraph):
         for n in nodes:
             totsp = []
             sp_with_node = []
-            for l in tot_shortest_paths_list:
+            for l in tot_shpaths_list:
                 if n in l and n == l[-1]:
                     sp_with_node.append(l)
                     length_path = self.nodes[l[0]]["shpath_length"][l[-1]]
                     totsp.append(length_path)
             norm = len(totsp) / (g_len - 1)
-            dict_clocen[n] = (len(totsp) / sum(totsp)) * norm \
-            if (sum(totsp)) != 0 else 0
+
+            if (sum(totsp)) != 0:
+                dict_clocen[n] = (len(totsp) / sum(totsp)) * norm
+            else:
+                dict_clocen[n] = 0
 
         return dict_clocen
 
@@ -555,8 +562,8 @@ class GeneralGraph(nx.DiGraph):
             raise ValueError("No shortest path attribute in the graph.")
 
         tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
-        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self), \
-        tot_shortest_paths)
+        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
+            tot_shortest_paths)
 
         clocen = self.closeness_centrality_kernel(list(self), \
         tot_shortest_paths_list, g_len)
