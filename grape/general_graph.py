@@ -98,45 +98,11 @@ class GeneralGraph(nx.DiGraph):
     def service(self):
         return nx.get_node_attributes(self, 'Service')
 
-    def construct_path(self, source, target, pred):
-        """
-
-        Reconstruct source-target paths starting from predecessors
-        matrix.
-
-        :param source: starting node for the path
-        :param target: ending node for the path
-        :param numpy.ndarray pred: matrix of predecessors, computed
-            with Floyd Warshall APSP algorithm
-
-        :return: the shortest path between source and target
-            (source and target included)
-        :rtype: list
-        """
-
-        if source == target:
-            path = [source]
-        else:
-            pred.astype(int)
-            curr = pred[source, target]
-            if curr != np.inf:
-                curr = int(curr)
-                path = [int(target), int(curr)]
-                while curr != source:
-                    curr = int(pred[int(source), int(curr)])
-                    path.append(curr)
-            else:
-                path = []
-
-        path = list(map(self.ids.get, path))
-        path = list(reversed(path))
-
-        return path
-
     def construct_path_kernel(self, nodes, pred):
         """
 
-        Populate the dictionary of shortest paths.
+        Reconstruct source-target paths starting from predecessors
+        matrix, and populate the dictionary of shortest paths.
 
         :param list nodes: list of nodes for which to compute the
             shortest path between them and all the other nodes
@@ -149,15 +115,37 @@ class GeneralGraph(nx.DiGraph):
         :rtype: dict
         """
 
-        paths = {}
+        shortest_paths = {}
 
         for i in nodes:
-            paths[self.ids[i]] = {
-                self.ids[j]: self.construct_path(i,j,pred)
-                for j in sorted(list(self.H))
-            }
+            all_targets_paths = {}
+            for j in sorted(list(self.H)):
 
-        return paths
+                source = i
+                target = j
+
+                if source == target:
+                    path = [source]
+                else:
+                    pred.astype(int)
+                    curr = pred[source, target]
+                    if curr != np.inf:
+                        curr = int(curr)
+                        path = [int(target), int(curr)]
+                        while curr != source:
+                            curr = int(pred[int(source), int(curr)])
+                            path.append(curr)
+                    else:
+                        path = []
+
+                path = list(map(self.ids.get, path))
+                path = list(reversed(path))
+
+                all_targets_paths[self.ids[j]] = path
+
+            shortest_paths[self.ids[i]] = all_targets_paths
+
+        return shortest_paths
 
     def efficiency_kernel(self, nodes):
         """
@@ -413,13 +401,13 @@ class GeneralGraph(nx.DiGraph):
             efficiency of all pairs of nodes.
         """
 
+        g_len = len(list(self))
+
         if g_len <= 1:
             raise ValueError("Graph size must equal or larger than 2.")
 
         if not nx.get_node_attributes(self, "nodal_eff"):
             raise ValueError("No nodal efficiency attribute in the graph.")
-
-        g_len = len(list(self))
 
         nodeff = nx.get_node_attributes(self, 'nodal_eff')
         nodeff_values = list(nodeff.values())
