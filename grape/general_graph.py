@@ -38,8 +38,8 @@ class GeneralGraph(nx.DiGraph):
         for index, row in graph_df.iterrows():
 
             weight = row.pop('Weight')
-            father_mark = row['Father_mark']
-            father_cond = row['Father_cond']
+            father_mark = row.pop('Father_mark')
+            father_cond = row.pop('Father_cond')
 
             self.add_node(row['Mark'], **row)
 
