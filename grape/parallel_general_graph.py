@@ -273,8 +273,8 @@ class ParallelGeneralGraph(GeneralGraph):
         :type tot_shpath_list: multiprocessing.managers.list
         """
 
-        partial_shpath_list = self.shortest_path_list_kernel(nodi, \
-        tot_shpaths)
+        partial_shpath_list = self.shortest_path_list_kernel(nodi,
+            tot_shpaths)
         tot_shpaths_list.extend(partial_shpath_list)
 
     def betweenness_centrality(self):
@@ -308,8 +308,8 @@ class ParallelGeneralGraph(GeneralGraph):
             proc.join()
 
         betcen = self.manager.dict()
-        self.measure_processes(betcen, self.betweenness_centrality_kernel, \
-        tot_shortest_paths_list)
+        self.measure_processes(betcen, self.betweenness_centrality_kernel,
+            tot_shortest_paths_list)
         nx.set_node_attributes(self, betcen, name="betweenness_centrality")
 
     def closeness_centrality(self):
@@ -347,8 +347,8 @@ class ParallelGeneralGraph(GeneralGraph):
             proc.join()
 
         clocen = self.manager.dict()
-        self.measure_processes(clocen, self.closeness_centrality_kernel, \
-        tot_shortest_paths_list, g_len)
+        self.measure_processes(clocen, self.closeness_centrality_kernel,
+            tot_shortest_paths_list, g_len)
         nx.set_node_attributes(self, clocen, name="closeness_centrality")
 
     def degree_centrality(self):
@@ -408,8 +408,8 @@ class ParallelGeneralGraph(GeneralGraph):
             raise ValueError("Graph size must equal or larger than 2.")
 
         outdegcen = self.manager.dict()
-        self.measure_processes(outdegcen, self.outdegree_centrality_kernel, \
-        g_len)
+        self.measure_processes(outdegcen, self.outdegree_centrality_kernel,
+            g_len)
         nx.set_node_attributes(self, outdegcen, name="outdegree_centrality")
 
     def calculate_shortest_path(self):

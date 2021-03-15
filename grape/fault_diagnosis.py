@@ -118,7 +118,7 @@ class FaultDiagnosis():
 
         self.paths_df = pd.DataFrame(original_source_user_paths)
 
-        # In check before we also also centralities
+        # In check before we include also centralities
         self.G.closeness_centrality()
         self.G.betweenness_centrality()
         self.G.indegree_centrality()
@@ -218,8 +218,8 @@ class FaultDiagnosis():
 
         if final_source_user_paths:
             final_df = pd.DataFrame(final_source_user_paths)
-            self.paths_df = pd.merge(self.paths_df, final_df, \
-            on=['from', 'to', 'ids'], how='outer')
+            self.paths_df = pd.merge(self.paths_df, final_df,
+                on=['from', 'to', 'ids'], how='outer')
 
     def rm_nodes(self, node, visited=None):
         """
@@ -390,8 +390,8 @@ class FaultDiagnosis():
 
         self.check_before()
 
-        centrality_fields = ['closeness_centrality', 'betweenness_centrality', \
-        'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
+        centrality_fields = ['closeness_centrality', 'betweenness_centrality',
+            'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
         self.update_output(centrality_fields)
 
         for node in perturbed_nodes:
@@ -407,11 +407,11 @@ class FaultDiagnosis():
             self.G.USER.remove(u)
 
         self.check_after()
-        self.paths_df.to_csv("service_paths_element_perturbation.csv", \
-        index=False)
+        self.paths_df.to_csv("service_paths_element_perturbation.csv",
+            index=False)
 
-        status_area_fields = ['IntermediateStatus', 'FinalStatus', \
-        'Mark_Status', 'Status_Area']
+        status_area_fields = ['IntermediateStatus', 'FinalStatus',
+            'Mark_Status', 'Status_Area']
         self.update_output(status_area_fields)
 
         self.update_status_areas(self.damaged_areas)
@@ -448,8 +448,8 @@ class FaultDiagnosis():
 
         self.check_before()
 
-        centrality_fields = ['closeness_centrality', 'betweenness_centrality', \
-        'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
+        centrality_fields = ['closeness_centrality', 'betweenness_centrality',
+            'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
         self.update_output(centrality_fields)
 
         for node in nodes_in_area:
@@ -468,8 +468,8 @@ class FaultDiagnosis():
         self.check_after()
         self.paths_df.to_csv("service_paths_area_perturbation.csv", index=False)
 
-        status_area_fields = ['IntermediateStatus', 'FinalStatus', \
-        'Mark_Status', 'Status_Area']
+        status_area_fields = ['IntermediateStatus', 'FinalStatus',
+            'Mark_Status', 'Status_Area']
         self.update_output(status_area_fields)
 
         self.update_status_areas(self.damaged_areas)
