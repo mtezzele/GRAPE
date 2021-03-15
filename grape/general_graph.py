@@ -324,6 +324,9 @@ class GeneralGraph(nx.DiGraph):
         :rtype: dict
         """
 
+        if g_len <= 1:
+            raise ValueError("Graph size must equal or larger than 2.")
+
         if not nx.get_node_attributes(self, "efficiency"):
             raise ValueError("No efficiency attribute in the graph.")
 
@@ -346,8 +349,6 @@ class GeneralGraph(nx.DiGraph):
         """
 
         g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
 
         nodeff = self.nodal_efficiency_kernel(list(self), g_len)
         nx.set_node_attributes(self, nodeff, name="nodal_eff")
@@ -412,12 +413,13 @@ class GeneralGraph(nx.DiGraph):
             efficiency of all pairs of nodes.
         """
 
-        g_len = len(list(self))
         if g_len <= 1:
             raise ValueError("Graph size must equal or larger than 2.")
 
         if not nx.get_node_attributes(self, "nodal_eff"):
             raise ValueError("No nodal efficiency attribute in the graph.")
+
+        g_len = len(list(self))
 
         nodeff = nx.get_node_attributes(self, 'nodal_eff')
         nodeff_values = list(nodeff.values())
@@ -518,6 +520,9 @@ class GeneralGraph(nx.DiGraph):
         :rtype: dict
         """
 
+        if g_len <= 1:
+            raise ValueError("Graph size must equal or larger than 2.")
+
         if not nx.get_node_attributes(self, "shpath_length"):
             raise ValueError("No shortest path length attribute in the graph.")
 
@@ -554,12 +559,10 @@ class GeneralGraph(nx.DiGraph):
             closely the nodes are connected with each other.
         """
 
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
-
         if not nx.get_node_attributes(self, "shortest_path"):
             raise ValueError("No shortest path attribute in the graph.")
+
+        g_len = len(list(self))
 
         tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
         tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
@@ -581,6 +584,9 @@ class GeneralGraph(nx.DiGraph):
         :return: degree centrality dictionary keyed by node
         :rtype: dict
         """
+
+        if g_len <= 1:
+            raise ValueError("Graph size must equal or larger than 2.")
 
         dict_deg_cen = {}
 
@@ -605,8 +611,6 @@ class GeneralGraph(nx.DiGraph):
         """
 
         g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
 
         deg_cen = self.degree_centrality_kernel(list(self), g_len)
         nx.set_node_attributes(self, deg_cen, name="degree_centrality")
@@ -623,6 +627,9 @@ class GeneralGraph(nx.DiGraph):
         :return: in-degree centrality dictionary keyed by node
         :rtype: dict
         """
+
+        if g_len <= 1:
+            raise ValueError("Graph size must equal or larger than 2.")
 
         dict_indeg_cen = {}
 
@@ -644,8 +651,6 @@ class GeneralGraph(nx.DiGraph):
         """
 
         g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
 
         indeg_cen = self.indegree_centrality_kernel(list(self), g_len)
         nx.set_node_attributes(self, indeg_cen, name="indegree_centrality")
@@ -662,6 +667,9 @@ class GeneralGraph(nx.DiGraph):
         :return: out-degree dictionary keyed by node
         :rtype: dict
         """
+
+        if g_len <= 1:
+            raise ValueError("Graph size must equal or larger than 2.")
 
         dict_outdeg_cen = {}
 
@@ -683,8 +691,6 @@ class GeneralGraph(nx.DiGraph):
         """
 
         g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
 
         outdeg_cen = self.outdegree_centrality_kernel(list(self), g_len)
         nx.set_node_attributes(self, outdeg_cen, name="outdegree_centrality")
