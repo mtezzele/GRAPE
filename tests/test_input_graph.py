@@ -84,40 +84,6 @@ class TestInputGraph(TestCase):
         g_cond = nx.get_edge_attributes(g, "Father_cond")
         self.assertDictEqual(cond_dict, g_cond, msg="Wrong CONDITION in input")
 
-    def test_Father_mark(self):
-        """
-		Unittest check for Father_mark attribute of GeneralGraph:
-		correct input reading.
-		"""
-        g = GeneralGraph()
-        g.load("tests/TOY_graph.csv")
-
-        Father_mark_dict = {
-            '1': 'NULL',
-            '2': '1',
-            '3': '1',
-            '4': '2',
-            '5': '3',
-            '6': '8',
-            '7': '6',
-            '8': '6',
-            '9': '15',
-            '10': '17',
-            '11': '5',
-            '12': '13',
-            '13': '12',
-            '14': '13',
-            '15': 'NULL',
-            '16': '17',
-            '17': '16',
-            '18': '14',
-            '19': '14'
-        }
-
-        g_Father_mark = nx.get_node_attributes(g, "Father_mark")
-        self.assertDictEqual(
-            Father_mark_dict, g_Father_mark, msg="Wrong FATHER MARK in input")
-
     def test_Area(self):
         """
 		Unittest check for Area attribute of GeneralGraph:
