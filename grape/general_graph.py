@@ -62,7 +62,7 @@ class GeneralGraph(nx.DiGraph):
 
         self.SOURCE = []
         self.USER = []
-        for idx, Type in self.Type.items():
+        for idx, Type in self.type.items():
             if Type == "SOURCE":
                 self.SOURCE.append(idx)
             elif Type == "USER":
@@ -75,11 +75,11 @@ class GeneralGraph(nx.DiGraph):
         return nx.get_node_attributes(self, 'Area')
 
     @property
-    def Fault_Resistant(self):
+    def fault_resistant(self):
         return nx.get_node_attributes(self, 'PerturbationResistant')
 
     @property
-    def Description(self):
+    def description(self):
         return nx.get_node_attributes(self, 'Description')
 
     @property
@@ -91,11 +91,11 @@ class GeneralGraph(nx.DiGraph):
         return nx.get_edge_attributes(self, 'Father_cond')
 
     @property
-    def Type(self):
+    def type(self):
         return nx.get_node_attributes(self, 'Type')
 
     @property
-    def Service(self):
+    def service(self):
         return nx.get_node_attributes(self, 'Service')
 
     def construct_path(self, source, target, pred):
@@ -744,7 +744,7 @@ class GeneralGraph(nx.DiGraph):
         for s in self.SOURCE:
             for u in users_per_source[s]:
                 self.nodes[u]['service'] += \
-                self.Service[s]/len(users_per_source[s])
+                self.service[s]/len(users_per_source[s])
 
         #Cycle just on the edges contained in source-user shortest paths
         for s in self.SOURCE:

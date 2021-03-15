@@ -154,14 +154,14 @@ class FaultDiagnosis():
 
                     for node in set_sip:
 
-                        if self.G.Description[node] in self.valv:
+                        if self.G.description[node] in self.valv:
 
                             if self.G.nodes[node]['IntermediateStatus'] == "1":
 
                                 logging.debug(
                                 "valve %s at node %s, state %s",
-                                self.G.Description[node], node,
-                                self.valv[self.G.Description[node]]["1"])
+                                self.G.description[node], node,
+                                self.valv[self.G.description[node]]["1"])
 
                             elif self.G.nodes[node]['IntermediateStatus']== "0":
 
@@ -169,9 +169,9 @@ class FaultDiagnosis():
 
                                 logging.debug(
                                 "valve %s at node %s, from %s to %s",
-                                self.G.Description[node], node,
-                                self.valv[self.G.Description[node]]["0"],
-                                self.valv[self.G.Description[node]]["1"])
+                                self.G.description[node], node,
+                                self.valv[self.G.description[node]]["0"],
+                                self.valv[self.G.description[node]]["1"])
 
                             else:
 
@@ -179,8 +179,8 @@ class FaultDiagnosis():
 
                                     logging.debug(
                                     "valve %s at node %s, state %s",
-                                    self.G.Description[node], node,
-                                    self.valv[self.G.Description[node]]["1"])
+                                    self.G.description[node], node,
+                                    self.valv[self.G.description[node]]["1"])
 
                                 elif self.G.status[node] == "0":
 
@@ -188,9 +188,9 @@ class FaultDiagnosis():
 
                                     logging.debug(
                                     "valve %s at node %s, from %s to %s",
-                                    self.G.Description[node], node,
-                                    self.valv[self.G.Description[node]]["0"],
-                                    self.valv[self.G.Description[node]]["1"])
+                                    self.G.description[node], node,
+                                    self.valv[self.G.description[node]]["0"],
+                                    self.valv[self.G.description[node]]["1"])
 
                     shp = self.G.nodes[source]["shortest_path"][user]
                     shpl = self.G.nodes[source]["shpath_length"][user]
@@ -243,16 +243,16 @@ class FaultDiagnosis():
         logging.debug('Visited: %s', visited)
         logging.debug('Node: %s', node)
 
-        if self.G.Fault_Resistant[node] == "1":
+        if self.G.fault_resistant[node] == "1":
             logging.debug('Node %s visited, fault resistant node', node)
             return visited
 
-        if self.G.Description[node] in self.valv:
+        if self.G.description[node] in self.valv:
 
             if self.G.status[node] == "0":
                 logging.debug('Valve %s at node %s, state %s',
-                self.G.Description[node], node,
-                self.valv[self.G.Description[node]]["0"])
+                self.G.description[node], node,
+                self.valv[self.G.description[node]]["0"])
 
             elif self.G.status[node] == "1":
 
@@ -260,9 +260,9 @@ class FaultDiagnosis():
 
                 logging.debug(
                 'Valve %s at node %s, from %s to %s',
-                self.G.Description[node], node,
-                self.valv[self.G.Description[node]]["1"],
-                self.valv[self.G.Description[node]]["0"])
+                self.G.description[node], node,
+                self.valv[self.G.description[node]]["1"],
+                self.valv[self.G.description[node]]["0"])
 
             if len(visited) == 1:
                 self.broken.append(node)
