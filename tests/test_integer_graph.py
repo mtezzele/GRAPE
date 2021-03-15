@@ -52,35 +52,8 @@ def test_global_efficiency():
     g.load("tests/TOY_graph.csv")
     g.calculate_shortest_path()
     g.nodal_efficiency()
-    g.global_efficiency()
 
-    global_eff_before = {
-        '1': 0.1759191750419821,
-        '2': 0.1759191750419821,
-        '3': 0.1759191750419821,
-        '4': 0.1759191750419821,
-        '5': 0.1759191750419821,
-        '6': 0.1759191750419821,
-        '7': 0.1759191750419821,
-        '8': 0.1759191750419821,
-        '9': 0.1759191750419821,
-        '10': 0.1759191750419821,
-        '11': 0.1759191750419821,
-        '12': 0.1759191750419821,
-        '13': 0.1759191750419821,
-        '14': 0.1759191750419821,
-        '15': 0.1759191750419821,
-        '16': 0.1759191750419821,
-        '17': 0.1759191750419821,
-        '18': 0.1759191750419821,
-        '19': 0.1759191750419821
-    }
-
-    g_global_eff_before = nx.get_node_attributes(g, 'avg_global_eff')
-
-    np.testing.assert_array_almost_equal(
-        np.asarray(sorted(global_eff_before.values())),
-        np.asarray(sorted(g_global_eff_before.values())),
+    np.testing.assert_almost_equal(g.global_efficiency, 0.1759191750419821,
         err_msg="ORIGINAL GLOBAL EFFICIENCY failure")
 
 def test_local_efficiency():

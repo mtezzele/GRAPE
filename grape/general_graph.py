@@ -392,6 +392,7 @@ class GeneralGraph(nx.DiGraph):
         loceff = self.local_efficiency_kernel(list(self))
         nx.set_node_attributes(self, loceff, name="local_eff")
 
+    @property
     def global_efficiency(self):
         """
 
@@ -411,8 +412,8 @@ class GeneralGraph(nx.DiGraph):
 
         nodeff = nx.get_node_attributes(self, 'nodal_eff')
         nodeff_values = list(nodeff.values())
-        avg_eff = sum(nodeff_values) / g_len
-        nx.set_node_attributes(self, avg_eff, name="avg_global_eff")
+
+        return sum(nodeff_values) / g_len
 
     def shortest_path_list_kernel(self, nodes, tot_shortest_paths):
         """

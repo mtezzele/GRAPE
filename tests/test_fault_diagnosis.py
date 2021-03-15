@@ -299,33 +299,7 @@ def test_global_efficiency_after_element_perturbation():
     F = FaultDiagnosis("tests/TOY_graph.csv")
     F.simulate_element_perturbation(["1"])
 
-    global_eff_after_element_perturbation = {
-        '2': 0.17771187599618973,
-        '3': 0.17771187599618973,
-        '4': 0.17771187599618973,
-        '5': 0.17771187599618973,
-        '6': 0.17771187599618973,
-        '7': 0.17771187599618973,
-        '8': 0.17771187599618973,
-        '9': 0.17771187599618973,
-        '10': 0.17771187599618973,
-        '11': 0.17771187599618973,
-        '12': 0.17771187599618973,
-        '13': 0.17771187599618973,
-        '14': 0.17771187599618973,
-        '15': 0.17771187599618973,
-        '16': 0.17771187599618973,
-        '17': 0.17771187599618973,
-        '18': 0.17771187599618973,
-        '19': 0.17771187599618973
-    }
-
-    g_global_eff_after_element_perturbation = \
-    nx.get_node_attributes(F.G, 'avg_global_eff')
-
-    np.testing.assert_array_almost_equal(
-        np.asarray(sorted(global_eff_after_element_perturbation.values())),
-        np.asarray(sorted(g_global_eff_after_element_perturbation.values())),
+    np.testing.assert_almost_equal(F.G.global_efficiency, 0.17771187599618973,
         err_msg="FINAL GLOBAL EFFICIENCY failure: perturbation of element 1")
 
 def test_global_efficiency_after_element_perturbation_isolating():
@@ -338,33 +312,7 @@ def test_global_efficiency_after_element_perturbation_isolating():
     F = FaultDiagnosis("tests/TOY_graph.csv")
     F.simulate_element_perturbation(["1"])
 
-    global_eff_after_element_perturbation = {
-        '2': 0.17771187599618973,
-        '3': 0.17771187599618973,
-        '4': 0.17771187599618973,
-        '5': 0.17771187599618973,
-        '6': 0.17771187599618973,
-        '7': 0.17771187599618973,
-        '8': 0.17771187599618973,
-        '9': 0.17771187599618973,
-        '10': 0.17771187599618973,
-        '11': 0.17771187599618973,
-        '12': 0.17771187599618973,
-        '13': 0.17771187599618973,
-        '14': 0.17771187599618973,
-        '15': 0.17771187599618973,
-        '16': 0.17771187599618973,
-        '17': 0.17771187599618973,
-        '18': 0.17771187599618973,
-        '19': 0.17771187599618973
-    }
-
-    g_global_eff_after_element_perturbation = \
-    nx.get_node_attributes(F.G, 'avg_global_eff')
-
-    np.testing.assert_array_almost_equal(
-        np.asarray(sorted(global_eff_after_element_perturbation.values())),
-        np.asarray(sorted(g_global_eff_after_element_perturbation.values())),
+    np.testing.assert_almost_equal(F.G.global_efficiency, 0.17771187599618973,
         err_msg="FINAL GLOBAL EFFICIENCY failure: perturbation of element 1")
 
 def test_global_efficiency_after_single_area_perturbation():
@@ -376,33 +324,7 @@ def test_global_efficiency_after_single_area_perturbation():
     F = FaultDiagnosis("tests/TOY_graph.csv")
     F.simulate_area_perturbation(['area1'])
 
-    global_eff_after_single_area_perturbation = {
-        '2': 0.17771187599618973,
-        '3': 0.17771187599618973,
-        '4': 0.17771187599618973,
-        '5': 0.17771187599618973,
-        '6': 0.17771187599618973,
-        '7': 0.17771187599618973,
-        '8': 0.17771187599618973,
-        '9': 0.17771187599618973,
-        '10': 0.17771187599618973,
-        '11': 0.17771187599618973,
-        '12': 0.17771187599618973,
-        '13': 0.17771187599618973,
-        '14': 0.17771187599618973,
-        '15': 0.17771187599618973,
-        '16': 0.17771187599618973,
-        '17': 0.17771187599618973,
-        '18': 0.17771187599618973,
-        '19': 0.17771187599618973
-    }
-
-    g_global_eff_after_single_area_perturbation = \
-    nx.get_node_attributes(F.G, 'avg_global_eff')
-
-    np.testing.assert_array_almost_equal(
-        np.asarray(sorted(global_eff_after_single_area_perturbation.values())),
-        np.asarray(sorted(g_global_eff_after_single_area_perturbation.values())),
+    np.testing.assert_almost_equal(F.G.global_efficiency, 0.17771187599618973,
         err_msg="FINAL GLOBAL EFFICIENCY failure: perturbation in area 1")
 
 def test_global_efficiency_after_multi_area_perturbation():
@@ -414,24 +336,8 @@ def test_global_efficiency_after_multi_area_perturbation():
     F = FaultDiagnosis("tests/TOY_graph.csv")
     F.simulate_area_perturbation(['area1', 'area2', 'area3'])
 
-    global_eff_after_multi_area_perturbation = {
-        '2': 0.24206349206349204,
-        '3': 0.24206349206349204,
-        '4': 0.24206349206349204,
-        '5': 0.24206349206349204,
-        '6': 0.24206349206349204,
-        '7': 0.24206349206349204,
-        '8': 0.24206349206349204,
-    }
-
-    g_global_eff_after_multi_area_perturbation = \
-    nx.get_node_attributes(F.G, 'avg_global_eff')
-
-    np.testing.assert_array_almost_equal(
-        np.asarray(sorted(global_eff_after_multi_area_perturbation.values())),
-        np.asarray(sorted(g_global_eff_after_multi_area_perturbation.values())),
-        err_msg=
-        "FINAL GLOBAL EFFICIENCY failure: perturbation in areas 1, 2, 3")
+    np.testing.assert_almost_equal(F.G.global_efficiency, 0.24206349206349204,
+        err_msg="FINAL GLOBAL EFFICIENCY failure: perturbation in area 1, 2, 3")
 
 def test_residual_service_after_element_perturbation():
     """

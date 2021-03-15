@@ -75,11 +75,10 @@ class FaultDiagnosis():
         original_source_user_paths = []
 
         self.G.nodal_efficiency()
-        self.G.global_efficiency()
         self.G.local_efficiency()
         self.G.compute_service()
 
-        eff_fields = ['nodal_eff', 'avg_global_eff', 'local_eff', 'service']
+        eff_fields = ['nodal_eff', 'local_eff', 'service']
         self.update_output(eff_fields, prefix="original_")
 
         for source in self.G.SOURCE:
@@ -138,11 +137,10 @@ class FaultDiagnosis():
         final_source_user_paths = []
 
         self.G.nodal_efficiency()
-        self.G.global_efficiency()
         self.G.local_efficiency()
         self.G.compute_service()
 
-        eff_fields = ['nodal_eff', 'avg_global_eff', 'local_eff', 'service']
+        eff_fields = ['nodal_eff', 'local_eff', 'service']
         self.update_output(eff_fields, prefix="final_")
 
         for source in self.G.SOURCE:
@@ -495,7 +493,6 @@ class FaultDiagnosis():
             "indegree_centrality", "outdegree_centrality",
             "original_local_eff", "final_local_eff",
             "original_nodal_eff", "final_nodal_eff",
-            "original_avg_global_eff", "final_avg_global_eff",
             "original_service", "final_service"
         ]
         self.df[fields].to_csv(filename, index=False)
