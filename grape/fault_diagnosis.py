@@ -71,12 +71,7 @@ class FaultDiagnosis():
         Check the availability of paths between source and target nodes.
         """
 
-        #self.G.calculate_shortest_path()
         original_source_user_paths = []
-
-        #self.G.compute_nodal_efficiency()
-        #self.G.compute_local_efficiency()
-        #self.G.compute_service()
 
         eff_fields = ['nodal_efficiency', 'local_efficiency', 'service']
         self.update_output(eff_fields, prefix='original_')
@@ -122,12 +117,6 @@ class FaultDiagnosis():
             'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
         self.update_output(centrality_fields)
 
-        #self.G.compute_closeness_centrality()
-        #self.G.compute_betweenness_centrality()
-        #self.G.compute_indegree_centrality()
-        #self.G.compute_outdegree_centrality()
-        #self.G.compute_degree_centrality()
-
     def check_after(self):
         """
 
@@ -137,12 +126,7 @@ class FaultDiagnosis():
         Check the availability of paths between source and target nodes.
         """
 
-        #self.G.calculate_shortest_path()
         final_source_user_paths = []
-
-        #self.G.compute_nodal_efficiency()
-        #self.G.compute_local_efficiency()
-        #self.G.compute_service()
 
         eff_fields = ['nodal_efficiency', 'local_efficiency', 'service']
         self.update_output(eff_fields, prefix='final_')

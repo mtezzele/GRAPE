@@ -426,8 +426,8 @@ class GeneralGraph(nx.DiGraph):
                 dist[init:stop, :],
                 dist[init:stop, :])
             diff = np.equal(dist[init:stop, :], dist_copy)
-            pred[init:stop, :][~diff] = \
-            np.tile(pred[w, :], (stop-init, 1))[~diff]
+            pred[init:stop, :][~diff] = np.tile(pred[w, :],
+                (stop-init, 1))[~diff]
 
         if barrier:
             barrier.wait()
@@ -773,8 +773,8 @@ class GeneralGraph(nx.DiGraph):
         g_len = len(list(self))
         tot_shortest_paths_list = self.shortest_path_list_kernel(list(self))
 
-        clo_cen = self.closeness_centrality_kernel(list(self), \
-        tot_shortest_paths_list, g_len)
+        clo_cen = self.closeness_centrality_kernel(list(self),
+            tot_shortest_paths_list, g_len)
         return clo_cen
 
     def degree_centrality_kernel(self, nodes, g_len):
@@ -905,35 +905,34 @@ class GeneralGraph(nx.DiGraph):
         :param str servicename: service to populate
         """
 
-        users_per_node = {node: 0. for node in self}
+        usr_per_node = {node: 0. for node in self}
         splitting = {edge: 0. for edge in self.edges()}
         computed_service = {node: 0. for node in self}
         initial_service = self.initial_service
         shortest_path = self.shortest_path
 
-        users_per_source = {
+        usr_per_source = {
             s: [u for u in self.USER if nx.has_path(self, s, u)]
             for s in self.SOURCE
         }
 
         for s in self.SOURCE:
-            for u in users_per_source[s]:
+            for u in usr_per_source[s]:
                 for node in self.shortest_path[s][u]:
-                    users_per_node[node] += 1.
+                    usr_per_node[node] += 1.
 
         for s in self.SOURCE:
-            for u in users_per_source[s]:
-                computed_service[u] += \
-                    initial_service[s]/len(users_per_source[s])
+            for u in usr_per_source[s]:
+                computed_service[u] += initial_service[s]/len(usr_per_source[s])
 
         #Cycle just on the edges contained in source-user shortest paths
         for s in self.SOURCE:
-            for u in users_per_source[s]:
+            for u in usr_per_source[s]:
                 for idx in range(len(shortest_path[s][u]) - 1):
 
                     head = shortest_path[s][u][idx]
                     tail = shortest_path[s][u][idx+1]
 
-                    splitting[(head, tail)] += 1./users_per_node[head]
+                    splitting[(head, tail)] += 1./usr_per_node[head]
 
         return computed_service, splitting
