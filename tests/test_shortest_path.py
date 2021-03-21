@@ -280,7 +280,7 @@ class TestShortestPathGraph(TestCase):
         }
 
     @classmethod
-    def check_shortest_paths(cls, test, true_path, graph):
+    def check_shortest_paths(cls, test, true_path, shpath, shpath_len):
         """
 		For every path, source and target must match with the true ones.
 		The length of the shortest path beteween source
@@ -291,27 +291,23 @@ class TestShortestPathGraph(TestCase):
         for source, all_paths in true_path.items():
             for target, path in all_paths.items():
                 test.assertEqual(
-                    path[0],
-                    graph.nodes[source]["shortest_path"][target][0],
+                    path[0], shpath[source][target][0],
                     msg="Wrong SOURCE in path from " + str(source) + " to " +
                     str(target))
 
                 test.assertEqual(
-                    path[-1],
-                    graph.nodes[source]["shortest_path"][target][-1],
+                    path[-1], shpath[source][target][-1],
                     msg="Wrong TARGET in path from " + str(source) + " to " +
                     str(target))
 
                 if source != target:
                     test.assertEqual(
-                        len(path)-1,
-					    graph.nodes[source]["shpath_length"][target],
+                        len(path)-1, shpath_len[source][target],
                         msg="Wrong LENGTH of path from " + str(source) +
                         " to " + str(target))
                 else:
                     test.assertEqual(
-                        0.0,
-                        graph.nodes[source]["shpath_length"][target],
+                        0.0, shpath_len[source][target],
                         msg="Wrong LENGTH of path from " + str(source) +
                         " to " + str(target))
 
@@ -323,9 +319,9 @@ class TestShortestPathGraph(TestCase):
         g = ParallelGeneralGraph()
         g.load("tests/TOY_graph.csv")
         g.num = mp.cpu_count()
-        g.dijkstra_single_source_shortest_path()
+        shpath, shpath_len = g.dijkstra_single_source_shortest_path()
 
-        self.check_shortest_paths(self, self.initial, g)
+        self.check_shortest_paths(self, self.initial, shpath, shpath_len)
 
     def test_floyd_warshall_parallel(self):
         """
@@ -334,9 +330,9 @@ class TestShortestPathGraph(TestCase):
         g = ParallelGeneralGraph()
         g.load("tests/TOY_graph.csv")
         g.num = mp.cpu_count()
-        g.floyd_warshall_predecessor_and_distance()
+        shpath, shpath_len = g.floyd_warshall_predecessor_and_distance()
 
-        self.check_shortest_paths(self, self.initial, g)
+        self.check_shortest_paths(self, self.initial, shpath, shpath_len)
 
     def test_Dijkstra_serial(self):
         """
@@ -345,9 +341,9 @@ class TestShortestPathGraph(TestCase):
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
-        g.dijkstra_single_source_shortest_path()
+        shpath, shpath_len = g.dijkstra_single_source_shortest_path()
 
-        self.check_shortest_paths(self, self.initial, g)
+        self.check_shortest_paths(self, self.initial, shpath, shpath_len)
 
     def test_floyd_warshall_serial(self):
         """
@@ -355,9 +351,9 @@ class TestShortestPathGraph(TestCase):
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
-        g.floyd_warshall_predecessor_and_distance()
+        shpath, shpath_len = g.floyd_warshall_predecessor_and_distance()
 
-        self.check_shortest_paths(self, self.initial, g)
+        self.check_shortest_paths(self, self.initial, shpath, shpath_len)
 
     def test_element_perturbation(self):
         """
@@ -368,7 +364,8 @@ class TestShortestPathGraph(TestCase):
         F = FaultDiagnosis("tests/TOY_graph.csv")
         F.simulate_element_perturbation(["1"])
 
-        self.check_shortest_paths(self, self.final_element_perturbation, F.G)
+        self.check_shortest_paths(self, self.final_element_perturbation,
+            F.G.shortest_path, F.G.shortest_path_length)
 
     def test_single_area_perturbation(self):
         """
@@ -381,7 +378,8 @@ class TestShortestPathGraph(TestCase):
         F = FaultDiagnosis("tests/TOY_graph.csv")
         F.simulate_area_perturbation(['area1'])
 
-        self.check_shortest_paths(self, self.final_element_perturbation, F.G)
+        self.check_shortest_paths(self, self.final_element_perturbation,
+            F.G.shortest_path, F.G.shortest_path_length)
 
     def test_multi_area_perturbation(self):
         """
@@ -392,4 +390,5 @@ class TestShortestPathGraph(TestCase):
         F = FaultDiagnosis("tests/TOY_graph.csv")
         F.simulate_area_perturbation(['area1', 'area2', 'area3'])
 
-        self.check_shortest_paths(self, self.final_multi_area_perturbation, F.G)
+        self.check_shortest_paths(self, self.final_multi_area_perturbation,
+            F.G.shortest_path, F.G.shortest_path_length)

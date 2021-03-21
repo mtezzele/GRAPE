@@ -36,12 +36,9 @@ def test_nodal_efficiency_after_element_perturbation():
         '19': 0.17647058823529413
     }
 
-    g_nodal_eff_after_element_perturbation = \
-    nx.get_node_attributes(F.G, 'nodal_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(nodal_eff_after_element_perturbation.values())),
-        np.asarray(sorted(g_nodal_eff_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.nodal_efficiency.values())),
         err_msg="FINAL NODAL EFFICIENCY failure: perturbation of element 1")
 
 def test_nodal_efficiency_after_element_perturbation_isolating():
@@ -75,12 +72,9 @@ def test_nodal_efficiency_after_element_perturbation_isolating():
         '19': 0.17647058823529413
     }
 
-    g_nodal_eff_after_element_perturbation = \
-    nx.get_node_attributes(F.G, 'nodal_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(nodal_eff_after_element_perturbation.values())),
-        np.asarray(sorted(g_nodal_eff_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.nodal_efficiency.values())),
         err_msg="FINAL NODAL EFFICIENCY failure: perturbation of element 1")
 
 def test_nodal_efficiency_after_single_area_perturbation():
@@ -113,12 +107,9 @@ def test_nodal_efficiency_after_single_area_perturbation():
         '19': 0.17647058823529413
     }
 
-    g_nodal_eff_after_single_area_perturbation = \
-    nx.get_node_attributes(F.G, 'nodal_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(nodal_eff_after_single_area_perturbation.values())),
-        np.asarray(sorted(g_nodal_eff_after_single_area_perturbation.values())),
+        np.asarray(sorted(F.G.nodal_efficiency.values())),
         err_msg="FINAL NODAL EFFICIENCY failure: perturbation in area 1")
 
 def test_nodal_efficiency_after_multi_area_perturbation():
@@ -140,12 +131,9 @@ def test_nodal_efficiency_after_multi_area_perturbation():
         '8': 0.25,
     }
 
-    g_nodal_eff_after_multi_area_perturbation = \
-    nx.get_node_attributes(F.G, 'nodal_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(nodal_eff_after_multi_area_perturbation.values())),
-        np.asarray(sorted(g_nodal_eff_after_multi_area_perturbation.values())),
+        np.asarray(sorted(F.G.nodal_efficiency.values())),
         err_msg=
         "FINAL NODAL EFFICIENCY failure: perturbation in areas 1, 2, 3")
 
@@ -178,12 +166,9 @@ def test_local_efficiency_after_element_perturbation():
         '19': 0.18627450980392157
     }
 
-    g_local_eff_after_element_perturbation = \
-    nx.get_node_attributes(F.G, 'local_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(local_eff_after_element_perturbation.values())),
-        np.asarray(sorted(g_local_eff_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.local_efficiency.values())),
         err_msg="FINAL LOCAL EFFICIENCY failure: perturbation of element 1")
 
 def test_local_efficiency_after_element_perturbation_isolating():
@@ -217,12 +202,9 @@ def test_local_efficiency_after_element_perturbation_isolating():
         '19': 0.18627450980392157
     }
 
-    g_local_eff_after_element_perturbation = \
-    nx.get_node_attributes(F.G, 'local_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(local_eff_after_element_perturbation.values())),
-        np.asarray(sorted(g_local_eff_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.local_efficiency.values())),
         err_msg="FINAL LOCAL EFFICIENCY failure: perturbation of element 1")
 
 def test_local_efficiency_after_single_area_perturbation():
@@ -255,12 +237,9 @@ def test_local_efficiency_after_single_area_perturbation():
         '19': 0.18627450980392157
     }
 
-    g_local_eff_after_single_area_perturbation = \
-    nx.get_node_attributes(F.G, 'local_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(local_eff_after_single_area_perturbation.values())),
-        np.asarray(sorted(g_local_eff_after_single_area_perturbation.values())),
+        np.asarray(sorted(F.G.local_efficiency.values())),
         err_msg="FINAL LOCAL EFFICIENCY failure: perturbation in area 1")
 
 def test_local_efficiency_after_multi_area_perturbation():
@@ -282,12 +261,9 @@ def test_local_efficiency_after_multi_area_perturbation():
         '8': 0.3333333333333333,
     }
 
-    g_local_eff_after_multi_area_perturbation = \
-    nx.get_node_attributes(F.G, 'local_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(local_eff_after_multi_area_perturbation.values())),
-        np.asarray(sorted(g_local_eff_after_multi_area_perturbation.values())),
+        np.asarray(sorted(F.G.local_efficiency.values())),
         err_msg=
         "FINAL LOCAL EFFICIENCY failure: perturbation in areas 1, 2, 3")
 
@@ -368,12 +344,9 @@ def test_residual_service_after_element_perturbation():
         '19': 0.0
     }
 
-    g_res_service_after_element_perturbation = \
-    nx.get_node_attributes(F.G, 'service')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(res_service_after_element_perturbation.values())),
-        np.asarray(sorted(g_res_service_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.service.values())),
         err_msg="FINAL RESIDUAL SERVICE failure: perturbation of element 1")
 
 def test_residual_service_after_element_perturbation_isolating():
@@ -407,12 +380,9 @@ def test_residual_service_after_element_perturbation_isolating():
         '19': 0.0
     }
 
-    g_res_service_after_element_perturbation = \
-    nx.get_node_attributes(F.G, 'service')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(res_service_after_element_perturbation.values())),
-        np.asarray(sorted(g_res_service_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.service.values())),
         err_msg="FINAL RESIDUAL SERVICE failure: perturbation of element 1")
 
 def test_residual_service_after_single_area_perturbation():
@@ -445,12 +415,9 @@ def test_residual_service_after_single_area_perturbation():
         '19': 0.0
     }
 
-    g_res_service_after_single_area_perturbation = \
-    nx.get_node_attributes(F.G, 'service')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(res_service_after_single_area_perturbation.values())),
-        np.asarray(sorted(g_res_service_after_single_area_perturbation.values())),
+        np.asarray(sorted(F.G.service.values())),
         err_msg="FINAL RESIDUAL SERVICE failure: perturbation in area 1")
 
 def test_residual_service_after_multi_area_perturbation():
@@ -472,11 +439,8 @@ def test_residual_service_after_multi_area_perturbation():
         '8': 0.0,
     }
 
-    g_res_service_after_multi_area_perturbation = \
-    nx.get_node_attributes(F.G, 'service')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(res_service_after_multi_area_perturbation.values())),
-        np.asarray(sorted(g_res_service_after_multi_area_perturbation.values())),
+        np.asarray(sorted(F.G.service.values())),
         err_msg=
         "FINAL RESIDUAL SERVICE failure: perturbation in areas 1, 2, 3")

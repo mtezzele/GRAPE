@@ -1,5 +1,8 @@
 """ParallelGeneralGraph for parallel directed graphs (DiGraph) module"""
 
+import logging
+import sys
+import warnings
 from multiprocessing import Queue
 import multiprocessing as mp
 from multiprocessing.sharedctypes import RawArray
@@ -11,6 +14,9 @@ import pandas as pd
 
 from .utils import chunk_it
 from .general_graph import GeneralGraph
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 class ParallelGeneralGraph(GeneralGraph):
@@ -31,13 +37,13 @@ class ParallelGeneralGraph(GeneralGraph):
         self.manager = mp.Manager()
         self.num = mp.cpu_count()
 
-    def measure_iteration(self, nodi, record, kernel=None, *measure_args):
+    def measure_iteration(self, nodes, record, kernel=None, *measure_args):
         """
 
         Inner iteration for parallel measures,
         to update shared dictionary.
 
-        :param list nodi: nodes for which to compute the
+        :param list nodes: nodes for which to compute the
             shortest path between them and all the other nodes
         :param multiprocessing.managers.dict record:
             shared dictionary to be updated
@@ -49,9 +55,9 @@ class ParallelGeneralGraph(GeneralGraph):
         """
 
         if kernel is None:
-            raise ValueError("No kernel function provided.")
+            raise ValueError('No kernel function provided.')
 
-        partial_dict = kernel(nodi, *measure_args)
+        partial_dict = kernel(nodes, *measure_args)
         record.update(partial_dict)
 
     def measure_processes(self, record, kernel=None, *measure_args):
@@ -65,12 +71,11 @@ class ParallelGeneralGraph(GeneralGraph):
         :param multiprocessing.managers.dict record:
             shared dictionary to be updated
         :param \*measure_args: arguments for kernel measures
-           (have a look at specific kernel measures in 
-           GeneralGraph for the particular variables/types
-           for each measure)
+           (have a look at specific kernel measures in GeneralGraph
+           for the particular variables/types for each measure)
         """
         if kernel is None:
-            raise ValueError("No kernel function provided.")
+            raise ValueError('No kernel function provided.')
 
         node_chunks = chunk_it(list(self.nodes()), self.num)
 
@@ -128,12 +133,12 @@ class ParallelGeneralGraph(GeneralGraph):
         for proc in processes:
             proc.join()
 
-        shpaths_dicts = self.manager.dict()
+        all_shortest_path = self.manager.dict()
 
         processes = [
             mp.Process( target=self.measure_iteration,
             args=(list(map(self.ids_reversed.get, node_chunks[p])),
-                  shpaths_dicts, self.construct_path_kernel, pred_shared) )
+                all_shortest_path, self.construct_path_kernel, pred_shared) )
             for p in range(self.num) ]
 
         for proc in processes:
@@ -142,32 +147,32 @@ class ParallelGeneralGraph(GeneralGraph):
         for proc in processes:
             proc.join()
 
-        for k in shpaths_dicts.keys():
-            self.nodes[k]["shortest_path"] = {
+        nonempty_shortest_path = {}
+        for k in all_shortest_path.keys():
+            nonempty_shortest_path[k] = {
                 key: value
-                for key, value in shpaths_dicts[k].items() if value
+                for key, value in all_shortest_path[k].items() if value
             }
 
+        shortest_path_length = {}
         for i in list(self.H):
 
-            self.nodes[self.ids[i]]["shpath_length"] = {}
+            shortest_path_length[self.ids[i]] = {}
 
-            for key, value in self.nodes[self.ids[i]]["shortest_path"].items():
+            for key, value in nonempty_shortest_path[self.ids[i]].items():
                 length_path = dist_shared[self.ids_reversed[value[0]],
                                           self.ids_reversed[value[-1]]]
-                self.nodes[self.ids[i]]["shpath_length"][key] =  length_path
+                shortest_path_length[self.ids[i]][key] =  length_path
+        
+        return nonempty_shortest_path, shortest_path_length
 
-        eff = self.manager.dict()
-        self.measure_processes(eff, self.efficiency_kernel)
-        nx.set_node_attributes(self, eff, name="efficiency")
-
-    def dijkstra_iteration_parallel(self, out_q, nodi):
+    def dijkstra_iteration_parallel(self, out_q, nodes):
         """
 
         Parallel SSSP algorithm based on Dijkstra’s method.
 
         :param multiprocessing.queues.Queue out_q: multiprocessing queue
-        :param list nodi: list of starting nodes from which the SSSP should be
+        :param list nodes: list of starting nodes from which the SSSP should be
             computed to every other target node in the graph
 
         .. note:: Edges weight is taken into account.
@@ -175,8 +180,8 @@ class ParallelGeneralGraph(GeneralGraph):
             Distances are calculated as sums of weighted edges traversed.
         """
 
-        for n in nodi:
-            ssspp = (n, nx.single_source_dijkstra(self, n, weight = 'weight'))
+        for n in nodes:
+            ssspp = (n, nx.single_source_dijkstra(self, n, weight='weight'))
             out_q.put(ssspp)
 
     def dijkstra_single_source_shortest_path(self):
@@ -214,203 +219,15 @@ class ParallelGeneralGraph(GeneralGraph):
             if not running:
                 break
 
+        shortest_path = {}
+        shortest_path_length = {}
         for ssspp in self.attribute_ssspp:
 
             n = ssspp[0]
-            self.nodes[n]["shortest_path"] = ssspp[1][1]
-            self.nodes[n]["shpath_length"] = ssspp[1][0]
+            shortest_path[n] = ssspp[1][1]
+            shortest_path_length[n] = ssspp[1][0]
 
-        eff = self.manager.dict()
-        self.measure_processes(eff, self.efficiency_kernel)
-        nx.set_node_attributes(self, eff, name="efficiency")
-
-    def nodal_efficiency(self):
-        """
-
-        Nodal efficiency.
-
-        .. note:: The nodal efficiency of the node is equal to zero
-            for a node without any outgoing path and equal to one if from it
-            we can reach each node of the digraph.
-        """
-
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
-
-        nodeff = self.manager.dict()
-        self.measure_processes(nodeff, self.nodal_efficiency_kernel, g_len)
-        nx.set_node_attributes(self, nodeff, name="nodal_eff")
-
-    def local_efficiency(self):
-        """
-
-        Local efficiency of the node.
-
-        .. note:: The local efficiency shows the efficiency of the connections
-            between the first-order outgoing neighbors of node v
-            when v is removed. Equivalently, local efficiency measures
-            the "resilience" of the digraph to the perturbation of node removal,
-            i.e. if we remove a node, how efficiently its first-order outgoing
-            neighbors can communicate.
-            It is in the range [0, 1].
-        """
-
-        loceff = self.manager.dict()
-        self.measure_processes(loceff, self.local_efficiency_kernel)
-        nx.set_node_attributes(self, loceff, name="local_eff")
-
-    def shortest_path_list_iteration(self, nodi, tot_shpaths, tot_shpaths_list):
-        """
-
-        Inner iteration for parallel shortest path list calculation,
-        to update shared list.
-
-        :param list nodi: list of nodes for which to compute the
-            shortest path between them and all the other nodes
-        :param tot_shpaths_list: list of shortest paths
-            with at least two nodes
-        :type tot_shpath_list: multiprocessing.managers.list
-        """
-
-        partial_shpath_list = self.shortest_path_list_kernel(nodi,
-            tot_shpaths)
-        tot_shpaths_list.extend(partial_shpath_list)
-
-    def betweenness_centrality(self):
-        """
-
-        Betweenness_centrality measure of each node.
-        Nodes' "betweenness_centrality" attribute is evaluated.
-
-        .. note:: Betweenness centrality is an index of the relative importance
-            of a node and it is defined by the number of shortest paths that run
-            through it.
-            Nodes with the highest betweenness centrality hold the higher level
-            of control on the information flowing between different nodes in
-            the network, because more information will pass through them.
-        """
-
-        tot_shortest_paths_list = self.manager.list()
-        node_chunks = chunk_it(list(self.nodes()), self.num)
-
-        tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
-
-        processes = [
-            mp.Process( target=self.shortest_path_list_iteration,
-            args=(node_chunks[p], tot_shortest_paths, tot_shortest_paths_list) )
-            for p in range(self.num) ]
-
-        for proc in processes:
-            proc.start()
-
-        for proc in processes:
-            proc.join()
-
-        betcen = self.manager.dict()
-        self.measure_processes(betcen, self.betweenness_centrality_kernel,
-            tot_shortest_paths_list)
-        nx.set_node_attributes(self, betcen, name="betweenness_centrality")
-
-    def closeness_centrality(self):
-        """
-
-        Closeness_centrality measure of each node.
-        Nodes' "closeness_centrality" attribute is evaluated.
-
-        .. note:: Closeness centrality measures the reciprocal of the
-            average shortest path distance from a node to all other reachable
-            nodes in the graph. Thus, the more central a node is, the closer
-            it is to all other nodes. This measure allows to identify good
-            broadcasters, that is key elements in a graph, depicting how
-            closely the nodes are connected with each other.
-        """
-
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
-
-        tot_shortest_paths_list = self.manager.list()
-        node_chunks = chunk_it(list(self.nodes()), self.num)
-
-        tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
-
-        processes = [
-            mp.Process( target=self.shortest_path_list_iteration,
-            args=(node_chunks[p], tot_shortest_paths, tot_shortest_paths_list) )
-            for p in range(self.num) ]
-
-        for proc in processes:
-            proc.start()
-
-        for proc in processes:
-            proc.join()
-
-        clocen = self.manager.dict()
-        self.measure_processes(clocen, self.closeness_centrality_kernel,
-            tot_shortest_paths_list, g_len)
-        nx.set_node_attributes(self, clocen, name="closeness_centrality")
-
-    def degree_centrality(self):
-        """
-
-        Degree centrality measure of each node.
-        Nodes' "degree_centrality" attribute is evaluated.
-
-        .. note:: Degree centrality is a simple centrality measure that counts
-            how many neighbors a node has in an undirected graph.
-            The more neighbors the node has the most important it is,
-            occupying a strategic position that serves as a source or conduit
-            for large volumes of flux transactions with other nodes.
-            A node with high degree centrality is a node with many dependencies.
-        """
-
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
-
-        degcen = self.manager.dict()
-        self.measure_processes(degcen, self.degree_centrality_kernel, g_len)
-        nx.set_node_attributes(self, degcen, name="degree_centrality")
-
-    def indegree_centrality(self):
-        """
-
-        Indegree centrality measure of each node.
-        Nodes' "indegree_centrality" attribute is evaluated.
-
-        .. note:: Indegree centrality is measured by the number of edges
-            ending at the node in a directed graph. Nodes with high indegree
-            centrality are called cascade resulting nodes.
-        """
-
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
-
-        indegcen = self.manager.dict()
-        self.measure_processes(indegcen, self.indegree_centrality_kernel, g_len)
-        nx.set_node_attributes(self, indegcen, name="indegree_centrality")
-
-    def outdegree_centrality(self):
-        """
-
-        Outdegree centrality measure of each node.
-        Nodes' "outdegree_centrality" attribute is evaluated.
-
-        .. note:: Outdegree centrality is measured by the number of edges
-            starting from a node in a directed graph. Nodes with high outdegree
-            centrality are called cascade inititing nodes.
-        """
-
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
-
-        outdegcen = self.manager.dict()
-        self.measure_processes(outdegcen, self.outdegree_centrality_kernel,
-            g_len)
-        nx.set_node_attributes(self, outdegcen, name="outdegree_centrality")
+        return shortest_path, shortest_path_length
 
     def calculate_shortest_path(self):
         """
@@ -427,13 +244,206 @@ class ParallelGeneralGraph(GeneralGraph):
         n_of_nodes = self.order()
         g_density = nx.density(self)
 
-        print("PROC NUM", self.num)
+        logging.debug(f'Number of processors: {self.num}')
 
-        print("In the graph are present", n_of_nodes, "nodes")
-        print("go parallel!")
+        logging.debug(f'In the graph are present {n_of_nodes} nodes')
         if g_density <= 0.000001:
-            print("the graph is sparse, density =", g_density)
-            self.dijkstra_single_source_shortest_path()
+            logging.debug(f'The graph is sparse, density = {g_density}')
+            shpath, shpath_len = self.dijkstra_single_source_shortest_path()
         else:
-            print("the graph is dense, density =", g_density)
-            self.floyd_warshall_predecessor_and_distance()
+            logging.debug(f'The graph is dense, density = {g_density}')
+            shpath, shpath_len = self.floyd_warshall_predecessor_and_distance()
+
+        return shpath, shpath_len
+
+    def compute_efficiency(self):
+        """
+
+        Efficiency calculation.
+
+        .. note:: The efficiency of a path connecting two nodes is defined
+            as the inverse of the path length, if the path has length non-zero,
+            and zero otherwise.
+        """
+
+        efficiency = self.manager.dict()
+        self.measure_processes(efficiency, self.efficiency_kernel)
+        return efficiency
+
+    def compute_nodal_efficiency(self):
+        """
+
+        Nodal efficiency calculation.
+
+        .. note:: The nodal efficiency of the node is equal to zero
+            for a node without any outgoing path and equal to one if from it
+            we can reach each node of the digraph.
+        """
+
+        g_len = len(list(self))
+        nod_eff = self.manager.dict()
+        self.measure_processes(nod_eff, self.nodal_efficiency_kernel, g_len)
+        return nod_eff
+
+    def compute_local_efficiency(self):
+        """
+
+        Local efficiency calculation.
+
+        .. note:: The local efficiency shows the efficiency of the connections
+            between the first-order outgoing neighbors of node v
+            when v is removed. Equivalently, local efficiency measures
+            the resilience of the digraph to the perturbation of node removal,
+            i.e. if we remove a node, how efficiently its first-order outgoing
+            neighbors can communicate.
+            It is in the range [0, 1].
+        """
+
+        loc_eff = self.manager.dict()
+        self.measure_processes(loc_eff, self.local_efficiency_kernel)
+        return loc_eff
+
+    def shortest_path_list_iteration(self, nodes, tot_shpaths_list):
+        """
+
+        Inner iteration for parallel shortest path list calculation,
+        to update shared list.
+
+        :param list nodes: list of nodes for which to compute the
+            shortest path between them and all the other nodes
+        :param tot_shpaths_list: list of shortest paths
+            with at least two nodes
+        :type tot_shpath_list: multiprocessing.managers.list
+        """
+
+        partial_shpath_list = self.shortest_path_list_kernel(nodes)
+        tot_shpaths_list.extend(partial_shpath_list)
+
+    def compute_betweenness_centrality(self):
+        """
+
+        Betweenness_centrality calculation.
+
+        .. note:: Betweenness centrality is an index of the relative importance
+            of a node and it is defined by the number of shortest paths that run
+            through it.
+            Nodes with the highest betweenness centrality hold the higher level
+            of control on the information flowing between different nodes in
+            the network, because more information will pass through them.
+        """
+
+        tot_shortest_paths_list = self.manager.list()
+        node_chunks = chunk_it(list(self.nodes()), self.num)
+
+        processes = [
+            mp.Process( target=self.shortest_path_list_iteration,
+            args=(node_chunks[p], tot_shortest_paths_list) )
+            for p in range(self.num) ]
+
+        for proc in processes:
+            proc.start()
+
+        for proc in processes:
+            proc.join()
+
+        bet_cen = self.manager.dict()
+        self.measure_processes(bet_cen, self.betweenness_centrality_kernel,
+            tot_shortest_paths_list)
+        
+        return bet_cen
+
+    def compute_closeness_centrality(self):
+        """
+
+        Closeness_centrality calculation.
+
+        .. note:: Closeness centrality measures the reciprocal of the
+            average shortest path distance from a node to all other reachable
+            nodes in the graph. Thus, the more central a node is, the closer
+            it is to all other nodes. This measure allows to identify good
+            broadcasters, that is key elements in a graph, depicting how
+            closely the nodes are connected with each other.
+        """
+
+        g_len = len(list(self))
+        if g_len <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        tot_shortest_paths_list = self.manager.list()
+        node_chunks = chunk_it(list(self.nodes()), self.num)
+
+        processes = [
+            mp.Process( target=self.shortest_path_list_iteration,
+            args=(node_chunks[p], tot_shortest_paths_list) )
+            for p in range(self.num) ]
+
+        for proc in processes:
+            proc.start()
+
+        for proc in processes:
+            proc.join()
+
+        clo_cen = self.manager.dict()
+        self.measure_processes(clo_cen, self.closeness_centrality_kernel,
+            tot_shortest_paths_list, g_len)
+
+        return clo_cen
+
+    def compute_degree_centrality(self):
+        """
+
+        Degree centrality calculation.
+
+        .. note:: Degree centrality is a simple centrality measure that counts
+            how many neighbors a node has in an undirected graph.
+            The more neighbors the node has the most important it is,
+            occupying a strategic position that serves as a source or conduit
+            for large volumes of flux transactions with other nodes.
+            A node with high degree centrality is a node with many dependencies.
+        """
+
+        g_len = len(list(self))
+        if g_len <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        deg_cen = self.manager.dict()
+        self.measure_processes(deg_cen, self.degree_centrality_kernel, g_len)
+        return deg_cen
+
+    def compute_indegree_centrality(self):
+        """
+
+        In-degree centrality calculation.
+
+        .. note:: In-degree centrality is measured by the number of edges
+            ending at the node in a directed graph. Nodes with high in-degree
+            centrality are called cascade resulting nodes.
+        """
+
+        g_len = len(list(self))
+        if g_len <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        indeg_cen = self.manager.dict()
+        self.measure_processes(indeg_cen, self.indegree_centrality_kernel,
+            g_len)
+        return indeg_cen
+
+    def compute_outdegree_centrality(self):
+        """
+
+        Out-degree centrality calculation.
+
+        .. note:: Out-degree centrality is measured by the number of edges
+            starting from a node in a directed graph. Nodes with high out-degree
+            centrality are called cascade inititing nodes.
+        """
+
+        g_len = len(list(self))
+        if g_len <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        outdeg_cen = self.manager.dict()
+        self.measure_processes(outdeg_cen, self.outdegree_centrality_kernel,
+            g_len)
+        return outdeg_cen

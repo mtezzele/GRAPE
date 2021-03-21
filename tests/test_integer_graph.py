@@ -12,8 +12,6 @@ def test_nodal_efficiency():
 	"""
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.nodal_efficiency()
 
     nodal_eff_before = {
         '1': 0.3213624338624339,
@@ -37,11 +35,9 @@ def test_nodal_efficiency():
         '19': 0.16666666666666666
     }
 
-    g_nodal_eff_before = nx.get_node_attributes(g, 'nodal_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(nodal_eff_before.values())),
-        np.asarray(sorted(g_nodal_eff_before.values())),
+        np.asarray(sorted(g.nodal_efficiency.values())),
         err_msg="ORIGINAL NODAL EFFICIENCY failure")
 
 def test_global_efficiency():
@@ -50,8 +46,6 @@ def test_global_efficiency():
 	"""
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.nodal_efficiency()
 
     np.testing.assert_almost_equal(g.global_efficiency, 0.1759191750419821,
         err_msg="ORIGINAL GLOBAL EFFICIENCY failure")
@@ -62,9 +56,6 @@ def test_local_efficiency():
 	"""
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.nodal_efficiency()
-    g.local_efficiency()
 
     local_eff_before = {
         '1': 0.17437369729036395,
@@ -88,11 +79,9 @@ def test_local_efficiency():
         '19': 0.17592592592592593
     }
 
-    g_local_eff_before = nx.get_node_attributes(g, 'local_eff')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(local_eff_before.values())),
-        np.asarray(sorted(g_local_eff_before.values())),
+        np.asarray(sorted(g.local_efficiency.values())),
         err_msg="ORIGINAL LOCAL EFFICIENCY failure")
 
 def test_closeness_centrality():
@@ -101,8 +90,6 @@ def test_closeness_centrality():
 	"""
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.closeness_centrality()
 
     closeness_centrality = {
         '1': 0.0,
@@ -126,11 +113,9 @@ def test_closeness_centrality():
         '19': 0.22299382716049382
     }
 
-    g_closeness_centrality = nx.get_node_attributes(g, 'closeness_centrality')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(closeness_centrality.values())),
-        np.asarray(sorted(g_closeness_centrality.values())),
+        np.asarray(sorted(g.closeness_centrality.values())),
         err_msg="CLOSENESS CENTRALITY failure")
 
 def test_betweenness_centrality():
@@ -139,8 +124,6 @@ def test_betweenness_centrality():
 	"""
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.betweenness_centrality()
 
     betweenness_centrality = {
         '1': 0.0,
@@ -164,11 +147,9 @@ def test_betweenness_centrality():
         '19': 0.38064516129032255
     }
 
-    g_betweenness_centrality=nx.get_node_attributes(g,'betweenness_centrality')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(betweenness_centrality.values())),
-        np.asarray(sorted(g_betweenness_centrality.values())),
+        np.asarray(sorted(g.betweenness_centrality.values())),
         err_msg="BETWENNESS CENTRALITY failure")
 
 def test_indegree_centrality():
@@ -177,8 +158,6 @@ def test_indegree_centrality():
 	"""
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.indegree_centrality()
 
     indegree_centrality = {
         '1': 0.0,
@@ -202,11 +181,9 @@ def test_indegree_centrality():
         '19': 0.16666666666666666
     }
 
-    g_indegree_centrality = nx.get_node_attributes(g, 'indegree_centrality')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(indegree_centrality.values())),
-        np.asarray(sorted(g_indegree_centrality.values())),
+        np.asarray(sorted(g.indegree_centrality.values())),
         err_msg="INDEGREE CENTRALITY failure")
 
 def test_outdegree_centrality():
@@ -215,8 +192,6 @@ def test_outdegree_centrality():
 	"""
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.outdegree_centrality()
 
     outdegree_centrality = {
         '1': 0.1111111111111111,
@@ -240,11 +215,9 @@ def test_outdegree_centrality():
         '19': 0.1111111111111111
     }
 
-    g_outdegree_centrality = nx.get_node_attributes(g, 'outdegree_centrality')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(outdegree_centrality.values())),
-        np.asarray(sorted(g_outdegree_centrality.values())),
+        np.asarray(sorted(g.outdegree_centrality.values())),
         err_msg="OUTDEGREE CENTRALITY failure")
 
 def test_degree_centrality():
@@ -253,8 +226,6 @@ def test_degree_centrality():
 	"""
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.degree_centrality()
 
     degree_centrality = {
         '1': 0.1111111111111111,
@@ -278,11 +249,9 @@ def test_degree_centrality():
         '19': 0.2777777777777778
     }
 
-    g_degree_centrality = nx.get_node_attributes(g, 'degree_centrality')
-
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(degree_centrality.values())),
-        np.asarray(sorted(g_degree_centrality.values())),
+        np.asarray(sorted(g.degree_centrality.values())),
         err_msg="DEGREE CENTRALITY failure")
 
 def test_service():
@@ -292,8 +261,6 @@ def test_service():
     """
     g = GeneralGraph()
     g.load("tests/TOY_graph.csv")
-    g.calculate_shortest_path()
-    g.compute_service()
 
     original_service = {
         '1': 0.0,
@@ -317,10 +284,7 @@ def test_service():
         '19': 0.0
     }
 
-    g_original_service = \
-    nx.get_node_attributes(g, 'service')
-    
     np.testing.assert_array_almost_equal(
         np.asarray(sorted(original_service.values())),
-        np.asarray(sorted(g_original_service.values())),
+        np.asarray(sorted(g.service.values())),
         err_msg="ORIGINAL SERVICE failure")

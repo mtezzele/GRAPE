@@ -39,9 +39,9 @@ class FaultDiagnosis():
 
         self.damaged_areas = set()
 
-        self.valv = {  "isolation_A" : { "0": "OPEN", "1": "CLOSED"},
-           "isolation_B" : { "0": "CLOSED", "1": "OPEN"},
-           "unknown" : { "0": "OFF", "1": "ON"} }
+        self.valv = {  'isolation_A' : { '0': 'OPEN', '1': 'CLOSED'},
+           'isolation_B' : { '0': 'CLOSED', '1': 'OPEN'},
+           'unknown' : { '0': 'OFF', '1': 'ON'} }
 
     def check_input_with_gephi(self):
         """
@@ -53,14 +53,14 @@ class FaultDiagnosis():
         gephi_nodes_df = self.df.reset_index()
         gephi_nodes_df.rename(columns={'index': 'Mark'}, inplace=True)
 
-        fields = [ "Mark", "Description", "InitStatus",
-                   "PerturbationResistant", "Area" ]
+        fields = [ 'Mark', 'Description', 'InitStatus',
+                   'PerturbationResistant', 'Area' ]
 
-        gephi_nodes_df[fields].to_csv("check_import_nodes.csv", index=False)
+        gephi_nodes_df[fields].to_csv('check_import_nodes.csv', index=False)
 
-        orphans = self.edges_df['Father_mark'].str.contains("NULL")
+        orphans = self.edges_df['Father_mark'].str.contains('NULL')
         self.edges_df = self.edges_df[~orphans]
-        self.edges_df.to_csv("check_import_edges.csv", index=False)
+        self.edges_df.to_csv('check_import_edges.csv', index=False)
 
     def check_before(self):
         """
@@ -71,31 +71,31 @@ class FaultDiagnosis():
         Check the availability of paths between source and target nodes.
         """
 
-        self.G.calculate_shortest_path()
+        #self.G.calculate_shortest_path()
         original_source_user_paths = []
 
-        self.G.nodal_efficiency()
-        self.G.local_efficiency()
-        self.G.compute_service()
+        #self.G.compute_nodal_efficiency()
+        #self.G.compute_local_efficiency()
+        #self.G.compute_service()
 
-        eff_fields = ['nodal_eff', 'local_eff', 'service']
-        self.update_output(eff_fields, prefix="original_")
+        eff_fields = ['nodal_efficiency', 'local_efficiency', 'service']
+        self.update_output(eff_fields, prefix='original_')
 
         for source in self.G.SOURCE:
             for user in self.G.USER:
                 if nx.has_path(self.G, source, user):
 
                     osip = list(nx.all_simple_paths(self.G, source, user))
-                    oshp = self.G.nodes[source]["shortest_path"][user]
-                    oshpl = self.G.nodes[source]["shpath_length"][user]
+                    oshp = self.G.shortest_path[source][user]
+                    oshpl = self.G.shortest_path_length[source][user]
                     oeff = 1 / oshpl
                     ids = source + user
 
                 else:
-                    oshpl = "NO_PATH"
-                    osip = "NO_PATH"
-                    oshp = "NO_PATH"
-                    oeff = "NO_PATH"
+                    oshpl = 'NO_PATH'
+                    osip = 'NO_PATH'
+                    oshp = 'NO_PATH'
+                    oeff = 'NO_PATH'
                     ids = source + user
 
                 original_source_user_paths.append({
@@ -118,11 +118,15 @@ class FaultDiagnosis():
         self.paths_df = pd.DataFrame(original_source_user_paths)
 
         # In check before we include also centralities
-        self.G.closeness_centrality()
-        self.G.betweenness_centrality()
-        self.G.indegree_centrality()
-        self.G.outdegree_centrality()
-        self.G.degree_centrality()
+        centrality_fields = ['closeness_centrality', 'betweenness_centrality',
+            'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
+        self.update_output(centrality_fields)
+
+        #self.G.compute_closeness_centrality()
+        #self.G.compute_betweenness_centrality()
+        #self.G.compute_indegree_centrality()
+        #self.G.compute_outdegree_centrality()
+        #self.G.compute_degree_centrality()
 
     def check_after(self):
         """
@@ -133,15 +137,15 @@ class FaultDiagnosis():
         Check the availability of paths between source and target nodes.
         """
 
-        self.G.calculate_shortest_path()
+        #self.G.calculate_shortest_path()
         final_source_user_paths = []
 
-        self.G.nodal_efficiency()
-        self.G.local_efficiency()
-        self.G.compute_service()
+        #self.G.compute_nodal_efficiency()
+        #self.G.compute_local_efficiency()
+        #self.G.compute_service()
 
-        eff_fields = ['nodal_eff', 'local_eff', 'service']
-        self.update_output(eff_fields, prefix="final_")
+        eff_fields = ['nodal_efficiency', 'local_efficiency', 'service']
+        self.update_output(eff_fields, prefix='final_')
 
         for source in self.G.SOURCE:
             for user in self.G.USER:
@@ -154,53 +158,54 @@ class FaultDiagnosis():
 
                         if self.G.description[node] in self.valv:
 
-                            if self.G.nodes[node]['IntermediateStatus'] == "1":
+                            if self.G.nodes[node]['IntermediateStatus'] == '1':
 
+                                valve = self.G.description[node]
+                                s = self.valv[self.G.description[node]]['1']
                                 logging.debug(
-                                "valve %s at node %s, state %s",
-                                self.G.description[node], node,
-                                self.valv[self.G.description[node]]["1"])
+                                f'valve {valve} at node {node}, state {s}')
 
-                            elif self.G.nodes[node]['IntermediateStatus']== "0":
+                            elif self.G.nodes[node]['IntermediateStatus']== '0':
 
-                                self.G.nodes[node]['FinalStatus'] = "1"
+                                self.G.nodes[node]['FinalStatus'] = '1'
 
-                                logging.debug(
-                                "valve %s at node %s, from %s to %s",
-                                self.G.description[node], node,
-                                self.valv[self.G.description[node]]["0"],
-                                self.valv[self.G.description[node]]["1"])
+                                valve = self.G.description[node]
+                                old = self.valv[self.G.description[node]]['0']
+                                new = self.valv[self.G.description[node]]['1']
+                                logging.debug(f'valve {valve} at node {node},')
+                                logging.debug(f'from {old} to {new}')
 
                             else:
 
-                                if self.G.status[node] == "1":
+                                if self.G.init_status[node] == '1':
 
+                                    valve = self.G.description[node]
+                                    s = self.valv[self.G.description[node]]['1']
                                     logging.debug(
-                                    "valve %s at node %s, state %s",
-                                    self.G.description[node], node,
-                                    self.valv[self.G.description[node]]["1"])
+                                    f'valve {valve} at node {node}, state {s}')
 
-                                elif self.G.status[node] == "0":
+                                elif self.G.init_status[node] == '0':
 
-                                    self.G.nodes[node]['FinalStatus'] = "1"
+                                    self.G.nodes[node]['FinalStatus'] = '1'
 
+                                    valve = self.G.description[node]
+                                    o = self.valv[self.G.description[node]]['0']
+                                    n = self.valv[self.G.description[node]]['1']
                                     logging.debug(
-                                    "valve %s at node %s, from %s to %s",
-                                    self.G.description[node], node,
-                                    self.valv[self.G.description[node]]["0"],
-                                    self.valv[self.G.description[node]]["1"])
+                                    f'valve {valve} at node {node}')
+                                    logging.debug(f'from {o} to {n}')
 
-                    shp = self.G.nodes[source]["shortest_path"][user]
-                    shpl = self.G.nodes[source]["shpath_length"][user]
+                    shp = self.G.shortest_path[source][user]
+                    shpl = self.G.shortest_path_length[source][user]
                     neff = 1 / shpl
                     ids = source + user
 
                 else:
 
-                    shpl = "NO_PATH"
-                    sip = "NO_PATH"
-                    shp = "NO_PATH"
-                    neff = "NO_PATH"
+                    shpl = 'NO_PATH'
+                    sip = 'NO_PATH'
+                    shp = 'NO_PATH'
+                    neff = 'NO_PATH'
                     ids = source + user
 
                 final_source_user_paths.append({
@@ -247,64 +252,64 @@ class FaultDiagnosis():
 
         if self.G.description[node] in self.valv:
 
-            if self.G.status[node] == "0":
+            if self.G.init_status[node] == '0':
                 logging.debug('Valve %s at node %s, state %s',
                 self.G.description[node], node,
-                self.valv[self.G.description[node]]["0"])
+                self.valv[self.G.description[node]]['0'])
 
-            elif self.G.status[node] == "1":
+            elif self.G.init_status[node] == '1':
 
-                self.G.nodes[node]['IntermediateStatus'] = "0"
+                self.G.nodes[node]['IntermediateStatus'] = '0'
 
                 logging.debug(
                 'Valve %s at node %s, from %s to %s',
                 self.G.description[node], node,
-                self.valv[self.G.description[node]]["1"],
-                self.valv[self.G.description[node]]["0"])
+                self.valv[self.G.description[node]]['1'],
+                self.valv[self.G.description[node]]['0'])
 
             if len(visited) == 1:
                 self.broken.append(node)
-                logging.debug("Valve perturbed: %s", self.broken)
+                logging.debug('Valve perturbed: %s', self.broken)
 
             else:
                 return visited
 
         else:
-            fathers = {"AND": set(), "OR": set(), "SINGLE": set() }
+            fathers = {'AND': set(), 'OR': set(), 'SINGLE': set() }
             pred = list(self.G.predecessors(node))
-            logging.debug("Predecessors: %s", pred)
+            logging.debug('Predecessors: %s', pred)
 
             if len(visited) == 1:
                 self.broken.append(node)
-                logging.debug("Broken: %s", self.broken)
+                logging.debug('Broken: %s', self.broken)
 
             elif pred:
                 for p in pred:
                     fathers[self.G.condition[(p, node)]].add(p)
 
-                if fathers["AND"] & set(self.broken):
+                if fathers['AND'] & set(self.broken):
                     self.broken.append(node)
-                    logging.debug("Broken %s, AND predecessor broken.", node)
-                    logging.debug("Nodes broken so far: %s", self.broken)
+                    logging.debug('Broken %s, AND predecessor broken.', node)
+                    logging.debug('Nodes broken so far: %s', self.broken)
 
-                #"SINGLE" treated as "AND"
-                elif fathers["SINGLE"] & set(self.broken):
+                #'SINGLE' treated as 'AND'
+                elif fathers['SINGLE'] & set(self.broken):
                     self.broken.append(node)
-                    logging.debug("Broken %s, SINGLE predecessor broken.", node)
-                    logging.debug("Nodes broken so far: %s", self.broken)
+                    logging.debug('Broken %s, SINGLE predecessor broken.', node)
+                    logging.debug('Nodes broken so far: %s', self.broken)
 
                 else:
-                    #all my "OR" predecessors are dead
-                    if (fathers["OR"] & set(self.broken)) == set(pred):
+                    #all my 'OR' predecessors are dead
+                    if (fathers['OR'] & set(self.broken)) == set(pred):
                         self.broken.append(node)
-                        logging.debug("Broken %s, no more fathers", node)
-                        logging.debug("Nodes broken so far: %s", self.broken)
+                        logging.debug('Broken %s, no more fathers', node)
+                        logging.debug('Nodes broken so far: %s', self.broken)
                     else:
                         return 0
             else:
                 self.broken.append(node)
-                logging.debug("Node: %s has no more predecessors", node)
-                logging.debug("Nodes broken so far: %s", self.broken)
+                logging.debug('Node: %s has no more predecessors', node)
+                logging.debug('Nodes broken so far: %s', self.broken)
 
         for next_node in set(self.G[node]) - visited:
             self.rm_nodes(next_node, visited)
@@ -325,7 +330,7 @@ class FaultDiagnosis():
 
         nested_dict = {}
         for col in attribute_list:
-            nested_dict[prefix + col] = nx.get_node_attributes(self.G, col)
+            nested_dict[prefix + col] = getattr(self.G, col)
 
         self.df = pd.concat([self.df, pd.DataFrame(nested_dict)], axis=1)
 
@@ -338,10 +343,10 @@ class FaultDiagnosis():
         :param list damaged_areas: area(s) in which to update the status
         """
 
-        self.df['Mark_Status'].fillna('NOT_ACTIVE', inplace=True)
+        self.df['mark_status'].fillna('NOT_ACTIVE', inplace=True)
 
         for area in damaged_areas:
-            self.df.loc[self.df.Area == area, 'Status_Area'] = "DAMAGED"
+            self.df.loc[self.df.Area == area, 'status_area'] = 'DAMAGED'
 
     def delete_a_node(self, node):
         """
@@ -360,15 +365,15 @@ class FaultDiagnosis():
         self.bn = list(set(self.broken))
 
         for n in self.bn:
-            self.damaged_areas.add(self.G.nodes[n]["Area"])
+            self.damaged_areas.add(self.G.nodes[n]['Area'])
             self.G.remove_node(n)
 
     def simulate_element_perturbation(self, perturbed_nodes):
         """
 
         Simulate a perturbation of one or multiple nodes.
-        Nodes' "IntermediateStatus", "FinalStatus", "Mark_Status"
-        and "Status_Area" attributes are evaluated.
+        Nodes' 'IntermediateStatus', 'FinalStatus', 'Mark_Status'
+        and 'Status_Area' attributes are evaluated.
 
         :param list perturbed_nodes: nodes(s) involved in the
             perturbing event
@@ -383,44 +388,43 @@ class FaultDiagnosis():
             if node not in self.G.nodes():
                 print('The node ', node, ' is not in the graph')
                 print('Insert a valid node')
-                print("Valid nodes:", self.G.nodes())
+                print('Valid nodes:', self.G.nodes())
                 sys.exit()
 
         self.check_before()
 
-        centrality_fields = ['closeness_centrality', 'betweenness_centrality',
-            'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
-        self.update_output(centrality_fields)
+        self.G.clear_data(['shortest_path', 'shortest_path_length',
+            'efficiency', 'nodal_efficiency', 'local_efficiency',
+            'computed_service', 'closeness_centrality',
+            'betweenness_centrality', 'indegree_centrality',
+            'outdegree_centrality', 'degree_centrality'])
 
         for node in perturbed_nodes:
-            if node in self.G.nodes():
-                self.delete_a_node(node)
+            if node in self.G.nodes(): self.delete_a_node(node)
 
         del_sources = [s for s in self.G.SOURCE if s not in list(self.G)]
-        for s in del_sources:
-            self.G.SOURCE.remove(s)
+        for s in del_sources: self.G.SOURCE.remove(s)
 
         del_users = [u for u in self.G.USER if u not in list(self.G)]
-        for u in del_users:
-            self.G.USER.remove(u)
+        for u in del_users: self.G.USER.remove(u)
 
         self.check_after()
-        self.paths_df.to_csv("service_paths_element_perturbation.csv",
+        self.paths_df.to_csv('service_paths_element_perturbation.csv',
             index=False)
 
-        status_area_fields = ['IntermediateStatus', 'FinalStatus',
-            'Mark_Status', 'Status_Area']
+        status_area_fields = ['intermediate_status', 'final_status',
+            'mark_status', 'status_area']
         self.update_output(status_area_fields)
 
         self.update_status_areas(self.damaged_areas)
-        self.graph_characterization_to_file("element_perturbation.csv")
+        self.graph_characterization_to_file('element_perturbation.csv')
 
     def simulate_area_perturbation(self, perturbed_areas):
         """
 
         Simulate a perturbation in one or multiple areas.
-        Nodes' "IntermediateStatus", "FinalStatus", "Mark_Status"
-        and "Status_Area" attributes are evaluated.
+        Nodes' 'IntermediateStatus', 'FinalStatus', 'Mark_Status'
+        and 'Status_Area' attributes are evaluated.
 
         :param list perturbed_areas: area(s) involved in the
             perturbing event
@@ -437,18 +441,19 @@ class FaultDiagnosis():
             if area not in list(self.G.area.values()):
                 print('The area ', area, ' is not in the graph')
                 print('Insert a valid area')
-                print("Valid areas:", set(self.G.area.values()))
+                print('Valid areas:', set(self.G.area.values()))
                 sys.exit()
             else:
                 for idx, Area in self.G.area.items():
-                    if Area == area:
-                        nodes_in_area.append(idx)
+                    if Area == area: nodes_in_area.append(idx)
 
         self.check_before()
 
-        centrality_fields = ['closeness_centrality', 'betweenness_centrality',
-            'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
-        self.update_output(centrality_fields)
+        self.G.clear_data(['shortest_path', 'shortest_path_length',
+            'efficiency', 'nodal_efficiency', 'local_efficiency',
+            'computed_service', 'closeness_centrality',
+            'betweenness_centrality', 'indegree_centrality',
+            'outdegree_centrality', 'degree_centrality'])
 
         for node in nodes_in_area:
             if node in self.G.nodes():
@@ -456,22 +461,20 @@ class FaultDiagnosis():
                 nodes_in_area = list(set(nodes_in_area) - set(self.bn))
 
         del_sources = [s for s in self.G.SOURCE if s not in list(self.G)]
-        for s in del_sources:
-            self.G.SOURCE.remove(s)
+        for s in del_sources: self.G.SOURCE.remove(s)
 
         del_users = [u for u in self.G.USER if u not in list(self.G)]
-        for u in del_users:
-            self.G.USER.remove(u)
+        for u in del_users: self.G.USER.remove(u)
 
         self.check_after()
-        self.paths_df.to_csv("service_paths_area_perturbation.csv", index=False)
+        self.paths_df.to_csv('service_paths_area_perturbation.csv', index=False)
 
-        status_area_fields = ['IntermediateStatus', 'FinalStatus',
-            'Mark_Status', 'Status_Area']
+        status_area_fields = ['intermediate_status', 'final_status',
+            'mark_status', 'status_area']
         self.update_output(status_area_fields)
 
         self.update_status_areas(self.damaged_areas)
-        self.graph_characterization_to_file("area_perturbation.csv")
+        self.graph_characterization_to_file('area_perturbation.csv')
 
     def graph_characterization_to_file(self, filename):
         """
@@ -487,12 +490,12 @@ class FaultDiagnosis():
         self.df.rename(columns={'index': 'Mark'}, inplace=True)
 
         fields = [
-            "Mark", "Description", "InitStatus", "IntermediateStatus",
-            "FinalStatus", "Mark_Status", "PerturbationResistant", "Area",
-            "Status_Area", "closeness_centrality", "betweenness_centrality",
-            "indegree_centrality", "outdegree_centrality",
-            "original_local_eff", "final_local_eff",
-            "original_nodal_eff", "final_nodal_eff",
-            "original_service", "final_service"
+            'Mark', 'Description', 'InitStatus', 'intermediate_status',
+            'final_status', 'mark_status', 'PerturbationResistant', 'Area',
+            'status_area', 'closeness_centrality', 'betweenness_centrality',
+            'indegree_centrality', 'outdegree_centrality',
+            'original_local_efficiency', 'final_local_efficiency',
+            'original_nodal_efficiency', 'final_nodal_efficiency',
+            'original_service', 'final_service'
         ]
         self.df[fields].to_csv(filename, index=False)
