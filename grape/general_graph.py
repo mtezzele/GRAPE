@@ -37,88 +37,97 @@ class GeneralGraph(nx.DiGraph):
         :param str filename: input file in CSV format
         """
 
-        conv = {'Mark' : str, 'Father_mark' : str,
-                'PerturbationResistant':str, 'InitStatus':str}
+        conv = {'mark' : str, 'father_mark' : str,
+                'perturbation_resistant':str, 'init_status':str}
         graph_df = pd.read_csv(filename, converters=conv, keep_default_na=False)
 
         for index, row in graph_df.iterrows():
 
-            weight = row.pop('Weight')
-            father_mark = row.pop('Father_mark')
-            father_cond = row.pop('Father_cond')
+            edge_weight = row.pop('weight')
+            father_mark = row.pop('father_mark')
+            edge_father_condition = row.pop('father_condition')
 
-            self.add_node(row['Mark'], **row)
+            self.add_node(row['mark'], **row)
 
             if father_mark != 'NULL':
                 self.add_edge(
-                    father_mark, row['Mark'],
-                    Father_cond=father_cond, weight=weight)
+                    father_mark, row['mark'],
+                    father_condition=edge_father_condition,
+                    weight=edge_weight)
 
-        graph_edges_df = graph_df[['Mark', 'Father_mark']]
+        graph_edges_df = graph_df[['mark', 'father_mark']]
 
-        graph_df.drop(['Father_cond', 'Father_mark', 'Type',
-                      'Weight', 'Service'], axis=1, inplace=True)
+        graph_df.drop(['father_condition', 'father_mark', 'type',
+                      'weight', 'initial_service'], axis=1, inplace=True)
         graph_df.drop_duplicates(inplace=True)
-        graph_df.set_index('Mark', inplace=True)
+        graph_df.set_index('mark', inplace=True)
 
-        nx.set_node_attributes(self, str(), 'IntermediateStatus')
-        nx.set_node_attributes(self, str(), 'FinalStatus')
-        nx.set_node_attributes(self, 'AVAILABLE', 'Status_Area')
+        nx.set_node_attributes(self, str(), 'intermediate_status')
+        nx.set_node_attributes(self, str(), 'final_status')
+        nx.set_node_attributes(self, 'AVAILABLE', 'status_area')
         nx.set_node_attributes(self, 'ACTIVE', 'Mark_Status')
 
-        self.SOURCE = []
-        self.USER = []
-        for idx, Type in self.type.items():
-            if Type == 'SOURCE':
-                self.SOURCE.append(idx)
-            elif Type == 'USER':
-                self.USER.append(idx)
+        self.source = []
+        self.user = []
+        for idx, node_type in self.type.items():
+            if node_type == 'SOURCE':
+                self.source.append(idx)
+            elif node_type == 'USER':
+                self.user.append(idx)
 
         return graph_df, graph_edges_df
 
     @property
-    def area(self):
-        return nx.get_node_attributes(self, 'Area')
+    def mark(self):
+        return nx.get_node_attributes(self, 'mark')
 
     @property
-    def fault_resistant(self):
-        return nx.get_node_attributes(self, 'PerturbationResistant')
+    def area(self):
+        return nx.get_node_attributes(self, 'area')
+
+    @property
+    def perturbation_resistant(self):
+        return nx.get_node_attributes(self, 'perturbation_resistant')
 
     @property
     def description(self):
-        return nx.get_node_attributes(self, 'Description')
+        return nx.get_node_attributes(self, 'description')
 
     @property
     def init_status(self):
-        return nx.get_node_attributes(self, 'InitStatus')
+        return nx.get_node_attributes(self, 'init_status')
 
     @property
     def intermediate_status(self):
-        return nx.get_node_attributes(self, 'IntermediateStatus')
+        return nx.get_node_attributes(self, 'intermediate_status')
 
     @property
     def final_status(self):
-        return nx.get_node_attributes(self, 'FinalStatus')
+        return nx.get_node_attributes(self, 'final_status')
 
     @property
     def mark_status(self):
-        return nx.get_node_attributes(self, 'Mark_Status')
+        return nx.get_node_attributes(self, 'mark_status')
 
     @property
     def status_area(self):
-        return nx.get_node_attributes(self, 'Status_Area')
+        return nx.get_node_attributes(self, 'status_area')
 
     @property
-    def condition(self):
-        return nx.get_edge_attributes(self, 'Father_cond')
+    def father_condition(self):
+        return nx.get_edge_attributes(self, 'father_condition')
+
+    @property
+    def weight(self):
+        return nx.get_edge_attributes(self, 'weight')
 
     @property
     def type(self):
-        return nx.get_node_attributes(self, 'Type')
+        return nx.get_node_attributes(self, 'type')
 
     @property
     def initial_service(self):
-        return nx.get_node_attributes(self, 'Service')
+        return nx.get_node_attributes(self, 'initial_service')
 
     @property
     def service(self):
@@ -387,8 +396,8 @@ class GeneralGraph(nx.DiGraph):
         """
 
         self.H = nx.convert_node_labels_to_integers(
-            self, first_label=0, label_attribute='Mark_ids')
-        self.ids = nx.get_node_attributes(self.H, 'Mark_ids')
+            self, first_label=0, label_attribute='mark_ids')
+        self.ids = nx.get_node_attributes(self.H, 'mark_ids')
         self.ids_reversed = { value: key for key, value in self.ids.items() }
 
         dist = nx.to_numpy_matrix(self.H, nodelist=sorted(list(self.H)),
@@ -585,7 +594,6 @@ class GeneralGraph(nx.DiGraph):
             raise ValueError('Graph size must equal or larger than 2.')
 
         dict_nod_eff = {}
-        #efficiency = self.efficiency
 
         for n in nodes:
             sum_efficiencies = sum(efficiency[n].values())
@@ -621,7 +629,6 @@ class GeneralGraph(nx.DiGraph):
         """
 
         dict_loc_eff = {}
-        #nodal_efficiency = self.nodal_efficiency
 
         for n in nodes:
             subgraph = list(self.successors(n))
@@ -671,7 +678,6 @@ class GeneralGraph(nx.DiGraph):
         """
 
         tot_shortest_paths_list = list()
-        #shortest_path = self.shortest_path
 
         for n in nodes:
             node_tot_shortest_paths = shortest_path[n]
@@ -751,7 +757,6 @@ class GeneralGraph(nx.DiGraph):
             raise ValueError('Graph size must equal or larger than 2.')
 
         dict_clo_cen = {}
-        #shortest_path_length = self.shortest_path_length
 
         for n in nodes:
             totsp = []
@@ -928,21 +933,21 @@ class GeneralGraph(nx.DiGraph):
         shortest_path = self.shortest_path
 
         usr_per_source = {
-            s: [u for u in self.USER if nx.has_path(self, s, u)]
-            for s in self.SOURCE
+            s: [u for u in self.user if nx.has_path(self, s, u)]
+            for s in self.source
         }
 
-        for s in self.SOURCE:
+        for s in self.source:
             for u in usr_per_source[s]:
                 for node in self.shortest_path[s][u]:
                     usr_per_node[node] += 1.
 
-        for s in self.SOURCE:
+        for s in self.source:
             for u in usr_per_source[s]:
                 computed_service[u] += initial_service[s]/len(usr_per_source[s])
 
         #Cycle just on the edges contained in source-user shortest paths
-        for s in self.SOURCE:
+        for s in self.source:
             for u in usr_per_source[s]:
                 for idx in range(len(shortest_path[s][u]) - 1):
 
