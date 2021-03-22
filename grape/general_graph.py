@@ -197,12 +197,12 @@ class GeneralGraph(nx.DiGraph):
         Otherwise, the attribute is computed.
         """
 
-        nodal_eff = nx.get_node_attributes(self, 'nodal_efficiency')
-        if nodal_eff: return nodal_eff
+        nodal_efficiency = nx.get_node_attributes(self, 'nodal_efficiency')
+        if nodal_efficiency: return nodal_efficiency
 
-        nodal_eff = self.compute_nodal_efficiency()
-        nx.set_node_attributes(self, nodal_eff, name='nodal_efficiency')
-        return nodal_eff
+        nodal_efficiency = self.compute_nodal_efficiency()
+        nx.set_node_attributes(self, nodal_efficiency, name='nodal_efficiency')
+        return nodal_efficiency
 
     @property
     def local_efficiency(self):
@@ -213,12 +213,12 @@ class GeneralGraph(nx.DiGraph):
         Otherwise, the attribute is computed.
         """
 
-        local_eff = nx.get_node_attributes(self, 'local_efficiency')
-        if local_eff: return local_eff
+        local_efficiency = nx.get_node_attributes(self, 'local_efficiency')
+        if local_efficiency: return local_efficiency
 
-        local_eff = self.compute_local_efficiency()
-        nx.set_node_attributes(self, local_eff, name='local_efficiency')
-        return local_eff
+        local_efficiency = self.compute_local_efficiency()
+        nx.set_node_attributes(self, local_efficiency, name='local_efficiency')
+        return local_efficiency
 
     @property
     def global_efficiency(self):
@@ -230,12 +230,12 @@ class GeneralGraph(nx.DiGraph):
             efficiency of all pairs of nodes.
         """
 
-        g_len = len(list(self))
-        if g_len <= 1:
+        graph_size = len(list(self))
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        nodeff_values = list(self.nodal_efficiency.values())
-        return sum(nodeff_values) / g_len
+        nodal_efficiency_values = list(self.nodal_efficiency.values())
+        return sum(nodal_efficiency_values) / graph_size
 
     @property
     def betweenness_centrality(self):
@@ -246,12 +246,14 @@ class GeneralGraph(nx.DiGraph):
         Otherwise, the attribute is computed.
         """
 
-        bet_cen = nx.get_node_attributes(self, 'betweenness_centrality')
-        if bet_cen: return bet_cen
+        betweenness_centrality = nx.get_node_attributes(self,
+            'betweenness_centrality')
+        if betweenness_centrality: return betweenness_centrality
 
-        bet_cen = self.compute_betweenness_centrality()
-        nx.set_node_attributes(self, bet_cen, name='betweenness_centrality')
-        return bet_cen
+        betweenness_centrality = self.compute_betweenness_centrality()
+        nx.set_node_attributes(self, betweenness_centrality,
+            name='betweenness_centrality')
+        return betweenness_centrality
 
     @property
     def closeness_centrality(self):
@@ -262,12 +264,14 @@ class GeneralGraph(nx.DiGraph):
         Otherwise, the attribute is computed.
         """
 
-        clo_cen = nx.get_node_attributes(self, 'closeness_centrality')
-        if clo_cen: return clo_cen
+        closeness_centrality = nx.get_node_attributes(self,
+            'closeness_centrality')
+        if closeness_centrality: return closeness_centrality
 
-        clo_cen = self.compute_closeness_centrality()
-        nx.set_node_attributes(self, clo_cen, name='closeness_centrality')
-        return clo_cen
+        closeness_centrality = self.compute_closeness_centrality()
+        nx.set_node_attributes(self, closeness_centrality,
+            name='closeness_centrality')
+        return closeness_centrality
 
     @property
     def degree_centrality(self):
@@ -278,12 +282,13 @@ class GeneralGraph(nx.DiGraph):
         Otherwise, the attribute is computed.
         """
 
-        deg_cen = nx.get_node_attributes(self, 'degree_centrality')
-        if deg_cen: return deg_cen
+        degree_centrality = nx.get_node_attributes(self, 'degree_centrality')
+        if degree_centrality: return degree_centrality
 
-        deg_cen = self.compute_degree_centrality()
-        nx.set_node_attributes(self, deg_cen, name='degree_centrality')
-        return deg_cen
+        degree_centrality = self.compute_degree_centrality()
+        nx.set_node_attributes(self, degree_centrality,
+            name='degree_centrality')
+        return degree_centrality
 
     @property
     def indegree_centrality(self):
@@ -294,12 +299,14 @@ class GeneralGraph(nx.DiGraph):
         Otherwise, the attribute is computed.
         """
 
-        indeg_cen = nx.get_node_attributes(self, 'indegree_centrality')
-        if indeg_cen: return indeg_cen
+        indegree_centrality = nx.get_node_attributes(self,
+            'indegree_centrality')
+        if indegree_centrality: return indegree_centrality
 
-        indeg_cen = self.compute_indegree_centrality()
-        nx.set_node_attributes(self, indeg_cen, name='indegree_centrality')
-        return indeg_cen
+        indegree_centrality = self.compute_indegree_centrality()
+        nx.set_node_attributes(self, indegree_centrality,
+            name='indegree_centrality')
+        return indegree_centrality
 
     @property
     def outdegree_centrality(self):
@@ -310,12 +317,14 @@ class GeneralGraph(nx.DiGraph):
         Otherwise, the attribute is computed.
         """
 
-        outdeg_cen = nx.get_node_attributes(self, 'outdegree_centrality')
-        if outdeg_cen: return outdeg_cen
+        outdegree_centrality = nx.get_node_attributes(self,
+            'outdegree_centrality')
+        if outdegree_centrality: return outdegree_centrality
 
-        outdeg_cen = self.compute_outdegree_centrality()
-        nx.set_node_attributes(self, outdeg_cen, name='outdegree_centrality')
-        return outdeg_cen
+        outdegree_centrality = self.compute_outdegree_centrality()
+        nx.set_node_attributes(self, outdegree_centrality,
+            name='outdegree_centrality')
+        return outdegree_centrality
 
     def clear_data(self, attributes_to_remove):
         """
@@ -326,11 +335,11 @@ class GeneralGraph(nx.DiGraph):
             with all the attributes we want to remove
         """
 
-        for attr in attributes_to_remove:
+        for attribute in attributes_to_remove:
             for node in self:
-                del self.nodes[node][attr]
+                del self.nodes[node][attribute]
 
-    def construct_path_kernel(self, nodes, pred):
+    def construct_path_kernel(self, nodes, predecessor):
         """
 
         Reconstruct source-target paths starting from predecessors
@@ -338,7 +347,7 @@ class GeneralGraph(nx.DiGraph):
 
         :param list nodes: list of nodes for which to compute the
             shortest path between them and all the other nodes
-        :param numpy.ndarray pred: matrix of predecessors,
+        :param numpy.ndarray predecessors: matrix of predecessors,
             computed with Floyd Warshall APSP algorithm
 
         :return: nested dictionary with key corresponding to
@@ -361,13 +370,13 @@ class GeneralGraph(nx.DiGraph):
                 if source == target:
                     path = [source]
                 else:
-                    pred.astype(int)
-                    curr = pred[source, target]
+                    predecessor.astype(int)
+                    curr = predecessor[source, target]
                     if curr != np.inf:
                         curr = int(curr)
                         path = [int(target), int(curr)]
                         while curr != source:
-                            curr = int(pred[int(source), int(curr)])
+                            curr = int(predecessor[int(source), int(curr)])
                             path.append(curr)
                     else:
                         path = []
@@ -400,17 +409,18 @@ class GeneralGraph(nx.DiGraph):
         self.ids = nx.get_node_attributes(self.H, 'mark_ids')
         self.ids_reversed = { value: key for key, value in self.ids.items() }
 
-        dist = nx.to_numpy_matrix(self.H, nodelist=sorted(list(self.H)),
+        distance = nx.to_numpy_matrix(self.H, nodelist=sorted(list(self.H)),
             nonedge=np.inf)
-        np.fill_diagonal(dist, 0.)
+        np.fill_diagonal(distance, 0.)
 
-        pred = np.full((len(self.H), len(self.H)), np.inf)
+        predecessor = np.full((len(self.H), len(self.H)), np.inf)
         for u, v in self.H.edges():
-            pred[u, v] = u
+            predecessor[u, v] = u
 
-        return dist, pred
+        return distance, predecessor
 
-    def floyd_warshall_kernel(self, dist, pred, init, stop, barrier=None):
+    def floyd_warshall_kernel(self, distance, predecessor, init, stop,
+        barrier=None):
         """
 
         Floyd Warshall's APSP inner iteration.
@@ -427,17 +437,17 @@ class GeneralGraph(nx.DiGraph):
             distance and predecessors matrices
         """
 
-        n = dist.shape[0]
+        n = distance.shape[0]
         for w in range(n):  # k
-            dist_copy = copy.deepcopy(dist[init:stop, :])
+            distance_copy = copy.deepcopy(distance[init:stop, :])
             np.minimum(
                 np.reshape(
-                    np.add.outer(dist[init:stop, w], dist[w, :]),
+                    np.add.outer(distance[init:stop, w], distance[w, :]),
                     (stop-init, n)),
-                dist[init:stop, :],
-                dist[init:stop, :])
-            diff = np.equal(dist[init:stop, :], dist_copy)
-            pred[init:stop, :][~diff] = np.tile(pred[w, :],
+                distance[init:stop, :],
+                distance[init:stop, :])
+            diff = np.equal(distance[init:stop, :], distance_copy)
+            predecessor[init:stop, :][~diff] = np.tile(predecessor[w, :],
                 (stop-init, 1))[~diff]
 
         if barrier:
@@ -456,11 +466,12 @@ class GeneralGraph(nx.DiGraph):
             as sums of weighted edges traversed.
         """
 
-        dist, pred = self.floyd_warshall_initialization()
+        distance, predecessor = self.floyd_warshall_initialization()
 
-        self.floyd_warshall_kernel(dist, pred, 0, dist.shape[0])
+        self.floyd_warshall_kernel(distance, predecessor, 0, distance.shape[0])
 
-        all_shortest_path = self.construct_path_kernel(list(self.H), pred)
+        all_shortest_path = self.construct_path_kernel(list(self.H),
+            predecessor)
 
         nonempty_shortest_path = {}
         for k in all_shortest_path.keys():
@@ -475,7 +486,7 @@ class GeneralGraph(nx.DiGraph):
             shortest_path_length[self.ids[i]] = {}
 
             for key, value in nonempty_shortest_path[self.ids[i]].items():
-                length_path = dist[self.ids_reversed[value[0]],
+                length_path = distance[self.ids_reversed[value[0]],
                                    self.ids_reversed[value[-1]]]
                 shortest_path_length[self.ids[i]][key] =  length_path
 
@@ -515,14 +526,14 @@ class GeneralGraph(nx.DiGraph):
         """
 
         n_of_nodes = self.order()
-        g_density = nx.density(self)
+        graph_density = nx.density(self)
 
         logging.debug(f'In the graph are present {n_of_nodes} nodes')
-        if g_density <= 0.000001:
-            logging.debug(f'The graph is sparse, density = {g_density}')
+        if graph_density <= 0.000001:
+            logging.debug(f'The graph is sparse, density = {graph_density}')
             shpath, shpath_len = self.dijkstra_single_source_shortest_path()
         else:
-            logging.debug(f'The graph is dense, density = {g_density}')
+            logging.debug(f'The graph is dense, density = {graph_density}')
             shpath, shpath_len = self.floyd_warshall_predecessor_and_distance()
 
         return shpath, shpath_len
@@ -574,7 +585,7 @@ class GeneralGraph(nx.DiGraph):
         efficiency = self.efficiency_kernel(list(self), shortest_path_length)
         return efficiency
 
-    def nodal_efficiency_kernel(self, nodes, efficiency, g_len):
+    def nodal_efficiency_kernel(self, nodes, efficiency, graph_size):
         """
 
         Compute nodal efficiency, starting from efficiency attribute.
@@ -584,22 +595,22 @@ class GeneralGraph(nx.DiGraph):
         :param dict efficiency: nested dictionary with key corresponding to
             source, while as value a dictionary keyed by target and valued
             by the source-target efficiency
-        :param int g_len: graph size
+        :param int graph_size: graph size
 
         :return: nodal efficiency dictionary keyed by node
         :rtype: dict
         """
 
-        if g_len <= 1:
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        dict_nod_eff = {}
+        dict_nodal_efficiency = {}
 
         for n in nodes:
             sum_efficiencies = sum(efficiency[n].values())
-            dict_nod_eff[n] = sum_efficiencies / (g_len - 1)
+            dict_nodal_efficiency[n] = sum_efficiencies / (graph_size - 1)
 
-        return dict_nod_eff
+        return dict_nodal_efficiency
 
     def compute_nodal_efficiency(self):
         """
@@ -611,10 +622,11 @@ class GeneralGraph(nx.DiGraph):
             we can reach each node of the digraph.
         """
 
-        g_len = len(list(self))
+        graph_size = len(list(self))
         efficiency = self.efficiency
-        nod_eff = self.nodal_efficiency_kernel(list(self), efficiency, g_len)
-        return nod_eff
+        nodal_efficiency = self.nodal_efficiency_kernel(list(self), efficiency,
+            graph_size)
+        return nodal_efficiency
 
     def local_efficiency_kernel(self, nodes, nodal_efficiency):
         """
@@ -628,24 +640,24 @@ class GeneralGraph(nx.DiGraph):
         :rtype: dict
         """
 
-        dict_loc_eff = {}
+        dict_local_efficiency = {}
 
         for n in nodes:
             subgraph = list(self.successors(n))
-            denom_subg = len(list(subgraph))
+            denominator_subg = len(list(subgraph))
 
-            if denom_subg != 0:
+            if denominator_subg != 0:
                 sum_efficiencies = 0
                 for w in list(subgraph):
                     kv_efficiency = nodal_efficiency[w]
                     sum_efficiencies = sum_efficiencies + kv_efficiency
 
-                dict_loc_eff[n] = sum_efficiencies / denom_subg
+                dict_local_efficiency[n] = sum_efficiencies / denominator_subg
 
             else:
-                dict_loc_eff[n] = 0.
+                dict_local_efficiency[n] = 0.
 
-        return dict_loc_eff
+        return dict_local_efficiency
 
     def compute_local_efficiency(self):
         """
@@ -662,8 +674,9 @@ class GeneralGraph(nx.DiGraph):
         """
 
         nodal_efficiency = self.nodal_efficiency
-        loc_eff = self.local_efficiency_kernel(list(self), nodal_efficiency)
-        return loc_eff
+        local_efficiency = self.local_efficiency_kernel(list(self),
+            nodal_efficiency)
+        return local_efficiency
 
     def shortest_path_list_kernel(self, nodes, shortest_path):
         """
@@ -705,13 +718,13 @@ class GeneralGraph(nx.DiGraph):
         dict_bet_cen = {}
 
         for n in nodes:
-            sp_with_node = []
+            shortest_paths_with_node = []
             for l in tot_shortest_paths_list:
                 if n in l and n != l[0] and n != l[-1]:
-                    sp_with_node.append(l)
+                    shortest_paths_with_node.append(l)
 
-            numb_sp_with_node = len(sp_with_node)
-            dict_bet_cen[n] = numb_sp_with_node / len(tot_shortest_paths_list)
+            n_shpaths_with_node = len(shortest_paths_with_node)
+            dict_bet_cen[n] = n_shpaths_with_node / len(tot_shortest_paths_list)
 
         return dict_bet_cen
 
@@ -732,48 +745,48 @@ class GeneralGraph(nx.DiGraph):
         tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
             shortest_path)
 
-        bet_cen = self.betweenness_centrality_kernel(list(self),
+        betweenness_centrality = self.betweenness_centrality_kernel(list(self),
             tot_shortest_paths_list)
-        return bet_cen
+        return betweenness_centrality
 
-    def closeness_centrality_kernel(self, nodes, shpath_len, tot_shpaths_list,
-        g_len):
+    def closeness_centrality_kernel(self, nodes, shortest_path_length,
+        tot_shortest_paths_list, graph_size):
         """
 
         Compute betweenness centrality, from shortest path list. 
 
         :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
-        :param tot_shpaths_list: list of shortest paths
+        :param tot_shortest_paths_list: list of shortest paths
             with at least two nodes
-        :type tot_shortest_path_list: list or multiprocessing.managers.list
-        :param int g_len: graph size
+        :type tot_shortest_paths_list: list or multiprocessing.managers.list
+        :param int graph_size: graph size
 
         :return: closeness centrality dictionary keyed by node
         :rtype: dict
         """
 
-        if g_len <= 1:
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        dict_clo_cen = {}
+        dict_closeness_centrality = {}
 
         for n in nodes:
             totsp = []
             sp_with_node = []
-            for l in tot_shpaths_list:
+            for l in tot_shortest_paths_list:
                 if n in l and n == l[-1]:
                     sp_with_node.append(l)
-                    length_path = shpath_len[l[0]][l[-1]]
+                    length_path = shortest_path_length[l[0]][l[-1]]
                     totsp.append(length_path)
-            norm = len(totsp) / (g_len - 1)
+            norm = len(totsp) / (graph_size - 1)
 
             if (sum(totsp)) != 0:
-                dict_clo_cen[n] = (len(totsp) / sum(totsp)) * norm
+                dict_closeness_centrality[n] = (len(totsp) / sum(totsp)) * norm
             else:
-                dict_clo_cen[n] = 0
+                dict_closeness_centrality[n] = 0
 
-        return dict_clo_cen
+        return dict_closeness_centrality
 
     def compute_closeness_centrality(self):
         """
@@ -788,39 +801,39 @@ class GeneralGraph(nx.DiGraph):
             closely the nodes are connected with each other.
         """
 
-        g_len = len(list(self))
+        graph_size = len(list(self))
         shortest_path = self.shortest_path
         shortest_path_length = self.shortest_path_length
         tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
             shortest_path)
 
-        clo_cen = self.closeness_centrality_kernel(list(self),
-            shortest_path_length, tot_shortest_paths_list, g_len)
-        return clo_cen
+        closeness_centrality = self.closeness_centrality_kernel(list(self),
+            shortest_path_length, tot_shortest_paths_list, graph_size)
+        return closeness_centrality
 
-    def degree_centrality_kernel(self, nodes, g_len):
+    def degree_centrality_kernel(self, nodes, graph_size):
         """
 
         Compute degree centrality.
 
         :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
-        :param int g_len: graph size
+        :param int graph_size: graph size
 
         :return: degree centrality dictionary keyed by node
         :rtype: dict
         """
 
-        if g_len <= 1:
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        dict_deg_cen = {}
+        dict_degree_centrality = {}
 
         for n in nodes:
             num_neighbor_nodes = self.degree(n, weight='weight')
-            dict_deg_cen[n] = num_neighbor_nodes / (g_len - 1)
+            dict_degree_centrality[n] = num_neighbor_nodes / (graph_size - 1)
 
-        return dict_deg_cen
+        return dict_degree_centrality
 
     def compute_degree_centrality(self):
         """
@@ -835,33 +848,34 @@ class GeneralGraph(nx.DiGraph):
             A node with high degree centrality is a node with many dependencies.
         """
 
-        g_len = len(list(self))
-        deg_cen = self.degree_centrality_kernel(list(self), g_len)
-        return deg_cen
+        graph_size = len(list(self))
+        degree_centrality = self.degree_centrality_kernel(list(self),
+            graph_size)
+        return degree_centrality
 
-    def indegree_centrality_kernel(self, nodes, g_len):
+    def indegree_centrality_kernel(self, nodes, graph_size):
         """
 
         Compute in-degree centrality.
 
         :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
-        :param int g_len: graph size
+        :param int graph_size: graph size
 
         :return: in-degree centrality dictionary keyed by node
         :rtype: dict
         """
 
-        if g_len <= 1:
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        dict_indeg_cen = {}
+        dict_indegree_centrality = {}
 
         for n in nodes:
             num_incoming_nodes = self.in_degree(n, weight='weight')
-            dict_indeg_cen[n] = num_incoming_nodes / (g_len - 1)
+            dict_indegree_centrality[n] = num_incoming_nodes / (graph_size - 1)
 
-        return dict_indeg_cen
+        return dict_indegree_centrality
 
     def compute_indegree_centrality(self):
         """
@@ -873,33 +887,34 @@ class GeneralGraph(nx.DiGraph):
             centrality are called cascade resulting nodes.
         """
 
-        g_len = len(list(self))
-        indeg_cen = self.indegree_centrality_kernel(list(self), g_len)
-        return indeg_cen
+        graph_size = len(list(self))
+        indegree_centrality = self.indegree_centrality_kernel(list(self),
+            graph_size)
+        return indegree_centrality
 
-    def outdegree_centrality_kernel(self, nodes, g_len):
+    def outdegree_centrality_kernel(self, nodes, graph_size):
         """
 
         Compute out-degree centrality.
 
         :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
-        :param int g_len: graph size
+        :param int graph_size: graph size
 
         :return: out-degree dictionary keyed by node
         :rtype: dict
         """
 
-        if g_len <= 1:
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        dict_outdeg_cen = {}
+        dict_outdegree_cen = {}
 
         for n in nodes:
             num_outcoming_nodes = self.out_degree(n, weight='weight')
-            dict_outdeg_cen[n] = num_outcoming_nodes / (g_len - 1)
+            dict_outdegree_cen[n] = num_outcoming_nodes / (graph_size - 1)
 
-        return dict_outdeg_cen
+        return dict_outdegree_cen
 
     def compute_outdegree_centrality(self):
         """
@@ -911,9 +926,10 @@ class GeneralGraph(nx.DiGraph):
             centrality are called cascade inititing nodes.
         """
 
-        g_len = len(list(self))
-        outdeg_cen = self.outdegree_centrality_kernel(list(self), g_len)
-        return outdeg_cen
+        graph_size = len(list(self))
+        outdegree_centrality = self.outdegree_centrality_kernel(list(self),
+            graph_size)
+        return outdegree_centrality
 
     def compute_service(self):
         """

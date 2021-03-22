@@ -162,16 +162,16 @@ class ParallelGeneralGraph(GeneralGraph):
             for key, value in nonempty_shortest_path[self.ids[i]].items():
                 length_path = dist_shared[self.ids_reversed[value[0]],
                                           self.ids_reversed[value[-1]]]
-                shortest_path_length[self.ids[i]][key] =  length_path
+                shortest_path_length[self.ids[i]][key] = length_path
         
         return nonempty_shortest_path, shortest_path_length
 
-    def dijkstra_iteration_parallel(self, out_q, nodes):
+    def dijkstra_iteration_parallel(self, out_queue, nodes):
         """
 
         Parallel SSSP algorithm based on Dijkstra’s method.
 
-        :param multiprocessing.queues.Queue out_q: multiprocessing queue
+        :param multiprocessing.queues.Queue out_queue: multiprocessing queue
         :param list nodes: list of starting nodes from which the SSSP should be
             computed to every other target node in the graph
 
@@ -182,7 +182,7 @@ class ParallelGeneralGraph(GeneralGraph):
 
         for n in nodes:
             ssspp = (n, nx.single_source_dijkstra(self, n, weight='weight'))
-            out_q.put(ssspp)
+            out_queue.put(ssspp)
 
     def dijkstra_single_source_shortest_path(self):
         """
@@ -198,13 +198,13 @@ class ParallelGeneralGraph(GeneralGraph):
 
         self.attribute_ssspp = []
 
-        out_q = Queue()
+        out_queue = Queue()
 
         node_chunks = chunk_it(list(self.nodes()), self.num)
 
         processes = [
             mp.Process( target=self.dijkstra_iteration_parallel,
-            args=( out_q,node_chunks[p] ))
+            args=( out_queue,node_chunks[p] ))
             for p in range(self.num) ]
 
         for proc in processes:
@@ -212,9 +212,9 @@ class ParallelGeneralGraph(GeneralGraph):
 
         while 1:
             running = any(p.is_alive() for p in processes)
-            while not out_q.empty():
+            while not out_queue.empty():
 
-                self.attribute_ssspp.append(out_q.get())
+                self.attribute_ssspp.append(out_queue.get())
 
             if not running:
                 break
@@ -242,16 +242,16 @@ class ParallelGeneralGraph(GeneralGraph):
         """
 
         n_of_nodes = self.order()
-        g_density = nx.density(self)
+        graph_density = nx.density(self)
 
         logging.debug(f'Number of processors: {self.num}')
 
         logging.debug(f'In the graph are present {n_of_nodes} nodes')
-        if g_density <= 0.000001:
-            logging.debug(f'The graph is sparse, density = {g_density}')
+        if graph_density <= 0.000001:
+            logging.debug(f'The graph is sparse, density = {graph_density}')
             shpath, shpath_len = self.dijkstra_single_source_shortest_path()
         else:
-            logging.debug(f'The graph is dense, density = {g_density}')
+            logging.debug(f'The graph is dense, density = {graph_density}')
             shpath, shpath_len = self.floyd_warshall_predecessor_and_distance()
 
         return shpath, shpath_len
@@ -282,12 +282,12 @@ class ParallelGeneralGraph(GeneralGraph):
             we can reach each node of the digraph.
         """
 
-        g_len = len(list(self))
+        graph_size = len(list(self))
         efficiency = self.efficiency
-        nod_eff = self.manager.dict()
-        self.measure_processes(nod_eff, self.nodal_efficiency_kernel,
-            efficiency, g_len)
-        return nod_eff
+        nodal_efficiency = self.manager.dict()
+        self.measure_processes(nodal_efficiency, self.nodal_efficiency_kernel,
+            efficiency, graph_size)
+        return nodal_efficiency
 
     def compute_local_efficiency(self):
         """
@@ -304,12 +304,13 @@ class ParallelGeneralGraph(GeneralGraph):
         """
 
         nodal_efficiency = self.nodal_efficiency
-        loc_eff = self.manager.dict()
-        self.measure_processes(loc_eff, self.local_efficiency_kernel, 
+        local_efficiency = self.manager.dict()
+        self.measure_processes(local_efficiency, self.local_efficiency_kernel, 
             nodal_efficiency)
-        return loc_eff
+        return local_efficiency
 
-    def shortest_path_list_iteration(self, nodes, shpath, tot_shpaths_list):
+    def shortest_path_list_iteration(self, nodes, shortest_path,
+        tot_shortest_paths_list):
         """
 
         Inner iteration for parallel shortest path list calculation,
@@ -317,13 +318,14 @@ class ParallelGeneralGraph(GeneralGraph):
 
         :param list nodes: list of nodes for which to compute the
             shortest path between them and all the other nodes
-        :param tot_shpaths_list: list of shortest paths
+        :param tot_shortest_paths_list: list of shortest paths
             with at least two nodes
-        :type tot_shpath_list: multiprocessing.managers.list
+        :type tot_shortest_paths_list: multiprocessing.managers.list
         """
 
-        partial_shpath_list = self.shortest_path_list_kernel(nodes, shpath)
-        tot_shpaths_list.extend(partial_shpath_list)
+        partial_shortest_paths_list = self.shortest_path_list_kernel(nodes,
+            shortest_path)
+        tot_shortest_paths_list.extend(partial_shortest_paths_list)
 
     def compute_betweenness_centrality(self):
         """
@@ -353,11 +355,11 @@ class ParallelGeneralGraph(GeneralGraph):
         for proc in processes:
             proc.join()
 
-        bet_cen = self.manager.dict()
-        self.measure_processes(bet_cen, self.betweenness_centrality_kernel,
-            tot_shortest_paths_list)
+        betweenness_centrality = self.manager.dict()
+        self.measure_processes(betweenness_centrality,
+            self.betweenness_centrality_kernel, tot_shortest_paths_list)
         
-        return bet_cen
+        return betweenness_centrality
 
     def compute_closeness_centrality(self):
         """
@@ -372,8 +374,8 @@ class ParallelGeneralGraph(GeneralGraph):
             closely the nodes are connected with each other.
         """
 
-        g_len = len(list(self))
-        if g_len <= 1:
+        graph_size = len(list(self))
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
         shortest_path = self.shortest_path
@@ -392,11 +394,12 @@ class ParallelGeneralGraph(GeneralGraph):
         for proc in processes:
             proc.join()
 
-        clo_cen = self.manager.dict()
-        self.measure_processes(clo_cen, self.closeness_centrality_kernel,
-            shortest_path_length, tot_shortest_paths_list, g_len)
+        closeness_centrality = self.manager.dict()
+        self.measure_processes(closeness_centrality,
+            self.closeness_centrality_kernel, shortest_path_length,
+            tot_shortest_paths_list, graph_size)
 
-        return clo_cen
+        return closeness_centrality
 
     def compute_degree_centrality(self):
         """
@@ -411,13 +414,14 @@ class ParallelGeneralGraph(GeneralGraph):
             A node with high degree centrality is a node with many dependencies.
         """
 
-        g_len = len(list(self))
-        if g_len <= 1:
+        graph_size = len(list(self))
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        deg_cen = self.manager.dict()
-        self.measure_processes(deg_cen, self.degree_centrality_kernel, g_len)
-        return deg_cen
+        degree_centrality = self.manager.dict()
+        self.measure_processes(degree_centrality,
+            self.degree_centrality_kernel, graph_size)
+        return degree_centrality
 
     def compute_indegree_centrality(self):
         """
@@ -429,14 +433,14 @@ class ParallelGeneralGraph(GeneralGraph):
             centrality are called cascade resulting nodes.
         """
 
-        g_len = len(list(self))
-        if g_len <= 1:
+        graph_size = len(list(self))
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        indeg_cen = self.manager.dict()
-        self.measure_processes(indeg_cen, self.indegree_centrality_kernel,
-            g_len)
-        return indeg_cen
+        indegree_centrality = self.manager.dict()
+        self.measure_processes(indegree_centrality,
+            self.indegree_centrality_kernel, graph_size)
+        return indegree_centrality
 
     def compute_outdegree_centrality(self):
         """
@@ -448,11 +452,11 @@ class ParallelGeneralGraph(GeneralGraph):
             centrality are called cascade inititing nodes.
         """
 
-        g_len = len(list(self))
-        if g_len <= 1:
+        graph_size = len(list(self))
+        if graph_size <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
-        outdeg_cen = self.manager.dict()
-        self.measure_processes(outdeg_cen, self.outdegree_centrality_kernel,
-            g_len)
-        return outdeg_cen
+        outdegree_centrality = self.manager.dict()
+        self.measure_processes(outdegree_centrality,
+            self.outdegree_centrality_kernel, graph_size)
+        return outdegree_centrality

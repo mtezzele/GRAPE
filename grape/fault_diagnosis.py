@@ -73,8 +73,8 @@ class FaultDiagnosis():
 
         original_source_user_paths = []
 
-        eff_fields = ['nodal_efficiency', 'local_efficiency', 'service']
-        self.update_output(eff_fields, prefix='original_')
+        measure_fields = ['nodal_efficiency', 'local_efficiency', 'service']
+        self.update_output(measure_fields, prefix='original_')
 
         for source in self.G.source:
             for user in self.G.user:
@@ -128,8 +128,8 @@ class FaultDiagnosis():
 
         final_source_user_paths = []
 
-        eff_fields = ['nodal_efficiency', 'local_efficiency', 'service']
-        self.update_output(eff_fields, prefix='final_')
+        measure_fields = ['nodal_efficiency', 'local_efficiency', 'service']
+        self.update_output(measure_fields, prefix='final_')
 
         for source in self.G.source:
             for user in self.G.user:
@@ -262,15 +262,15 @@ class FaultDiagnosis():
 
         else:
             fathers = {'AND': set(), 'OR': set(), 'SINGLE': set() }
-            pred = list(self.G.predecessors(node))
-            logging.debug(f'Predecessors: {pred}')
+            predecessors = list(self.G.predecessors(node))
+            logging.debug(f'Predecessors: {predecessors}')
 
             if len(visited) == 1:
                 self.broken.append(node)
                 logging.debug(f'Broken: {self.broken}')
 
-            elif pred:
-                for p in pred:
+            elif predecessors:
+                for p in predecessors:
                     fathers[self.G.father_condition[(p, node)]].add(p)
 
                 if fathers['AND'] & set(self.broken):
@@ -313,8 +313,6 @@ class FaultDiagnosis():
         :param prefix: prefix to be added to column name
         :type prefix: str, optional
         """
-
-        nested_dict = {}
 
         for col in attribute_list:
             self.df[prefix + col] = pd.Series(getattr(self.G, col))
@@ -387,11 +385,11 @@ class FaultDiagnosis():
         for node in perturbed_nodes:
             if node in self.G.nodes(): self.delete_a_node(node)
 
-        del_sources = [s for s in self.G.source if s not in list(self.G)]
-        for s in del_sources: self.G.source.remove(s)
+        deleted_sources = [s for s in self.G.source if s not in list(self.G)]
+        for s in deleted_sources: self.G.source.remove(s)
 
-        del_users = [u for u in self.G.user if u not in list(self.G)]
-        for u in del_users: self.G.user.remove(u)
+        deleted_users = [u for u in self.G.user if u not in list(self.G)]
+        for u in deleted_users: self.G.user.remove(u)
 
         self.check_after()
         self.paths_df.to_csv('service_paths_element_perturbation.csv',
@@ -429,8 +427,8 @@ class FaultDiagnosis():
                 print(f'Valid areas: {set(self.G.area.values())}')
                 sys.exit()
             else:
-                for idx, Area in self.G.area.items():
-                    if Area == area: nodes_in_area.append(idx)
+                for idx, idx_area in self.G.area.items():
+                    if idx_area == area: nodes_in_area.append(idx)
 
         self.check_before()
 
@@ -445,11 +443,11 @@ class FaultDiagnosis():
                 self.delete_a_node(node)
                 nodes_in_area = list(set(nodes_in_area) - set(self.bn))
 
-        del_sources = [s for s in self.G.source if s not in list(self.G)]
-        for s in del_sources: self.G.source.remove(s)
+        deleted_sources = [s for s in self.G.source if s not in list(self.G)]
+        for s in deleted_sources: self.G.source.remove(s)
 
-        del_users = [u for u in self.G.user if u not in list(self.G)]
-        for u in del_users: self.G.user.remove(u)
+        deleted_users = [u for u in self.G.user if u not in list(self.G)]
+        for u in deleted_users: self.G.user.remove(u)
 
         self.check_after()
         self.paths_df.to_csv('service_paths_area_perturbation.csv', index=False)
