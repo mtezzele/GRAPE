@@ -12,13 +12,13 @@ class TestInputGraph(TestCase):
 
     def test_Mark(self):
         """
-		Unittest check for Mark attribute of GeneralGraph:
+		Unittest check for mark attribute of GeneralGraph:
 		correct input reading.
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        Mark_dict = {
+        mark_dict = {
             '1': '1',
             '2': '2',
             '3': '3',
@@ -40,12 +40,11 @@ class TestInputGraph(TestCase):
             '19': '19'
         }
 
-        g_Mark = nx.get_node_attributes(g, "Mark")
-        self.assertDictEqual(Mark_dict, g_Mark, msg="Wrong MARK in input")
+        self.assertDictEqual(mark_dict, g.mark, msg="Wrong MARK in input")
 
-    def test_Father_cond(self):
+    def test_father_condition(self):
         """
-		Unittest check for Father_cond attribute of GeneralGraph:
+		Unittest check for father_condition attribute of GeneralGraph:
 		correct input reading.
 		"""
         g = GeneralGraph()
@@ -81,52 +80,18 @@ class TestInputGraph(TestCase):
             ('19', '14'): 'SINGLE'
         }
 
-        g_cond = nx.get_edge_attributes(g, "Father_cond")
-        self.assertDictEqual(cond_dict, g_cond, msg="Wrong CONDITION in input")
+        self.assertDictEqual(cond_dict, g.father_condition,
+        msg="Wrong FATHER CONDITION in input")
 
-    def test_Father_mark(self):
+    def test_area(self):
         """
-		Unittest check for Father_mark attribute of GeneralGraph:
+		Unittest check for area attribute of GeneralGraph:
 		correct input reading.
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        Father_mark_dict = {
-            '1': 'NULL',
-            '2': '1',
-            '3': '1',
-            '4': '2',
-            '5': '3',
-            '6': '8',
-            '7': '6',
-            '8': '6',
-            '9': '15',
-            '10': '17',
-            '11': '5',
-            '12': '13',
-            '13': '12',
-            '14': '13',
-            '15': 'NULL',
-            '16': '17',
-            '17': '16',
-            '18': '14',
-            '19': '14'
-        }
-
-        g_Father_mark = nx.get_node_attributes(g, "Father_mark")
-        self.assertDictEqual(
-            Father_mark_dict, g_Father_mark, msg="Wrong FATHER MARK in input")
-
-    def test_Area(self):
-        """
-		Unittest check for Area attribute of GeneralGraph:
-		correct input reading.
-		"""
-        g = GeneralGraph()
-        g.load("tests/TOY_graph.csv")
-
-        Area_dict = {
+        area_dict = {
             '1': 'area1',
             '2': 'area1',
             '3': 'area1',
@@ -148,18 +113,17 @@ class TestInputGraph(TestCase):
             '19': 'area2'
         }
 
-        g_Area = nx.get_node_attributes(g, "Area")
-        self.assertDictEqual(Area_dict, g_Area, msg="Wrong AREA in input")
+        self.assertDictEqual(area_dict, g.area, msg="Wrong AREA in input")
 
-    def test_PerturbationResistant(self):
+    def test_perturbation_resistant(self):
         """
-		Unittest check for PerturbationResistant attribute of GeneralGraph:
+		Unittest check for perturbation_resistant attribute of GeneralGraph:
 		correct input reading.
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        PR_dict = {
+        perturbation_resistant_dict = {
             '1': '0',
             '2': '1',
             '3': '1',
@@ -181,19 +145,20 @@ class TestInputGraph(TestCase):
             '19': '0'
         }
 
-        g_PR = nx.get_node_attributes(g, "PerturbationResistant")
         self.assertDictEqual(
-            PR_dict, g_PR, msg="Wrong PERTURBATION RESISTANT in input")
+            perturbation_resistant_dict,
+            g.perturbation_resistant,
+            msg="Wrong PERTURBATION RESISTANT in input")
 
-    def test_InitStatus(self):
+    def test_init_status(self):
         """
-		Unittest check for InitStatus attribute of GeneralGraph:
+		Unittest check for init_status attribute of GeneralGraph:
 		correct input reading.
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        status_dict = {
+        init_status_dict = {
             '1': '',
             '2': '1',
             '3': '1',
@@ -215,19 +180,18 @@ class TestInputGraph(TestCase):
             '19': ''
         }
 
-        g_status = nx.get_node_attributes(g, "InitStatus")
-        self.assertDictEqual(
-            status_dict, g_status, msg="Wrong INIT STATUS in input")
+        self.assertDictEqual(init_status_dict, g.init_status,
+            msg="Wrong INIT STATUS in input")
 
-    def test_Description(self):
+    def test_description(self):
         """
-		Unittest check for Description attribute of GeneralGraph:
+		Unittest check for description attribute of GeneralGraph:
 		correct input reading.
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        D_dict = {
+        description_dict = {
             '1': '',
             '2': 'isolation_A',
             '3': 'isolation_A',
@@ -249,18 +213,18 @@ class TestInputGraph(TestCase):
             '19': ''
         }
 
-        g_D = nx.get_node_attributes(g, "Description")
-        self.assertDictEqual(D_dict, g_D, msg=" Wrong DESCRIPTION in input ")
+        self.assertDictEqual(description_dict, g.description,
+            msg=" Wrong DESCRIPTION in input ")
 
-    def test_Type(self):
+    def test_type(self):
         """
-		Unittest check for Type attribute of GeneralGraph:
+		Unittest check for type attribute of GeneralGraph:
 		correct input reading.
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        Type_dict = {
+        type_dict = {
             '1': 'SOURCE',
             '2': 'HUB',
             '3': 'HUB',
@@ -282,10 +246,9 @@ class TestInputGraph(TestCase):
             '19': 'HUB'
         }
 
-        g_Type = nx.get_node_attributes(g, "Type")
-        self.assertDictEqual(Type_dict, g_Type, msg="Wrong TYPE in input")
+        self.assertDictEqual(type_dict, g.type, msg="Wrong TYPE in input")
 
-    def test_Weight(self):
+    def test_weight(self):
         """
 		Unittest check for Weight attribute of GeneralGraph:
 		correct input reading.
@@ -293,7 +256,7 @@ class TestInputGraph(TestCase):
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        Weight_dict = {
+        weight_dict = {
 			('1', '2'): 1.0,
 			('1', '3'): 1.0,
 			('2', '4'): 1.0,
@@ -323,18 +286,17 @@ class TestInputGraph(TestCase):
 			('13', '14'): 1.0
         }
 
-        g_Weight = nx.get_edge_attributes(g, "weight")
-        self.assertDictEqual(Weight_dict, g_Weight, msg="Wrong WEIGHT in input")
+        self.assertDictEqual(weight_dict, g.weight, msg="Wrong WEIGHT in input")
 
-    def test_Service(self):
+    def test_initial_service(self):
         """
-		Unittest check for Service attribute of GeneralGraph:
+		Unittest check for initial_service attribute of GeneralGraph:
 		correct input reading.
 		"""
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        Service_dict = {
+        initial_service_dict = {
             '1': 1.0,
             '2': 0.0,
             '3': 0.0,
@@ -356,6 +318,5 @@ class TestInputGraph(TestCase):
             '19': 0.0
         }
 
-        g_Service = nx.get_node_attributes(g, "Service")
-        self.assertDictEqual(
-            Service_dict, g_Service, msg=" Wrong SERVICE in input ")
+        self.assertDictEqual(initial_service_dict, g.initial_service,
+            msg=" Wrong INITIAL SERVICE in input ")

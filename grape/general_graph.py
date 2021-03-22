@@ -1,23 +1,15 @@
 """GeneralGraph for directed graphs (DiGraph) module"""
 
-from multiprocessing import Queue
-import multiprocessing as mp
-from multiprocessing.sharedctypes import RawArray
-import numpy as np
-import sys
-import csv
-import ctypes
 import logging
+import sys
 import warnings
 import copy
+import numpy as np
 import networkx as nx
 import pandas as pd
 
-from .utils import chunk_it
-
 warnings.simplefilter(action='ignore', category=FutureWarning)
-logging.basicConfig(
-    filename="general_code_output.log", level=logging.DEBUG, filemode='w')
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 class GeneralGraph(nx.DiGraph):
@@ -31,6 +23,9 @@ class GeneralGraph(nx.DiGraph):
     attributes.
     """
 
+    def __init__(self):
+        super().__init__()
+
     def load(self, filename):
         """
 
@@ -42,130 +37,318 @@ class GeneralGraph(nx.DiGraph):
         :param str filename: input file in CSV format
         """
 
-        conv = {'Mark' : str, 'Father_mark' : str,
-                'PerturbationResistant':str, 'InitStatus':str}
-        self.df = pd.read_csv(filename, converters=conv, keep_default_na=False)
+        conv = {'mark' : str, 'father_mark' : str,
+                'perturbation_resistant':str, 'init_status':str}
+        graph_df = pd.read_csv(filename, converters=conv, keep_default_na=False)
 
-        for index in self.df.index.values.tolist():
-            if not self.df.iloc[index]['Mark'] in self:
-                self.add_node(self.df.iloc[index]['Mark'])
+        for index, row in graph_df.iterrows():
 
-            for key in ['Mark', 'Area', 'PerturbationResistant', 'InitStatus',
-                        'Description', 'Type', 'Father_mark']:
-                self.nodes[self.df.iloc[index]['Mark']][key] = \
-                self.df.iloc[index][key]
+            edge_weight = row.pop('weight')
+            father_mark = row.pop('father_mark')
+            edge_father_condition = row.pop('father_condition')
 
-            self.nodes[self.df.iloc[index]['Mark']]['Service'] = \
-            float(self.df.iloc[index]['Service'])
+            self.add_node(row['mark'], **row)
 
-            if self.df.iloc[index]['Father_mark'] == 'NULL':
-                continue
+            if father_mark != 'NULL':
+                self.add_edge(
+                    father_mark, row['mark'],
+                    father_condition=edge_father_condition,
+                    weight=edge_weight)
 
-            if not self.df.iloc[index]['Father_mark'] in self:
-                self.add_node(self.df.iloc[index]['Father_mark'])
+        graph_edges_df = graph_df[['mark', 'father_mark']]
 
-            self.add_edge(
-                self.df.iloc[index]['Father_mark'],
-                self.df.iloc[index]['Mark'],
-                Father_cond = self.df.iloc[index]['Father_cond'],
-                weight = float(self.df.iloc[index]['Weight']))
+        graph_df.drop(['father_condition', 'father_mark', 'type',
+                      'weight', 'initial_service'], axis=1, inplace=True)
+        graph_df.drop_duplicates(inplace=True)
+        graph_df.set_index('mark', inplace=True)
 
-        self.edges_df = self.df[['Mark', 'Father_mark']]
-
-        self.df.drop(['Father_cond', 'Father_mark', 'Type',
-                      'Weight', 'Service'], axis=1, inplace=True)
-        self.df.drop_duplicates(inplace=True)
-        self.df.set_index('Mark', inplace=True)
-
-        nx.set_node_attributes(self, str(), 'IntermediateStatus')
-        nx.set_node_attributes(self, str(), 'FinalStatus')
-        nx.set_node_attributes(self, 'AVAILABLE', 'Status_Area')
+        nx.set_node_attributes(self, str(), 'intermediate_status')
+        nx.set_node_attributes(self, str(), 'final_status')
+        nx.set_node_attributes(self, 'AVAILABLE', 'status_area')
         nx.set_node_attributes(self, 'ACTIVE', 'Mark_Status')
-        self.damaged_areas = set()
 
-        self.area = nx.get_node_attributes(self, 'Area')
-        self.FR = nx.get_node_attributes(self, 'PerturbationResistant')
-        self.D = nx.get_node_attributes(self, 'Description')
-        self.status = nx.get_node_attributes(self, 'InitStatus')
-        self.condition = nx.get_edge_attributes(self, 'Father_cond')
-        self.Type = nx.get_node_attributes(self, 'Type')
-        self.Service = nx.get_node_attributes(self, 'Service')
+        self.source = []
+        self.user = []
+        for idx, node_type in self.type.items():
+            if node_type == 'SOURCE':
+                self.source.append(idx)
+            elif node_type == 'USER':
+                self.user.append(idx)
 
-        self.SOURCE = []
-        self.USER = []
-        for id, Type in self.Type.items():
-            if Type == "SOURCE":
-                self.SOURCE.append(id)
-            elif Type == "USER":
-                self.USER.append(id)
+        return graph_df, graph_edges_df
 
-        self.valv = {	"isolation_A" : { "0": "OPEN", "1": "CLOSED"},
-			"isolation_B" : { "0": "CLOSED", "1": "OPEN"},
-			"unknown" : { "0": "OFF", "1": "ON"} }
+    @property
+    def mark(self):
+        return nx.get_node_attributes(self, 'mark')
 
-    def check_input_with_gephi(self):
+    @property
+    def area(self):
+        return nx.get_node_attributes(self, 'area')
+
+    @property
+    def perturbation_resistant(self):
+        return nx.get_node_attributes(self, 'perturbation_resistant')
+
+    @property
+    def description(self):
+        return nx.get_node_attributes(self, 'description')
+
+    @property
+    def init_status(self):
+        return nx.get_node_attributes(self, 'init_status')
+
+    @property
+    def intermediate_status(self):
+        return nx.get_node_attributes(self, 'intermediate_status')
+
+    @property
+    def final_status(self):
+        return nx.get_node_attributes(self, 'final_status')
+
+    @property
+    def mark_status(self):
+        return nx.get_node_attributes(self, 'mark_status')
+
+    @property
+    def status_area(self):
+        return nx.get_node_attributes(self, 'status_area')
+
+    @property
+    def father_condition(self):
+        return nx.get_edge_attributes(self, 'father_condition')
+
+    @property
+    def weight(self):
+        return nx.get_edge_attributes(self, 'weight')
+
+    @property
+    def type(self):
+        return nx.get_node_attributes(self, 'type')
+
+    @property
+    def initial_service(self):
+        return nx.get_node_attributes(self, 'initial_service')
+
+    @property
+    def service(self):
+
+        computed_service = nx.get_node_attributes(self, 'computed_service')
+        if computed_service: return computed_service
+
+        computed_service, _ = self.compute_service()
+        nx.set_node_attributes(self, computed_service, name='computed_service')
+        return computed_service
+
+    @property
+    def shortest_path(self):
         """
 
-        Write list of nodes and list of edges csv files
-        to visualize the input with Gephi.
+        Shortest existing paths between all node pairs.
         """
 
-        gephi_nodes_df = self.df.reset_index()
-        gephi_nodes_df.rename(columns={'index': 'Mark'}, inplace=True)
+        shortest_path = nx.get_node_attributes(self, 'shortest_path')
+        if shortest_path: return shortest_path
 
-        fields = [ "Mark", "Description", "InitStatus",
-                   "PerturbationResistant", "Area" ]
+        shortest_path, shortest_path_length = self.calculate_shortest_path()
+        nx.set_node_attributes(self, shortest_path, name='shortest_path')
+        nx.set_node_attributes(self, shortest_path_length,
+            name='shortest_path_length')
+        return shortest_path
 
-        gephi_nodes_df[fields].to_csv("check_import_nodes.csv", index=False)
+    @property
+    def shortest_path_length(self):
+        """
 
-        orphans = self.edges_df['Father_mark'].str.contains("NULL")
-        self.edges_df = self.edges_df[~orphans]
-        self.edges_df.to_csv("check_import_edges.csv", index=False)
+        Shortest path length.
+        """
 
-    def construct_path(self, source, target, pred):
+        shortest_path_length = nx.get_node_attributes(self,
+            'shortest_path_length')
+        if shortest_path_length: return shortest_path_length
+
+        shortest_path, shortest_path_length = self.calculate_shortest_path()
+        nx.set_node_attributes(self, shortest_path, name='shortest_path')
+        nx.set_node_attributes(self, shortest_path_length,
+            name='shortest_path_length')
+        return shortest_path_length
+
+    @property
+    def efficiency(self):
+        """
+
+        Efficiency of the graph.
+        Returns the efficiency if already stored in the nodes.
+        Otherwise, the attribute is computed.
+        """
+
+        efficiency = nx.get_node_attributes(self, 'efficiency')
+        if efficiency: return efficiency
+
+        efficiency = self.compute_efficiency()
+        nx.set_node_attributes(self, efficiency, name='efficiency')
+        return efficiency
+
+    @property
+    def nodal_efficiency(self):
+        """
+
+        Nodal efficiency of the graph.
+        Returns the nodal efficiency if already stored in the nodes.
+        Otherwise, the attribute is computed.
+        """
+
+        nodal_efficiency = nx.get_node_attributes(self, 'nodal_efficiency')
+        if nodal_efficiency: return nodal_efficiency
+
+        nodal_efficiency = self.compute_nodal_efficiency()
+        nx.set_node_attributes(self, nodal_efficiency, name='nodal_efficiency')
+        return nodal_efficiency
+
+    @property
+    def local_efficiency(self):
+        """
+
+        Local efficiency of the graph.
+        Returns the local efficiency if already stored in the nodes.
+        Otherwise, the attribute is computed.
+        """
+
+        local_efficiency = nx.get_node_attributes(self, 'local_efficiency')
+        if local_efficiency: return local_efficiency
+
+        local_efficiency = self.compute_local_efficiency()
+        nx.set_node_attributes(self, local_efficiency, name='local_efficiency')
+        return local_efficiency
+
+    @property
+    def global_efficiency(self):
+        """
+
+        Average global efficiency of the whole graph.
+
+        .. note:: The average global efficiency of a graph is the average
+            efficiency of all pairs of nodes.
+        """
+
+        graph_size = len(list(self))
+        if graph_size <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        nodal_efficiency_values = list(self.nodal_efficiency.values())
+        return sum(nodal_efficiency_values) / graph_size
+
+    @property
+    def betweenness_centrality(self):
+        """
+
+        Betweenness centrality of the graph.
+        Returns the betweenness centrality if already stored in the nodes.
+        Otherwise, the attribute is computed.
+        """
+
+        betweenness_centrality = nx.get_node_attributes(self,
+            'betweenness_centrality')
+        if betweenness_centrality: return betweenness_centrality
+
+        betweenness_centrality = self.compute_betweenness_centrality()
+        nx.set_node_attributes(self, betweenness_centrality,
+            name='betweenness_centrality')
+        return betweenness_centrality
+
+    @property
+    def closeness_centrality(self):
+        """
+
+        Closeness centrality of the graph.
+        Returns the closeness centrality if already stored in the nodes.
+        Otherwise, the attribute is computed.
+        """
+
+        closeness_centrality = nx.get_node_attributes(self,
+            'closeness_centrality')
+        if closeness_centrality: return closeness_centrality
+
+        closeness_centrality = self.compute_closeness_centrality()
+        nx.set_node_attributes(self, closeness_centrality,
+            name='closeness_centrality')
+        return closeness_centrality
+
+    @property
+    def degree_centrality(self):
+        """
+
+        Degree centrality of the graph.
+        Returns the degree centrality if already stored in the nodes.
+        Otherwise, the attribute is computed.
+        """
+
+        degree_centrality = nx.get_node_attributes(self, 'degree_centrality')
+        if degree_centrality: return degree_centrality
+
+        degree_centrality = self.compute_degree_centrality()
+        nx.set_node_attributes(self, degree_centrality,
+            name='degree_centrality')
+        return degree_centrality
+
+    @property
+    def indegree_centrality(self):
+        """
+
+        In-degree centrality of the graph.
+        Returns the in-degree centrality if already stored in the nodes.
+        Otherwise, the attribute is computed.
+        """
+
+        indegree_centrality = nx.get_node_attributes(self,
+            'indegree_centrality')
+        if indegree_centrality: return indegree_centrality
+
+        indegree_centrality = self.compute_indegree_centrality()
+        nx.set_node_attributes(self, indegree_centrality,
+            name='indegree_centrality')
+        return indegree_centrality
+
+    @property
+    def outdegree_centrality(self):
+        """
+
+        Out-degree centrality of the graph.
+        Returns the out-degree centrality if already stored in the nodes.
+        Otherwise, the attribute is computed.
+        """
+
+        outdegree_centrality = nx.get_node_attributes(self,
+            'outdegree_centrality')
+        if outdegree_centrality: return outdegree_centrality
+
+        outdegree_centrality = self.compute_outdegree_centrality()
+        nx.set_node_attributes(self, outdegree_centrality,
+            name='outdegree_centrality')
+        return outdegree_centrality
+
+    def clear_data(self, attributes_to_remove):
+        """
+
+        Delete attributes for all nodes in the graph.
+
+        :param list attributes_to_remove: a list of strings
+            with all the attributes we want to remove
+        """
+
+        for attribute in attributes_to_remove:
+            for node in self:
+                del self.nodes[node][attribute]
+
+    def construct_path_kernel(self, nodes, predecessor):
         """
 
         Reconstruct source-target paths starting from predecessors
-        matrix.
+        matrix, and populate the dictionary of shortest paths.
 
-        :param source: starting node for the path
-        :param target: ending node for the path
-        :param numpy.ndarray pred: matrix of predecessors, computed
-            with Floyd Warshall APSP algorithm
-
-        :return: the shortest path between source and target
-            (source and target included)
-        :rtype: list
-        """
-
-        if source == target:
-            path = [source]
-        else:
-            pred.astype(int)
-            curr = pred[source, target]
-            if curr != np.inf:
-                curr = int(curr)
-                path = [int(target), int(curr)]
-                while curr != source:
-                    curr = int(pred[int(source), int(curr)])
-                    path.append(curr)
-            else:
-                path = []
-
-        path = list(map(self.ids.get, path))
-        path = list(reversed(path))
-
-        return path
-
-    def construct_path_kernel(self, pred, nodi):
-        """
-
-        Populate the dictionary of shortest paths.
-
-        :param numpy.ndarray pred: matrix of predecessors,
-            computed with Floyd Warshall APSP algorithm
-        :param list nodi: list of nodes for which to compute the
+        :param list nodes: list of nodes for which to compute the
             shortest path between them and all the other nodes
+        :param numpy.ndarray predecessors: matrix of predecessors,
+            computed with Floyd Warshall APSP algorithm
 
         :return: nested dictionary with key corresponding to
             source, while as value a dictionary keyed by target and valued
@@ -173,81 +356,39 @@ class GeneralGraph(nx.DiGraph):
         :rtype: dict
         """
 
-        paths = {}
+        shortest_paths = {}
 
-        for i in nodi:
-            paths[self.ids[i]] = {
-                self.ids[j]: self.construct_path(i,j,pred)
-                for j in sorted(list(self.H))
-            }   
+        for i in nodes:
+            
+            all_targets_paths = {}
 
-        return paths
+            for j in sorted(list(self.H)):
 
-    def construct_path_iteration_parallel(self, pred, nodi, record):
-        """
+                source = i
+                target = j
 
-        Inner iteration for parallel Floyd Warshall APSP algorithm,
-        to update shared dictionary.
-
-        :param numpy.ndarray pred: matrix of predecessors,
-            computed with Floyd Warshall APSP algorithm
-        :param list nodi: list of nodes for which to compute the
-            shortest path between them and all the other nodes
-        :param multiprocessing.managers.dict record: nested dictionary
-            with key corresponding to source, while as value a
-            dictionary keyed by target and valued by the
-            source-target shortest path
-        """
-
-        paths = self.construct_path_kernel(pred, nodi)
-        record.update(paths) 
-
-    def compute_efficiency_kernel(self, nodi):
-        """
-
-        Compute efficiency, starting from path length attribute.
-        Efficiency is a measure of how good is the exchange of commodities
-        flowing from one node to the others.
-
-        :param list nodi: list of nodes for which to compute the
-            efficiency between them and all the other nodes
-
-        :return: nested dictionary with key corresponding to
-            source, while as value a dictionary keyed by target and valued
-            by the source-target efficiency
-        :rtype: dict
-        """
-
-        dict_efficiency = {}
-
-        for n in nodi:
-            dict_efficiency[n] = {}
-            for key, length_path in self.nodes[n]["shpath_length"].items():
-                if length_path != 0 : 
-                    efficiency = 1 / length_path
-                    dict_efficiency[n].update({key: efficiency})
+                if source == target:
+                    path = [source]
                 else:
-                    efficiency = 0
-                    dict_efficiency[n].update({key: efficiency})
+                    predecessor.astype(int)
+                    curr = predecessor[source, target]
+                    if curr != np.inf:
+                        curr = int(curr)
+                        path = [int(target), int(curr)]
+                        while curr != source:
+                            curr = int(predecessor[int(source), int(curr)])
+                            path.append(curr)
+                    else:
+                        path = []
 
-        return dict_efficiency
+                path = list(map(self.ids.get, path))
+                path = list(reversed(path))
 
-    def compute_efficiency_iteration_parallel(self, nodi, record):
-        """
+                all_targets_paths[self.ids[j]] = path
 
-        Inner iteration for parallel efficiency calculation,
-        to update shared dictionary.
+            shortest_paths[self.ids[i]] = all_targets_paths
 
-        :param list nodi: nodes for which to compute the
-            shortest path between them and all the other nodes
-        :param multiprocessing.managers.dict record: nested dictionary
-            with key corresponding to source, while as value a
-            dictionary keyed by target and valued by the
-            source-target efficiency
-        """
-
-        dict_efficiency = self.compute_efficiency_kernel(nodi)
-        record.update(dict_efficiency) 
+        return shortest_paths
 
     def floyd_warshall_initialization(self):
         """
@@ -260,32 +401,35 @@ class GeneralGraph(nx.DiGraph):
         matrix indices (and viceversa) is also exploited.
 
         .. note:: In order for the ids relation to be bijective,
-            "Mark" attribute must be unique for each node.
+            'Mark' attribute must be unique for each node.
         """
 
         self.H = nx.convert_node_labels_to_integers(
-            self, first_label=0, label_attribute='Mark_ids')
-        self.ids = nx.get_node_attributes(self.H, 'Mark_ids')
+            self, first_label=0, label_attribute='mark_ids')
+        self.ids = nx.get_node_attributes(self.H, 'mark_ids')
         self.ids_reversed = { value: key for key, value in self.ids.items() }
 
-        dist = nx.to_numpy_matrix(self.H, nodelist=sorted(list(self.H)))
-        dist[dist == 0] = np.inf
-        np.fill_diagonal(dist, 0.)
+        distance = nx.to_numpy_matrix(self.H, nodelist=sorted(list(self.H)),
+            nonedge=np.inf)
+        np.fill_diagonal(distance, 0.)
 
-        pred = np.full((len(self.H), len(self.H)), np.inf)
-        for u, v, d in self.H.edges(data=True):
-            pred[u, v] = u
+        predecessor = np.full((len(self.H), len(self.H)), np.inf)
+        for u, v in self.H.edges():
+            predecessor[u, v] = u
 
-        return dist, pred
+        return distance, predecessor
 
-    def floyd_warshall_kernel(self, dist, pred, init, stop, barrier=None):
+    def floyd_warshall_kernel(self, distance, predecessor, init, stop,
+        barrier=None):
         """
 
         Floyd Warshall's APSP inner iteration.
         Distance matrix is intended to take edges weight into account.
 
-        :param numpy.ndarray dist: matrix of distances
-        :param numpy.ndarray pred: matrix of predecessors
+        :param dist: matrix of distances
+        :type dist: numpy.ndarray or multiprocessing.sharedctypes.RawArray
+        :param pred: matrix of predecessors
+        :type pred: numpy.ndarray or multiprocessing.sharedctypes.RawArray
         :param int init: starting column of numpy matrix slice
         :param int stop: ending column of numpy matrix slice
         :param multiprocessing.synchronize.Barrier barrier:
@@ -293,111 +437,23 @@ class GeneralGraph(nx.DiGraph):
             distance and predecessors matrices
         """
 
-        n = dist.shape[0]
+        n = distance.shape[0]
         for w in range(n):  # k
-            dist_copy = copy.deepcopy(dist[init:stop, :])
+            distance_copy = copy.deepcopy(distance[init:stop, :])
             np.minimum(
                 np.reshape(
-                    np.add.outer(dist[init:stop, w], dist[w, :]),
+                    np.add.outer(distance[init:stop, w], distance[w, :]),
                     (stop-init, n)),
-                dist[init:stop, :],
-                dist[init:stop, :])
-            diff = np.equal(dist[init:stop, :], dist_copy)
-            pred[init:stop, :][~diff] = \
-            np.tile(pred[w, :], (stop-init, 1))[~diff]
-            
-        if barrier: barrier.wait() 
+                distance[init:stop, :],
+                distance[init:stop, :])
+            diff = np.equal(distance[init:stop, :], distance_copy)
+            predecessor[init:stop, :][~diff] = np.tile(predecessor[w, :],
+                (stop-init, 1))[~diff]
 
-    def floyd_warshall_predecessor_and_distance_parallel(self):
-        """
+        if barrier:
+            barrier.wait()
 
-        Parallel Floyd Warshall's APSP algorithm. The predecessors
-        and distance matrices are evaluated, together with the nested
-        dictionaries for shortest-path, length of the paths and
-        efficiency attributes.
-
-        .. note:: Edges weight is taken into account in the distance matrix.
-            Edge weight attributes must be numerical. Distances are calculated
-            as sums of weighted edges traversed.
-        """
-
-        dist, pred = self.floyd_warshall_initialization()
-
-        shared_d = mp.sharedctypes.RawArray(ctypes.c_double, dist.shape[0]**2)
-        dist_shared = np.frombuffer(shared_d, 'float64').reshape(dist.shape)
-        dist_shared[:] = dist
-
-        shared_p = mp.sharedctypes.RawArray(ctypes.c_double,pred.shape[0]**2)
-        pred_shared = np.frombuffer(shared_p, 'float64').reshape(pred.shape)
-        pred_shared[:] = pred
-
-        n = len(self.nodes())
-        chunk = [(0, int(n / self.num))]
-        node_chunks = chunk_it(list(self.nodes()), self.num)
-
-        for i in range(1, self.num):
-            chunk.append((chunk[i - 1][1],
-                          chunk[i - 1][1] + len(node_chunks[i])))
-
-        barrier = mp.Barrier(self.num)
-        processes = [
-            mp.Process( target=self.floyd_warshall_kernel,
-            args=(dist_shared, pred_shared, chunk[p][0], chunk[p][1], barrier))
-            for p in range(self.num) ]
-
-        for proc in processes:
-            proc.start()
-
-        for proc in processes:
-            proc.join()
-
-        manager = mp.Manager()
-        shpaths_dicts = manager.dict()
-
-        processes = [
-            mp.Process( target=self.construct_path_iteration_parallel,
-            args=(pred_shared,
-                  list(map(self.ids_reversed.get, node_chunks[p])),
-                  shpaths_dicts))
-            for p in range(self.num) ]
-
-        for proc in processes:
-            proc.start()
-
-        for proc in processes:
-            proc.join()
-
-        for k in shpaths_dicts.keys():
-            self.nodes[k]["shortest_path"] = {
-                key: value
-                for key, value in shpaths_dicts[k].items() if value
-            }
-
-        for i in list(self.H):
-
-            self.nodes[self.ids[i]]["shpath_length"] = {}
-
-            for key, value in self.nodes[self.ids[i]]["shortest_path"].items():
-                length_path = dist_shared[self.ids_reversed[value[0]],
-                                          self.ids_reversed[value[-1]]]
-                self.nodes[self.ids[i]]["shpath_length"][key] =  length_path
-
-        eff_dicts = manager.dict()
-        
-        processes = [
-            mp.Process( target=self.compute_efficiency_iteration_parallel,
-            args=(node_chunks[p], eff_dicts) )
-            for p in range(self.num) ]
-
-        for proc in processes:
-            proc.start()
-
-        for proc in processes:
-            proc.join()
-
-        nx.set_node_attributes(self, eff_dicts, name="efficiency")
-
-    def floyd_warshall_predecessor_and_distance_serial(self):
+    def floyd_warshall_predecessor_and_distance(self):
         """
 
         Serial Floyd Warshall's APSP algorithm. The predecessors
@@ -410,31 +466,33 @@ class GeneralGraph(nx.DiGraph):
             as sums of weighted edges traversed.
         """
 
-        dist, pred = self.floyd_warshall_initialization()
+        distance, predecessor = self.floyd_warshall_initialization()
 
-        self.floyd_warshall_kernel(dist, pred, 0, dist.shape[0])
+        self.floyd_warshall_kernel(distance, predecessor, 0, distance.shape[0])
 
-        shpaths_dicts = self.construct_path_kernel(pred, list(self.H))
+        all_shortest_path = self.construct_path_kernel(list(self.H),
+            predecessor)
 
-        for k in shpaths_dicts.keys():
-            self.nodes[k]["shortest_path"] = {
+        nonempty_shortest_path = {}
+        for k in all_shortest_path.keys():
+            nonempty_shortest_path[k] = {
                 key: value
-                for key, value in shpaths_dicts[k].items() if value
+                for key, value in all_shortest_path[k].items() if value
             }
 
+        shortest_path_length = {}
         for i in list(self.H):
 
-            self.nodes[self.ids[i]]["shpath_length"] = {}
-            
-            for key, value in self.nodes[self.ids[i]]["shortest_path"].items():
-                length_path = dist[self.ids_reversed[value[0]],
+            shortest_path_length[self.ids[i]] = {}
+
+            for key, value in nonempty_shortest_path[self.ids[i]].items():
+                length_path = distance[self.ids_reversed[value[0]],
                                    self.ids_reversed[value[-1]]]
-                self.nodes[self.ids[i]]["shpath_length"][key] =  length_path
+                shortest_path_length[self.ids[i]][key] =  length_path
 
-        eff_dicts = self.compute_efficiency_kernel(list(self))
-        nx.set_node_attributes(self, eff_dicts, name="efficiency")
+        return nonempty_shortest_path, shortest_path_length 
 
-    def single_source_shortest_path_serial(self):
+    def dijkstra_single_source_shortest_path(self):
         """
 
         Serial SSSP algorithm based on Dijkstra’s method.
@@ -446,161 +504,234 @@ class GeneralGraph(nx.DiGraph):
             Distances are calculated as sums of weighted edges traversed.
         """
 
+        shortest_path = {}
+        shortest_path_length = {}
         for n in self:
-            sssps = (n, nx.single_source_dijkstra(self, n, weight = 'weight'))
-            self.nodes[n]["shortest_path"] = sssps[1][1]
-            self.nodes[n]["shpath_length"] = sssps[1][0]
-            
-        eff_dicts = self.compute_efficiency_kernel(list(self))
-        nx.set_node_attributes(self, eff_dicts, name="efficiency")
+            sssps = (n, nx.single_source_dijkstra(self, n, weight='weight'))
+            shortest_path[n] = sssps[1][1]
+            shortest_path_length[n] = sssps[1][0]
 
-    def single_source_shortest_path_parallel(self, out_q, nodi):
+        return shortest_path, shortest_path_length
+
+    def calculate_shortest_path(self):
         """
 
-        Parallel SSSP algorithm based on Dijkstra’s method.
+        Choose the most appropriate way to compute the all-pairs shortest
+        path depending on graph size and density.
+        For a dense graph choose Floyd Warshall algorithm.
+        For a sparse graph choose SSSP algorithm based on Dijkstra's method.
 
-        :param multiprocessing.queues.Queue out_q: multiprocessing queue
-        :param list nodi: list of starting nodes from which the SSSP should be
-            computed to every other target node in the graph
-
-        .. note:: Edges weight is taken into account.
-            Edge weight attributes must be numerical.
-            Distances are calculated as sums of weighted edges traversed.
+        .. note:: Edge weights of the graph are taken into account
+            in the computation.
         """
 
-        for n in nodi:
-            ssspp = (n, nx.single_source_dijkstra(self, n, weight = 'weight'))
-            out_q.put(ssspp)
+        n_of_nodes = self.order()
+        graph_density = nx.density(self)
 
-    def parallel_wrapper_proc(self):
+        logging.debug(f'In the graph are present {n_of_nodes} nodes')
+        if graph_density <= 0.000001:
+            logging.debug(f'The graph is sparse, density = {graph_density}')
+            shpath, shpath_len = self.dijkstra_single_source_shortest_path()
+        else:
+            logging.debug(f'The graph is dense, density = {graph_density}')
+            shpath, shpath_len = self.floyd_warshall_predecessor_and_distance()
+
+        return shpath, shpath_len
+
+    def efficiency_kernel(self, nodes, shortest_path_length):
         """
 
-        Wrapper for parallel SSSP algorithm based on Dijkstra’s method.
-        The nested dictionaries for shortest-path, length of the paths and
-        efficiency attributes are evaluated.
+        Compute efficiency, starting from path length attribute.
+        Efficiency is a measure of how good is the exchange of commodities
+        flowing from one node to the others.
 
-        .. note:: Edges weight is taken into account.
-            Edge weight attributes must be numerical.
-            Distances are calculated as sums of weighted edges traversed.
+        :param list nodes: list of nodes for which to compute the
+            efficiency between them and all the other nodes
+        :param dict shortest_path_length: nested dictionary with key
+            corresponding to source, while as value a dictionary keyed by target
+            and valued by the source-target efficiency
+
+        :return: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target efficiency
+        :rtype: dict
         """
 
-        self.attribute_ssspp = []
-        
-        out_q = Queue()
+        dict_efficiency = {}
 
-        node_chunks = chunk_it(list(self.nodes()), self.num)
+        for n in nodes:
+            dict_efficiency[n] = {}
+            for key, length_path in shortest_path_length[n].items():
+                if length_path != 0:
+                    efficiency = 1 / length_path
+                    dict_efficiency[n].update({key: efficiency})
+                else:
+                    efficiency = 0
+                    dict_efficiency[n].update({key: efficiency})
 
-        processes = [
-            mp.Process( target=self.single_source_shortest_path_parallel,
-            args=( out_q,node_chunks[p] ))
-            for p in range(self.num) ]
+        return dict_efficiency
 
-        for proc in processes:
-            proc.start()
-
-        while 1:
-            running = any(p.is_alive() for p in processes)
-            while not out_q.empty():
-
-                self.attribute_ssspp.append(out_q.get())
-
-            if not running:
-                break
-
-        for ssspp in self.attribute_ssspp:
-
-            n = ssspp[0]
-            self.nodes[n]["shortest_path"] = ssspp[1][1]
-            self.nodes[n]["shpath_length"] = ssspp[1][0]
-
-        manager = mp.Manager()
-        eff_dicts = manager.dict()
-        
-        processes = [
-            mp.Process( target=self.compute_efficiency_iteration_parallel,
-            args=(node_chunks[p], eff_dicts) )
-            for p in range(self.num) ]
-
-        for proc in processes:
-            proc.start()
-
-        for proc in processes:
-            proc.join()
-
-        nx.set_node_attributes(self, eff_dicts, name="efficiency")
-
-    def nodal_efficiency(self):
+    def compute_efficiency(self):
         """
 
-        Nodal efficiency.
+        Efficiency calculation.
+
+        .. note:: The efficiency of a path connecting two nodes is defined
+            as the inverse of the path length, if the path has length non-zero,
+            and zero otherwise.
+        """
+
+        shortest_path_length = self.shortest_path_length
+        efficiency = self.efficiency_kernel(list(self), shortest_path_length)
+        return efficiency
+
+    def nodal_efficiency_kernel(self, nodes, efficiency, graph_size):
+        """
+
+        Compute nodal efficiency, starting from efficiency attribute.
+
+        :param list nodes: list of nodes for which to compute the
+            efficiency between them and all the other nodes
+        :param dict efficiency: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target efficiency
+        :param int graph_size: graph size
+
+        :return: nodal efficiency dictionary keyed by node
+        :rtype: dict
+        """
+
+        if graph_size <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        dict_nodal_efficiency = {}
+
+        for n in nodes:
+            sum_efficiencies = sum(efficiency[n].values())
+            dict_nodal_efficiency[n] = sum_efficiencies / (graph_size - 1)
+
+        return dict_nodal_efficiency
+
+    def compute_nodal_efficiency(self):
+        """
+
+        Nodal efficiency calculation.
 
         .. note:: The nodal efficiency of the node is equal to zero
             for a node without any outgoing path and equal to one if from it
             we can reach each node of the digraph.
         """
-        
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
 
-        for node in self:
-            sum_efficiencies = sum(self.nodes[node]["efficiency"].values())
-            self.nodes[node]["nodal_eff"] = sum_efficiencies / (g_len - 1)
+        graph_size = len(list(self))
+        efficiency = self.efficiency
+        nodal_efficiency = self.nodal_efficiency_kernel(list(self), efficiency,
+            graph_size)
+        return nodal_efficiency
 
-    def local_efficiency(self):
+    def local_efficiency_kernel(self, nodes, nodal_efficiency):
         """
 
-        Local efficiency of the node.
+        Compute local efficiency, starting from nodal efficiency attribute.
+
+        :param list nodes: list of nodes for which to compute the
+            efficiency between them and all the other nodes
+
+        :return: local efficiency dictionary keyed by node
+        :rtype: dict
+        """
+
+        dict_local_efficiency = {}
+
+        for n in nodes:
+            subgraph = list(self.successors(n))
+            denominator_subg = len(list(subgraph))
+
+            if denominator_subg != 0:
+                sum_efficiencies = 0
+                for w in list(subgraph):
+                    kv_efficiency = nodal_efficiency[w]
+                    sum_efficiencies = sum_efficiencies + kv_efficiency
+
+                dict_local_efficiency[n] = sum_efficiencies / denominator_subg
+
+            else:
+                dict_local_efficiency[n] = 0.
+
+        return dict_local_efficiency
+
+    def compute_local_efficiency(self):
+        """
+
+        Local efficiency calculation.
 
         .. note:: The local efficiency shows the efficiency of the connections
             between the first-order outgoing neighbors of node v
             when v is removed. Equivalently, local efficiency measures
-            the "resilience" of the digraph to the perturbation of node removal,
+            the resilience of the digraph to the perturbation of node removal,
             i.e. if we remove a node, how efficiently its first-order outgoing
             neighbors can communicate.
             It is in the range [0, 1].
         """
 
-        for node in self:
-            subgraph = list(self.successors(node))
-            denom_subg = len(list(subgraph))
+        nodal_efficiency = self.nodal_efficiency
+        local_efficiency = self.local_efficiency_kernel(list(self),
+            nodal_efficiency)
+        return local_efficiency
 
-            if denom_subg != 0:
-                sum_efficiencies = 0
-                for w in list(subgraph):
-                    kv_efficiency = self.nodes[w]["nodal_eff"]
-                    sum_efficiencies = sum_efficiencies + kv_efficiency
-
-                self.nodes[node]["local_eff"] = sum_efficiencies / denom_subg
-
-            else:
-                self.nodes[node]["local_eff"] = 0.
-
-    def global_efficiency(self):
+    def shortest_path_list_kernel(self, nodes, shortest_path):
         """
 
-        Average global efficiency of the whole graph.
+        Collect the shortest paths that contain at least two nodes.
 
-        .. note:: The average global efficiency of a graph is the average
-            efficiency of all pairs of nodes.
+        :param list nodes: list of nodes for which to compute the
+            list of shortest paths
+
+        :return: list of shortest paths
+        :rtype: list
         """
 
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
+        tot_shortest_paths_list = list()
 
-        sum_eff = 0
-        for node in self:
-            sum_eff = sum_eff + self.nodes[node]["nodal_eff"] / g_len
+        for n in nodes:
+            node_tot_shortest_paths = shortest_path[n]
+            for value in node_tot_shortest_paths.values():
+                if len(value) > 1:
+                    tot_shortest_paths_list.append(value)
 
-        for node in self:
-            self.nodes[node]["avg_global_eff"] = sum_eff
+        return tot_shortest_paths_list
 
-    def betweenness_centrality(self):
+    def betweenness_centrality_kernel(self, nodes, tot_shortest_paths_list):
         """
 
-        Betweenness_centrality measure of each node.
-        Nodes' "betweenness_centrality" attribute is evaluated.
+        Compute betweenness centrality, from shortest path list. 
+
+        :param list nodes: list of nodes for which to compute the
+            efficiency between them and all the other nodes
+        :param tot_shortest_paths_list: list of shortest paths
+            with at least two nodes
+        :type tot_shortest_path_list: list or multiprocessing.managers.list
+
+        :return: between centrality dictionary keyed by node
+        :rtype: dict
+        """
+
+        dict_bet_cen = {}
+
+        for n in nodes:
+            shortest_paths_with_node = []
+            for l in tot_shortest_paths_list:
+                if n in l and n != l[0] and n != l[-1]:
+                    shortest_paths_with_node.append(l)
+
+            n_shpaths_with_node = len(shortest_paths_with_node)
+            dict_bet_cen[n] = n_shpaths_with_node / len(tot_shortest_paths_list)
+
+        return dict_bet_cen
+
+    def compute_betweenness_centrality(self):
+        """
+
+        Betweenness_centrality calculation
 
         .. note:: Betweenness centrality is an index of the relative importance
             of a node and it is defined by the number of shortest paths that run
@@ -610,31 +741,57 @@ class GeneralGraph(nx.DiGraph):
             the network, because more information will pass through them.
         """
 
-        tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
-        tot_shortest_paths_list = []
+        shortest_path = self.shortest_path
+        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
+            shortest_path)
 
-        for node in self:
-            node_tot_shortest_paths = tot_shortest_paths[node]
-            for key, value in node_tot_shortest_paths.items():
-                if len(value) > 1:
-                    tot_shortest_paths_list.append(value)
-        length_tot_shortest_paths_list = len(tot_shortest_paths_list)
+        betweenness_centrality = self.betweenness_centrality_kernel(list(self),
+            tot_shortest_paths_list)
+        return betweenness_centrality
 
-        for node in self:
-            sp_with_node = []
-            for l in tot_shortest_paths_list:
-                if node in l and node != l[0] and node != l[-1]:
-                    sp_with_node.append(l)
-
-            numb_sp_with_node = len(sp_with_node)
-            bet_cen = numb_sp_with_node / length_tot_shortest_paths_list
-            self.nodes[node]["betweenness_centrality"] = bet_cen
-
-    def closeness_centrality(self):
+    def closeness_centrality_kernel(self, nodes, shortest_path_length,
+        tot_shortest_paths_list, graph_size):
         """
 
-        Closeness_centrality measure of each node.
-        Nodes' "closeness_centrality" attribute is evaluated.
+        Compute betweenness centrality, from shortest path list. 
+
+        :param list nodes: list of nodes for which to compute the
+            efficiency between them and all the other nodes
+        :param tot_shortest_paths_list: list of shortest paths
+            with at least two nodes
+        :type tot_shortest_paths_list: list or multiprocessing.managers.list
+        :param int graph_size: graph size
+
+        :return: closeness centrality dictionary keyed by node
+        :rtype: dict
+        """
+
+        if graph_size <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        dict_closeness_centrality = {}
+
+        for n in nodes:
+            totsp = []
+            sp_with_node = []
+            for l in tot_shortest_paths_list:
+                if n in l and n == l[-1]:
+                    sp_with_node.append(l)
+                    length_path = shortest_path_length[l[0]][l[-1]]
+                    totsp.append(length_path)
+            norm = len(totsp) / (graph_size - 1)
+
+            if (sum(totsp)) != 0:
+                dict_closeness_centrality[n] = (len(totsp) / sum(totsp)) * norm
+            else:
+                dict_closeness_centrality[n] = 0
+
+        return dict_closeness_centrality
+
+    def compute_closeness_centrality(self):
+        """
+
+        Closeness centrality calculation
 
         .. note:: Closeness centrality measures the reciprocal of the
             average shortest path distance from a node to all other reachable
@@ -644,37 +801,44 @@ class GeneralGraph(nx.DiGraph):
             closely the nodes are connected with each other.
         """
 
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
-        
-        tot_shortest_paths = nx.get_node_attributes(self, 'shortest_path')
-        tot_shortest_paths_list = []
+        graph_size = len(list(self))
+        shortest_path = self.shortest_path
+        shortest_path_length = self.shortest_path_length
+        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
+            shortest_path)
 
-        for node in self:
-            node_tot_shortest_paths = tot_shortest_paths[node]
-            for key, value in node_tot_shortest_paths.items():
-                if len(value) > 1:
-                    tot_shortest_paths_list.append(value)
+        closeness_centrality = self.closeness_centrality_kernel(list(self),
+            shortest_path_length, tot_shortest_paths_list, graph_size)
+        return closeness_centrality
 
-        for node in self:
-            totsp = []
-            sp_with_node = []
-            for l in tot_shortest_paths_list:
-                if node in l and node == l[-1]:
-                    sp_with_node.append(l)
-                    length_path = self.nodes[l[0]]["shpath_length"][l[-1]]
-                    totsp.append(length_path)
-            norm = len(totsp) / (g_len - 1)
-            clo_cen = (
-                len(totsp) / sum(totsp)) * norm if (sum(totsp)) != 0 else 0
-            self.nodes[node]["closeness_centrality"] = clo_cen
-
-    def degree_centrality(self):
+    def degree_centrality_kernel(self, nodes, graph_size):
         """
 
-        Degree centrality measure of each node.
-        Nodes' "degree_centrality" attribute is evaluated.
+        Compute degree centrality.
+
+        :param list nodes: list of nodes for which to compute the
+            efficiency between them and all the other nodes
+        :param int graph_size: graph size
+
+        :return: degree centrality dictionary keyed by node
+        :rtype: dict
+        """
+
+        if graph_size <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        dict_degree_centrality = {}
+
+        for n in nodes:
+            num_neighbor_nodes = self.degree(n, weight='weight')
+            dict_degree_centrality[n] = num_neighbor_nodes / (graph_size - 1)
+
+        return dict_degree_centrality
+
+    def compute_degree_centrality(self):
+        """
+
+        Degree centrality measure of each node calculation.
 
         .. note:: Degree centrality is a simple centrality measure that counts
             how many neighbors a node has in an undirected graph.
@@ -684,536 +848,88 @@ class GeneralGraph(nx.DiGraph):
             A node with high degree centrality is a node with many dependencies.
         """
 
-        #TODO: it can be trivially parallelized
-        #(see single_source_shortest_path_parallel for the way to go)
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
+        graph_size = len(list(self))
+        degree_centrality = self.degree_centrality_kernel(list(self),
+            graph_size)
+        return degree_centrality
 
-        for node in self:
-            num_neighbor_nodes = self.degree(node, weight = 'weight')
-            deg_cen = num_neighbor_nodes / (g_len - 1)
-            self.nodes[node]["degree_centrality"] = deg_cen
-
-    def indegree_centrality(self):
+    def indegree_centrality_kernel(self, nodes, graph_size):
         """
 
-        Indegree centrality measure of each node.
-        Nodes' "indegree_centrality" attribute is evaluated.
+        Compute in-degree centrality.
 
-        .. note:: Indegree centrality is measured by the number of edges
-            ending at the node in a directed graph. Nodes with high indegree
+        :param list nodes: list of nodes for which to compute the
+            efficiency between them and all the other nodes
+        :param int graph_size: graph size
+
+        :return: in-degree centrality dictionary keyed by node
+        :rtype: dict
+        """
+
+        if graph_size <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        dict_indegree_centrality = {}
+
+        for n in nodes:
+            num_incoming_nodes = self.in_degree(n, weight='weight')
+            dict_indegree_centrality[n] = num_incoming_nodes / (graph_size - 1)
+
+        return dict_indegree_centrality
+
+    def compute_indegree_centrality(self):
+        """
+
+        In-degree centrality calculation.
+
+        .. note:: In-degree centrality is measured by the number of edges
+            ending at the node in a directed graph. Nodes with high in-degree
             centrality are called cascade resulting nodes.
         """
 
-        #TODO: it can be trivially parallelized
-        #(see single_source_shortest_path_parallel for the way to go)
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
+        graph_size = len(list(self))
+        indegree_centrality = self.indegree_centrality_kernel(list(self),
+            graph_size)
+        return indegree_centrality
 
-        for node in self:
-            num_incoming_nodes = self.in_degree(node, weight = 'weight')
-            in_cen = num_incoming_nodes / (g_len - 1)
-            self.nodes[node]["indegree_centrality"] = in_cen
-
-    def outdegree_centrality(self):
+    def outdegree_centrality_kernel(self, nodes, graph_size):
         """
 
-        Outdegree centrality measure of each node.
-        Nodes' "outdegree_centrality" attribute is evaluated.
+        Compute out-degree centrality.
+
+        :param list nodes: list of nodes for which to compute the
+            efficiency between them and all the other nodes
+        :param int graph_size: graph size
+
+        :return: out-degree dictionary keyed by node
+        :rtype: dict
+        """
+
+        if graph_size <= 1:
+            raise ValueError('Graph size must equal or larger than 2.')
+
+        dict_outdegree_cen = {}
+
+        for n in nodes:
+            num_outcoming_nodes = self.out_degree(n, weight='weight')
+            dict_outdegree_cen[n] = num_outcoming_nodes / (graph_size - 1)
+
+        return dict_outdegree_cen
+
+    def compute_outdegree_centrality(self):
+        """
+
+        Outdegree centrality calculation.
 
         .. note:: Outdegree centrality is measured by the number of edges
             starting from a node in a directed graph. Nodes with high outdegree
             centrality are called cascade inititing nodes.
         """
 
-        #TODO: it can be trivially parallelized
-        #(see single_source_shortest_path_parallel for the way to go)
-        g_len = len(list(self))
-        if g_len <= 1:
-            raise ValueError("Graph size must equal or larger than 2.")
-        
-        for node in self:
-            num_outcoming_nodes = self.out_degree(node, weight = 'weight')
-            out_cen = num_outcoming_nodes / (g_len - 1)
-            self.nodes[node]["outdegree_centrality"] = out_cen
-
-    def calculate_shortest_path(self):
-        """
-
-        Choose the most appropriate way to compute the all-pairs shortest
-        path depending on graph size and density.
-
-        For a dense graph choose Floyd Warshall algorithm.
-
-        For a sparse graph choose SSSP algorithm based on Dijkstra's method.
-        
-        For big graphs go parallel (number of processes equals the total
-        number of available CPUs).
-
-        For small graphs go serial.
-
-        .. note:: Edge weights of the graph are taken into account
-            in the computation.
-        """
-
-        n_of_nodes = self.order()
-        g_density = nx.density(self)
-        self.num = mp.cpu_count()
-
-        print("PROC NUM", self.num)
-
-        print("In the graph are present", n_of_nodes, "nodes")
-        if n_of_nodes > 10000:
-            print("go parallel!")
-            if g_density <= 0.000001:
-                print("the graph is sparse, density =", g_density)
-                self.parallel_wrapper_proc()
-            else:
-                print("the graph is dense, density =", g_density)
-                self.floyd_warshall_predecessor_and_distance_parallel()
-        else:
-            print("go serial!")
-            if g_density <= 0.000001:
-                print("the graph is sparse, density =", g_density)
-                self.single_source_shortest_path_serial()
-            else:
-                print("the graph is dense, density =", g_density)
-                self.floyd_warshall_predecessor_and_distance_serial()
-
-    def check_before(self):
-        """
-
-        Describe the topology of the integer graph, before the
-        occurrence of any perturbation in the system.
-        Compute efficiency measures for the whole graph and its nodes.
-        Check the availability of paths between source and target nodes.
-        """
-
-        self.calculate_shortest_path()
-        original_source_user_paths = []
-
-        self.nodal_efficiency()
-        self.global_efficiency()
-        self.local_efficiency()
-        self.compute_service()
-
-        eff_fields = ['nodal_eff', 'avg_global_eff', 'local_eff', 'service']
-        self.update_output(eff_fields, prefix="original_")
-
-        for source in self.SOURCE:
-            for user in self.USER:
-               if nx.has_path(self, source, user):
-
-                   osip = list(nx.all_simple_paths(self, source, user))
-                   oshp = self.nodes[source]["shortest_path"][user]
-                   oshpl = self.nodes[source]["shpath_length"][user]
-                   oeff = 1 / oshpl
-                   ids = source + user
-
-               else:
-                   oshpl = "NO_PATH"
-                   osip = "NO_PATH"
-                   oshp = "NO_PATH"
-                   oeff = "NO_PATH"
-                   ids = source + user
-
-               original_source_user_paths.append({
-                  'from':
-                  source,
-                  'to':
-                  user,
-                  'original_shortest_path_length':
-                  oshpl,
-                  'original_shortest_path':
-                  oshp,
-                  'original_simple_path':
-                  osip,
-                  'original_pair_efficiency':
-                  oeff,
-                  'ids':
-                  ids
-               })
-
-        self.paths_df = pd.DataFrame(original_source_user_paths)
-
-    def check_after(self):
-        """
-
-        Describe the topology of the potentially perturbed graph,
-        after the occurrence of a perturbation in the system.
-        Compute efficiency measures for the whole graph and its nodes.
-        Check the availability of paths between source and target nodes.
-        """
-
-        self.calculate_shortest_path()
-        final_source_user_paths = []
-
-        self.nodal_efficiency()
-        self.global_efficiency()
-        self.local_efficiency()
-        self.compute_service()
-
-        eff_fields = ['nodal_eff', 'avg_global_eff', 'local_eff', 'service']
-        self.update_output(eff_fields, prefix="final_")
-
-        for source in self.SOURCE:
-            for user in self.USER:
-                if nx.has_path(self, source, user):
-
-                    sip = list(nx.all_simple_paths(self, source, user))
-                    set_sip = set(x for lst in sip for x in lst)
-
-                    for node in set_sip:
-
-                        if self.D[node] in self.valv:
-
-                            if self.nodes[node]['IntermediateStatus'] == "1":
-
-                                logging.debug(
-                                   "valve %s at node %s, state %s",
-                                    self.D[node], node,
-                                    self.valv[self.D[node]]["1"])
-
-                            elif self.nodes[node]['IntermediateStatus'] == "0":
-
-                                self.nodes[node]['FinalStatus'] = "1"
-                                    
-                                logging.debug(
-                                    "valve %s at node %s, from %s to %s",
-                                    self.D[node], node,
-                                    self.valv[self.D[node]]["0"],
-                                    self.valv[self.D[node]]["1"])
-                            else:
-                                if self.status[node] == "1":
-
-                                    logging.debug(
-                                        "valve %s at node %s, state %s",
-                                        self.D[node], node,
-                                        self.valv[self.D[node]]["1"])
-
-                                elif self.status[node] == "0":
-
-                                    self.nodes[node]['FinalStatus'] = "1"
-
-                                    logging.debug(
-                                        "valve %s at node %s, from %s to %s",
-                                        self.D[node], node,
-                                        self.valv[self.D[node]]["0"],
-                                        self.valv[self.D[node]]["1"])
-
-                    shp = self.nodes[source]["shortest_path"][user]
-                    shpl = self.nodes[source]["shpath_length"][user]
-                    neff = 1 / shpl
-                    ids = source + user
-
-                else:
-
-                    shpl = "NO_PATH"
-                    sip = "NO_PATH"
-                    shp = "NO_PATH"
-                    neff = "NO_PATH"
-                    ids = source + user
-
-                final_source_user_paths.append({
-                    'from': source,
-                    'area': self.area[source],
-                    'to': user,
-                    'final_shortest_path_length': shpl,
-                    'final_shortest_path': shp,
-                    'final_simple_path': sip,
-                    'final_pair_efficiency': neff,
-                    'ids': ids
-                })
-
-        if final_source_user_paths:
-            final_df = pd.DataFrame(final_source_user_paths)
-            self.paths_df = pd.merge(self.paths_df, final_df, \
-            on=['from', 'to', 'ids'], how='outer')
-
-    def rm_nodes(self, node, visited=None):
-        """
-
-        Remove nodes from the graph in a depth first search way to
-        propagate the perturbation.
-        Nodes are not deleted if perturbation resistant.
-        Moreover, valves are not deleted if encountered
-        during the propagation of a the perturbation.
-        They are deleted, instead, if object of node deletion
-        themselves.
-
-        :param str node: the id of the node to remove
-        :param visited: list of nodes already visited
-        :type visited: set, optional
-        """
-
-        if visited is None:
-            visited = set()
-        visited.add(node)
-        logging.debug('Visited: %s', visited)
-        logging.debug('Node: %s', node)
-
-        if self.FR[node] == "1":
-            logging.debug('Node %s visited, fault resistant node', node)
-            return visited
-
-        elif self.D[node] in self.valv:
-
-            if self.status[node] == "0":
-                logging.debug('Valve %s at node %s, state %s',
-                self.D[node], node, self.valv[self.D[node]]["0"])
-
-            elif self.status[node] == "1":
-                self.nodes[node]['IntermediateStatus'] = "0"
-                logging.debug(
-                    'Valve %s at node %s, from %s to %s',
-                    self.D[node], node, self.valv[self.D[node]]["1"],
-                    self.valv[self.D[node]]["0"])
-
-            if len(visited) == 1:
-                self.broken.append(node)
-                logging.debug("Valve perturbed: %s", self.broken)
-
-            else:
-                return visited
-
-        else:
-            fathers = {"AND": set(), "OR": set(), "SINGLE": set() }
-            pred = list(self.predecessors(node))
-            logging.debug("Predecessors: %s", pred)
-
-            if len(visited) == 1:
-                self.broken.append(node)
-                logging.debug("Broken: %s", self.broken)
-
-            elif pred:
-                for p in pred:
-                    fathers[self.condition[(p, node)]].add(p)
-            
-                if fathers["AND"] & set(self.broken):
-                    self.broken.append(node)
-                    logging.debug("Broken %s, AND predecessor broken.", node)
-                    logging.debug("Nodes broken so far: %s", self.broken)
-
-                #"SINGLE" treated as "AND"
-                elif fathers["SINGLE"] & set(self.broken):
-                    self.broken.append(node)
-                    logging.debug("Broken %s, SINGLE predecessor broken.", node)
-                    logging.debug("Nodes broken so far: %s", self.broken)
-  
-                else:
-                    #all my "OR" predecessors are dead
-                    if (fathers["OR"] & set(self.broken)) == set(pred):
-                        self.broken.append(node)
-                        logging.debug("Broken %s, no more fathers", node)
-                        logging.debug("Nodes broken so far: %s", self.broken)
-                    else:
-                        return 0
-            else:
-                self.broken.append(node)
-                logging.debug("Node: %s has no more predecessors", node)
-                logging.debug("Nodes broken so far: %s", self.broken)
-
-        for next in set(self[node]) - visited:
-            self.rm_nodes(next, visited)
-
-        return visited
-
-    def update_output(self, attribute_list, prefix=str()):
-        """
-
-        Update columns output DataFrame with attributes
-        in attribute_list.
-
-        :param list attribute_list: list of attributes to be updated
-            to the DataFrame
-        :param prefix: prefix to be added to column name
-        :type prefix: str, optional
-        """
-
-        nested_dict = {}
-        for col in attribute_list:
-            nested_dict[prefix + col] = nx.get_node_attributes(self, col)
-
-        self.df = pd.concat([self.df, pd.DataFrame(nested_dict)], axis=1)
-
-    def update_status_areas(self, damaged_areas):
-        """
-
-        Update the status of the elements in the damaged areas
-        after the propagation of the perturbation.
-
-        :param list damaged_areas: area(s) in which to update the status
-        """
-
-        self.df['Mark_Status'].fillna('NOT_ACTIVE', inplace=True)
-
-        for area in damaged_areas:
-            self.df.loc[self.df.Area == area, 'Status_Area'] = "DAMAGED"
-
-    def delete_a_node(self, node):
-        """
-
-        Delete a node in the graph.
-
-        :param str node: the id of the node to remove
-
-        .. note:: the node id must be contained in the graph.
-            No check is done within this function.
-        """
-
-        self.broken = [] #clear previous perturbation broken nodes
-
-        self.rm_nodes(node)
-        self.bn = list(set(self.broken))
-
-        for n in self.bn:
-            self.damaged_areas.add(self.nodes[n]["Area"])
-            self.remove_node(n)
-
-    def simulate_element_perturbation(self, perturbed_nodes):
-        """
-
-        Simulate a perturbation of one or multiple nodes.
-        Nodes' "IntermediateStatus", "FinalStatus", "Mark_Status"
-        and "Status_Area" attributes are evaluated.
-
-        :param list perturbed_nodes: nodes(s) involved in the
-            perturbing event
-
-        .. note:: A perturbation, depending on the considered system,
-            may spread in all directions starting from the damaged
-            component(s) and may be affect nearby areas.  
-        """
-
-        for node in perturbed_nodes:
-
-            if node not in self.nodes():
-                print('The node ', node, ' is not in the graph')
-                print('Insert a valid node')
-                print("Valid nodes:", self.nodes())
-                sys.exit()
-
-        self.check_before()
-        self.closeness_centrality()
-        self.betweenness_centrality()
-        self.indegree_centrality()
-        self.outdegree_centrality()
-        self.degree_centrality()
-
-        centrality_fields = ['closeness_centrality', 'betweenness_centrality', \
-        'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
-        self.update_output(centrality_fields)
-
-        for node in perturbed_nodes:
-            if node in self.nodes():
-                self.delete_a_node(node)
-
-        del_sources = [s for s in self.SOURCE if s not in list(self)]
-        for s in del_sources: self.SOURCE.remove(s)
-
-        del_users = [u for u in self.USER if u not in list(self)]
-        for u in del_users: self.USER.remove(u)
-
-        self.lst = []
-        self.check_after()
-        self.paths_df.to_csv("service_paths_element_perturbation.csv", \
-        index=False)
-
-        status_area_fields = ['IntermediateStatus', 'FinalStatus', \
-        'Mark_Status', 'Status_Area']
-        self.update_output(status_area_fields)
-
-        self.update_status_areas(self.damaged_areas)
-        self.graph_characterization_to_file("element_perturbation.csv")
-
-    def simulate_area_perturbation(self, perturbed_areas):
-        """
-
-        Simulate a perturbation in one or multiple areas.
-        Nodes' "IntermediateStatus", "FinalStatus", "Mark_Status"
-        and "Status_Area" attributes are evaluated.
-
-        :param list perturbed_areas: area(s) involved in the
-            perturbing event
-
-        .. note:: A perturbation, depending on the considered system,
-            may spread in all directions starting from the damaged
-            component(s) and may be affect nearby areas
-        """
-
-        nodes_in_area = []
-
-        for area in perturbed_areas:
-
-            if area not in list(self.area.values()):
-                print('The area ', area, ' is not in the graph')
-                print('Insert a valid area')
-                print("Valid areas:", set(self.area.values()))
-                sys.exit()
-            else:
-                for id, Area in self.area.items():
-                    if Area == area:
-                        nodes_in_area.append(id)
-        
-        self.check_before()
-        self.closeness_centrality()
-        self.betweenness_centrality()
-        self.indegree_centrality()
-        self.outdegree_centrality()
-        self.degree_centrality()
-
-        centrality_fields = ['closeness_centrality', 'betweenness_centrality', \
-        'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
-        self.update_output(centrality_fields)
-
-        for node in nodes_in_area:
-            if node in self.nodes():
-                self.delete_a_node(node)
-                nodes_in_area = list(set(nodes_in_area) - set(self.bn))
-
-        del_sources = [s for s in self.SOURCE if s not in list(self)]
-        for s in del_sources: self.SOURCE.remove(s)
-
-        del_users = [u for u in self.USER if u not in list(self)]
-        for u in del_users: self.USER.remove(u)
-
-        self.lst = []
-        self.check_after()
-        self.paths_df.to_csv("service_paths_area_perturbation.csv", index=False)
-
-        status_area_fields = ['IntermediateStatus', 'FinalStatus', \
-        'Mark_Status', 'Status_Area']
-        self.update_output(status_area_fields)
-
-        self.update_status_areas(self.damaged_areas)
-        self.graph_characterization_to_file("area_perturbation.csv")
-        
-    def graph_characterization_to_file(self, filename):
-        """
-
-        Write to file graph characterization
-        after the perturbation.
-
-        :param str filename: output file name where to print the
-            graph characterization
-        """
-
-        self.df.reset_index(inplace=True)
-        self.df.rename(columns={'index': 'Mark'}, inplace=True)
-
-        fields = [
-            "Mark", "Description", "InitStatus", "IntermediateStatus",
-            "FinalStatus", "Mark_Status", "PerturbationResistant", "Area",
-            "Status_Area", "closeness_centrality", "betweenness_centrality",
-            "indegree_centrality", "outdegree_centrality",
-            "original_local_eff", "final_local_eff",
-            "original_nodal_eff", "final_nodal_eff",
-            "original_avg_global_eff", "final_avg_global_eff",
-            "original_service", "final_service"
-        ]
-        self.df[fields].to_csv(filename, index=False)
+        graph_size = len(list(self))
+        outdegree_centrality = self.outdegree_centrality_kernel(list(self),
+            graph_size)
+        return outdegree_centrality
 
     def compute_service(self):
         """
@@ -1226,31 +942,34 @@ class GeneralGraph(nx.DiGraph):
         :param str servicename: service to populate
         """
 
-        users_per_node = {node: 0. for node in self}
+        usr_per_node = {node: 0. for node in self}
         splitting = {edge: 0. for edge in self.edges()}
-        nx.set_node_attributes(self, 0., 'service')
+        computed_service = {node: 0. for node in self}
+        initial_service = self.initial_service
+        shortest_path = self.shortest_path
 
-        users_per_source = {
-            s: [u for u in self.USER if nx.has_path(self, s, u)]
-            for s in self.SOURCE
+        usr_per_source = {
+            s: [u for u in self.user if nx.has_path(self, s, u)]
+            for s in self.source
         }
 
-        for s in self.SOURCE:
-            for u in users_per_source[s]:
-                for node in self.nodes[s]["shortest_path"][u]:
-                     users_per_node[node] += 1.
+        for s in self.source:
+            for u in usr_per_source[s]:
+                for node in self.shortest_path[s][u]:
+                    usr_per_node[node] += 1.
 
-        for s in self.SOURCE:
-            for u in users_per_source[s]:
-                self.nodes[u]['service'] += \
-                self.Service[s]/len(users_per_source[s])
+        for s in self.source:
+            for u in usr_per_source[s]:
+                computed_service[u] += initial_service[s]/len(usr_per_source[s])
 
         #Cycle just on the edges contained in source-user shortest paths
-        for s in self.SOURCE:
-            for u in users_per_source[s]:
-                for idx in range(len(self.nodes[s]["shortest_path"][u])-1):
+        for s in self.source:
+            for u in usr_per_source[s]:
+                for idx in range(len(shortest_path[s][u]) - 1):
 
-                    head = self.nodes[s]["shortest_path"][u][idx]
-                    tail = self.nodes[s]["shortest_path"][u][idx+1]
+                    head = shortest_path[s][u][idx]
+                    tail = shortest_path[s][u][idx+1]
 
-                    splitting[(head, tail)] += 1./users_per_node[head]
+                    splitting[(head, tail)] += 1./usr_per_node[head]
+
+        return computed_service, splitting
