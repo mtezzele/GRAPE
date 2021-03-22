@@ -37,46 +37,39 @@ class ParallelGeneralGraph(GeneralGraph):
         self.manager = mp.Manager()
         self.num = mp.cpu_count()
 
-    def measure_iteration(self, nodes, record, kernel=None, *measure_args):
+    def measure_iteration(self, nodes, record, kernel, *measure_args):
         """
 
         Inner iteration for parallel measures,
         to update shared dictionary.
 
         :param list nodes: nodes for which to compute the
-            shortest path between them and all the other nodes
+            shortest path between them and all the other nodes.
         :param multiprocessing.managers.dict record:
-            shared dictionary to be updated
-        :param callable kernel: kernel measure to be computed
-        :param \*measure_args: arguments for kernel measures
-           (have a look at specific kernel measures in 
-           GeneralGraph for the particular variables/types
-           for each measure)
+            shared dictionary to be updated.
+        :param callable kernel: kernel measure to be computed.
+        :param \*measure_args: arguments for kernel measures.
+           Have a look at specific kernel measures in GeneralGraph for
+           the particular variables/types for each measure.
         """
-
-        if kernel is None:
-            raise ValueError('No kernel function provided.')
 
         partial_dict = kernel(nodes, *measure_args)
         record.update(partial_dict)
 
-    def measure_processes(self, record, kernel=None, *measure_args):
+    def measure_processes(self, record, kernel, *measure_args):
         """
 
         Division of total number of nodes in chuncks and
         parallel distribution of tasks into processes,
         for different kernel measure functions.
 
-        :param callable kernel: kernel measure to be computed
         :param multiprocessing.managers.dict record:
             shared dictionary to be updated
+        :param callable kernel: kernel measure to be computed
         :param \*measure_args: arguments for kernel measures
            (have a look at specific kernel measures in GeneralGraph
            for the particular variables/types for each measure)
         """
-        if kernel is None:
-            raise ValueError('No kernel function provided.')
-
         node_chunks = chunk_it(list(self.nodes()), self.num)
 
         processes = [
@@ -101,6 +94,14 @@ class ParallelGeneralGraph(GeneralGraph):
         .. note:: Edges weight is taken into account in the distance matrix.
             Edge weight attributes must be numerical. Distances are calculated
             as sums of weighted edges traversed.
+
+        :return: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path;
+            nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path length.
+        :rtype: dict, dict
         """
 
         dist, pred = self.floyd_warshall_initialization()
@@ -194,6 +195,14 @@ class ParallelGeneralGraph(GeneralGraph):
         .. note:: Edges weight is taken into account.
             Edge weight attributes must be numerical.
             Distances are calculated as sums of weighted edges traversed.
+
+        :return: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path;
+            nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path length.
+        :rtype: dict, dict
         """
 
         self.attribute_ssspp = []
@@ -239,6 +248,14 @@ class ParallelGeneralGraph(GeneralGraph):
 
         .. note:: Edge weights of the graph are taken into account
             in the computation.
+
+        :return: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path;
+            nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path length.
+        :rtype: dict, dict
         """
 
         n_of_nodes = self.order()
@@ -264,6 +281,11 @@ class ParallelGeneralGraph(GeneralGraph):
         .. note:: The efficiency of a path connecting two nodes is defined
             as the inverse of the path length, if the path has length non-zero,
             and zero otherwise.
+
+        :return: efficiency computed for every node.
+            The keys correspond to source, while as value a dictionary keyed
+            by target and valued by the source-target efficiency.
+        :rtype: multiprocessing.managers.dict
         """
 
         shortest_path_length = self.shortest_path_length
@@ -280,6 +302,9 @@ class ParallelGeneralGraph(GeneralGraph):
         .. note:: The nodal efficiency of the node is equal to zero
             for a node without any outgoing path and equal to one if from it
             we can reach each node of the digraph.
+
+        :return: nodal efficiency computed for every node.
+        :rtype: multiprocessing.managers.dict
         """
 
         graph_size = len(list(self))
@@ -301,6 +326,9 @@ class ParallelGeneralGraph(GeneralGraph):
             i.e. if we remove a node, how efficiently its first-order outgoing
             neighbors can communicate.
             It is in the range [0, 1].
+
+        :return: local efficiency computed for every node.
+        :rtype: multiprocessing.managers.dict
         """
 
         nodal_efficiency = self.nodal_efficiency
@@ -318,6 +346,9 @@ class ParallelGeneralGraph(GeneralGraph):
 
         :param list nodes: list of nodes for which to compute the
             shortest path between them and all the other nodes
+        :param dict shortest_path: nested dictionary with key
+            corresponding to source, while as value a dictionary keyed by target
+            and valued by the source-target shortest path.
         :param tot_shortest_paths_list: list of shortest paths
             with at least two nodes
         :type tot_shortest_paths_list: multiprocessing.managers.list
@@ -338,6 +369,9 @@ class ParallelGeneralGraph(GeneralGraph):
             Nodes with the highest betweenness centrality hold the higher level
             of control on the information flowing between different nodes in
             the network, because more information will pass through them.
+
+        :return: betweenness centrality computed for every node.
+        :rtype: multiprocessing.managers.dict
         """
 
         shortest_path = self.shortest_path
@@ -372,12 +406,12 @@ class ParallelGeneralGraph(GeneralGraph):
             it is to all other nodes. This measure allows to identify good
             broadcasters, that is key elements in a graph, depicting how
             closely the nodes are connected with each other.
+
+        :return: closeness centrality computed for every node.
+        :rtype: multiprocessing.managers.dict
         """
 
         graph_size = len(list(self))
-        if graph_size <= 1:
-            raise ValueError('Graph size must equal or larger than 2.')
-
         shortest_path = self.shortest_path
         shortest_path_length = self.shortest_path_length
         tot_shortest_paths_list = self.manager.list()
@@ -412,13 +446,14 @@ class ParallelGeneralGraph(GeneralGraph):
             occupying a strategic position that serves as a source or conduit
             for large volumes of flux transactions with other nodes.
             A node with high degree centrality is a node with many dependencies.
+
+        :return: degree centrality computed for every node.
+        :rtype: multiprocessing.managers.dict
         """
 
         graph_size = len(list(self))
-        if graph_size <= 1:
-            raise ValueError('Graph size must equal or larger than 2.')
-
         degree_centrality = self.manager.dict()
+
         self.measure_processes(degree_centrality,
             self.degree_centrality_kernel, graph_size)
         return degree_centrality
@@ -431,13 +466,14 @@ class ParallelGeneralGraph(GeneralGraph):
         .. note:: In-degree centrality is measured by the number of edges
             ending at the node in a directed graph. Nodes with high in-degree
             centrality are called cascade resulting nodes.
+
+        :return: in-degree centrality computed for every node.
+        :rtype: multiprocessing.managers.dict
         """
 
         graph_size = len(list(self))
-        if graph_size <= 1:
-            raise ValueError('Graph size must equal or larger than 2.')
-
         indegree_centrality = self.manager.dict()
+
         self.measure_processes(indegree_centrality,
             self.indegree_centrality_kernel, graph_size)
         return indegree_centrality
@@ -450,13 +486,14 @@ class ParallelGeneralGraph(GeneralGraph):
         .. note:: Out-degree centrality is measured by the number of edges
             starting from a node in a directed graph. Nodes with high out-degree
             centrality are called cascade inititing nodes.
+
+        :return: out-degree centrality computed for every node.
+        :rtype: multiprocessing.managers.dict
         """
 
         graph_size = len(list(self))
-        if graph_size <= 1:
-            raise ValueError('Graph size must equal or larger than 2.')
-
         outdegree_centrality = self.manager.dict()
+
         self.measure_processes(outdegree_centrality,
             self.outdegree_centrality_kernel, graph_size)
         return outdegree_centrality
