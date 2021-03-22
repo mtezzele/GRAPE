@@ -313,10 +313,9 @@ class FaultDiagnosis():
         """
 
         nested_dict = {}
-        for col in attribute_list:
-            nested_dict[prefix + col] = getattr(self.G, col)
 
-        self.df = pd.concat([self.df, pd.DataFrame(nested_dict)], axis=1)
+        for col in attribute_list:
+            self.df[prefix + col] = pd.Series(getattr(self.G, col))
 
     def update_status_areas(self, damaged_areas):
         """
@@ -370,9 +369,9 @@ class FaultDiagnosis():
         for node in perturbed_nodes:
 
             if node not in self.G.nodes():
-                print('The node ', node, ' is not in the graph')
-                print('Insert a valid node')
-                print('Valid nodes:', self.G.nodes())
+                logging.debug(f'The node {node} is not in the graph')
+                logging.debug('Insert a valid node')
+                logging.debug(f'Valid nodes: {self.G.nodes()}')
                 sys.exit()
 
         self.check_before()

@@ -341,7 +341,9 @@ class GeneralGraph(nx.DiGraph):
         shortest_paths = {}
 
         for i in nodes:
+            
             all_targets_paths = {}
+
             for j in sorted(list(self.H)):
 
                 source = i
@@ -516,7 +518,7 @@ class GeneralGraph(nx.DiGraph):
 
         return shpath, shpath_len
 
-    def efficiency_kernel(self, nodes):
+    def efficiency_kernel(self, nodes, shortest_path_length):
         """
 
         Compute efficiency, starting from path length attribute.
@@ -525,6 +527,9 @@ class GeneralGraph(nx.DiGraph):
 
         :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
+        :param dict shortest_path_length: nested dictionary with key
+            corresponding to source, while as value a dictionary keyed by target
+            and valued by the source-target efficiency
 
         :return: nested dictionary with key corresponding to
             source, while as value a dictionary keyed by target and valued
@@ -533,7 +538,6 @@ class GeneralGraph(nx.DiGraph):
         """
 
         dict_efficiency = {}
-        shortest_path_length = self.shortest_path_length
 
         for n in nodes:
             dict_efficiency[n] = {}
@@ -557,16 +561,20 @@ class GeneralGraph(nx.DiGraph):
             and zero otherwise.
         """
 
-        efficiency = self.efficiency_kernel(list(self))
+        shortest_path_length = self.shortest_path_length
+        efficiency = self.efficiency_kernel(list(self), shortest_path_length)
         return efficiency
 
-    def nodal_efficiency_kernel(self, nodes, g_len):
+    def nodal_efficiency_kernel(self, nodes, efficiency, g_len):
         """
 
         Compute nodal efficiency, starting from efficiency attribute.
 
         :param list nodes: list of nodes for which to compute the
             efficiency between them and all the other nodes
+        :param dict efficiency: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target efficiency
         :param int g_len: graph size
 
         :return: nodal efficiency dictionary keyed by node
@@ -577,7 +585,7 @@ class GeneralGraph(nx.DiGraph):
             raise ValueError('Graph size must equal or larger than 2.')
 
         dict_nod_eff = {}
-        efficiency = self.efficiency
+        #efficiency = self.efficiency
 
         for n in nodes:
             sum_efficiencies = sum(efficiency[n].values())
@@ -596,10 +604,11 @@ class GeneralGraph(nx.DiGraph):
         """
 
         g_len = len(list(self))
-        nod_eff = self.nodal_efficiency_kernel(list(self), g_len)
+        efficiency = self.efficiency
+        nod_eff = self.nodal_efficiency_kernel(list(self), efficiency, g_len)
         return nod_eff
 
-    def local_efficiency_kernel(self, nodes):
+    def local_efficiency_kernel(self, nodes, nodal_efficiency):
         """
 
         Compute local efficiency, starting from nodal efficiency attribute.
@@ -612,7 +621,7 @@ class GeneralGraph(nx.DiGraph):
         """
 
         dict_loc_eff = {}
-        nodal_efficiency = self.nodal_efficiency
+        #nodal_efficiency = self.nodal_efficiency
 
         for n in nodes:
             subgraph = list(self.successors(n))
@@ -645,10 +654,11 @@ class GeneralGraph(nx.DiGraph):
             It is in the range [0, 1].
         """
 
-        loc_eff = self.local_efficiency_kernel(list(self))
+        nodal_efficiency = self.nodal_efficiency
+        loc_eff = self.local_efficiency_kernel(list(self), nodal_efficiency)
         return loc_eff
 
-    def shortest_path_list_kernel(self, nodes):
+    def shortest_path_list_kernel(self, nodes, shortest_path):
         """
 
         Collect the shortest paths that contain at least two nodes.
@@ -661,7 +671,7 @@ class GeneralGraph(nx.DiGraph):
         """
 
         tot_shortest_paths_list = list()
-        shortest_path = self.shortest_path
+        #shortest_path = self.shortest_path
 
         for n in nodes:
             node_tot_shortest_paths = shortest_path[n]
@@ -712,13 +722,16 @@ class GeneralGraph(nx.DiGraph):
             the network, because more information will pass through them.
         """
 
-        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self))
+        shortest_path = self.shortest_path
+        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
+            shortest_path)
 
         bet_cen = self.betweenness_centrality_kernel(list(self),
             tot_shortest_paths_list)
         return bet_cen
 
-    def closeness_centrality_kernel(self, nodes, tot_shpaths_list, g_len):
+    def closeness_centrality_kernel(self, nodes, shpath_len, tot_shpaths_list,
+        g_len):
         """
 
         Compute betweenness centrality, from shortest path list. 
@@ -738,7 +751,7 @@ class GeneralGraph(nx.DiGraph):
             raise ValueError('Graph size must equal or larger than 2.')
 
         dict_clo_cen = {}
-        shortest_path_length = self.shortest_path_length
+        #shortest_path_length = self.shortest_path_length
 
         for n in nodes:
             totsp = []
@@ -746,7 +759,7 @@ class GeneralGraph(nx.DiGraph):
             for l in tot_shpaths_list:
                 if n in l and n == l[-1]:
                     sp_with_node.append(l)
-                    length_path = shortest_path_length[l[0]][l[-1]]
+                    length_path = shpath_len[l[0]][l[-1]]
                     totsp.append(length_path)
             norm = len(totsp) / (g_len - 1)
 
@@ -771,10 +784,13 @@ class GeneralGraph(nx.DiGraph):
         """
 
         g_len = len(list(self))
-        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self))
+        shortest_path = self.shortest_path
+        shortest_path_length = self.shortest_path_length
+        tot_shortest_paths_list = self.shortest_path_list_kernel(list(self),
+            shortest_path)
 
         clo_cen = self.closeness_centrality_kernel(list(self),
-            tot_shortest_paths_list, g_len)
+            shortest_path_length, tot_shortest_paths_list, g_len)
         return clo_cen
 
     def degree_centrality_kernel(self, nodes, g_len):

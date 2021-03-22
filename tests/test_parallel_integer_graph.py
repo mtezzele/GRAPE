@@ -90,8 +90,6 @@ def test_closeness_centrality():
 	"""
     g = ParallelGeneralGraph()
     g.load("tests/TOY_graph.csv")
-    #g.calculate_shortest_path()
-    #g.compute_closeness_centrality()
 
     closeness_centrality = {
         '1': 0.0,

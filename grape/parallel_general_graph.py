@@ -266,8 +266,10 @@ class ParallelGeneralGraph(GeneralGraph):
             and zero otherwise.
         """
 
+        shortest_path_length = self.shortest_path_length
         efficiency = self.manager.dict()
-        self.measure_processes(efficiency, self.efficiency_kernel)
+        self.measure_processes(efficiency, self.efficiency_kernel, 
+            shortest_path_length)
         return efficiency
 
     def compute_nodal_efficiency(self):
@@ -281,8 +283,10 @@ class ParallelGeneralGraph(GeneralGraph):
         """
 
         g_len = len(list(self))
+        efficiency = self.efficiency
         nod_eff = self.manager.dict()
-        self.measure_processes(nod_eff, self.nodal_efficiency_kernel, g_len)
+        self.measure_processes(nod_eff, self.nodal_efficiency_kernel,
+            efficiency, g_len)
         return nod_eff
 
     def compute_local_efficiency(self):
@@ -299,11 +303,13 @@ class ParallelGeneralGraph(GeneralGraph):
             It is in the range [0, 1].
         """
 
+        nodal_efficiency = self.nodal_efficiency
         loc_eff = self.manager.dict()
-        self.measure_processes(loc_eff, self.local_efficiency_kernel)
+        self.measure_processes(loc_eff, self.local_efficiency_kernel, 
+            nodal_efficiency)
         return loc_eff
 
-    def shortest_path_list_iteration(self, nodes, tot_shpaths_list):
+    def shortest_path_list_iteration(self, nodes, shpath, tot_shpaths_list):
         """
 
         Inner iteration for parallel shortest path list calculation,
@@ -316,7 +322,7 @@ class ParallelGeneralGraph(GeneralGraph):
         :type tot_shpath_list: multiprocessing.managers.list
         """
 
-        partial_shpath_list = self.shortest_path_list_kernel(nodes)
+        partial_shpath_list = self.shortest_path_list_kernel(nodes, shpath)
         tot_shpaths_list.extend(partial_shpath_list)
 
     def compute_betweenness_centrality(self):
@@ -332,12 +338,13 @@ class ParallelGeneralGraph(GeneralGraph):
             the network, because more information will pass through them.
         """
 
+        shortest_path = self.shortest_path
         tot_shortest_paths_list = self.manager.list()
         node_chunks = chunk_it(list(self.nodes()), self.num)
 
         processes = [
             mp.Process( target=self.shortest_path_list_iteration,
-            args=(node_chunks[p], tot_shortest_paths_list) )
+            args=(node_chunks[p], shortest_path, tot_shortest_paths_list) )
             for p in range(self.num) ]
 
         for proc in processes:
@@ -369,12 +376,14 @@ class ParallelGeneralGraph(GeneralGraph):
         if g_len <= 1:
             raise ValueError('Graph size must equal or larger than 2.')
 
+        shortest_path = self.shortest_path
+        shortest_path_length = self.shortest_path_length
         tot_shortest_paths_list = self.manager.list()
         node_chunks = chunk_it(list(self.nodes()), self.num)
 
         processes = [
             mp.Process( target=self.shortest_path_list_iteration,
-            args=(node_chunks[p], tot_shortest_paths_list) )
+            args=(node_chunks[p], shortest_path, tot_shortest_paths_list) )
             for p in range(self.num) ]
 
         for proc in processes:
@@ -385,7 +394,7 @@ class ParallelGeneralGraph(GeneralGraph):
 
         clo_cen = self.manager.dict()
         self.measure_processes(clo_cen, self.closeness_centrality_kernel,
-            tot_shortest_paths_list, g_len)
+            shortest_path_length, tot_shortest_paths_list, g_len)
 
         return clo_cen
 
