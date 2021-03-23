@@ -23,3 +23,5 @@ __maintainer__ = __author__
 __status__ = "Alpha"
 
 from .general_graph import GeneralGraph
+from .parallel_general_graph import ParallelGeneralGraph
+from .fault_diagnosis import FaultDiagnosis

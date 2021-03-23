@@ -55,7 +55,8 @@ intersphinx_mapping = {'python': ('http://docs.python.org/2', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy/', None),
                        'networkx': ('https://networkx.github.io/documentation/stable/', None),
                        'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                       'matplotlib': ('http://matplotlib.sourceforge.net/', None)}
+                       'matplotlib': ('http://matplotlib.sourceforge.net/', None),
+                       'pandas': ('https://pandas.pydata.org/docs/', None)}
 
 autosummary_generate = True
 

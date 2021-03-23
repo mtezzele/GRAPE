@@ -11,7 +11,7 @@ VERSION = grape.__version__
 KEYWORDS = 'risk-analysis graph-theory parallel-programming shortest-path system-analysis fault-diagnostics'
 
 REQUIRED = [
-    'networkx', 'numpy', 'scipy', 'matplotlib',
+    'networkx', 'numpy', 'scipy', 'matplotlib', 'pandas',
 ]
 
 EXTRAS = {
