@@ -34,7 +34,12 @@ class GeneralGraph(nx.DiGraph):
         with the relative hierarchy, together with the list
         of all the node attributes.
 
-        :param str filename: input file in CSV format
+        :param str filename: input file in CSV format.
+
+        :return: DataFrame containing the following attributes: mark, area,
+            perturbation_resistant, init_status, description;
+            DataFrame containing mark and father_mark attribute.
+        :rtype: pandas.DataFrame, pandas.DataFrame
         """
 
         conv = {'mark' : str, 'father_mark' : str,
@@ -79,58 +84,144 @@ class GeneralGraph(nx.DiGraph):
 
     @property
     def mark(self):
+        """
+
+        :return: mark attribute for every node.
+        :rtype: dict
+        """
         return nx.get_node_attributes(self, 'mark')
 
     @property
     def area(self):
+        """
+
+        :return: area attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'area')
 
     @property
     def perturbation_resistant(self):
+        """
+
+        :return: perturbation_resistant attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'perturbation_resistant')
 
     @property
     def description(self):
+        """
+
+        :return: description attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'description')
 
     @property
     def init_status(self):
+        """
+
+        :return: init_status attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'init_status')
 
     @property
     def intermediate_status(self):
+        """
+
+        :return: intermediate_status attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'intermediate_status')
 
     @property
     def final_status(self):
+        """
+
+        :return: final_status attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'final_status')
 
     @property
     def mark_status(self):
+        """
+
+        :return: mark_status attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'mark_status')
 
     @property
     def status_area(self):
+        """
+
+        :return: status_area attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'status_area')
 
     @property
     def father_condition(self):
+        """
+
+        :return: father_condition attribute for every edge.
+        :rtype: dict
+        """
+
         return nx.get_edge_attributes(self, 'father_condition')
 
     @property
     def weight(self):
+        """
+
+        :return: weight attribute for every edge.
+        :rtype: dict
+        """
+
         return nx.get_edge_attributes(self, 'weight')
 
     @property
     def type(self):
+        """
+
+        :return: type attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'type')
 
     @property
     def initial_service(self):
+        """
+
+        :return: initial_service attribute for every node.
+        :rtype: dict
+        """
+
         return nx.get_node_attributes(self, 'initial_service')
 
     @property
     def service(self):
+        """
+
+        Computed service.
+        Returns the computed service if already stored in the nodes.
+        Otherwise, the attribute is computed.
+
+        :return: service attribute for every node.
+        :rtype: dict
+        """
 
         computed_service = nx.get_node_attributes(self, 'computed_service')
         if computed_service: return computed_service
@@ -144,6 +235,13 @@ class GeneralGraph(nx.DiGraph):
         """
 
         Shortest existing paths between all node pairs.
+        Returns the shortest path if already stored in the nodes.
+        Otherwise, the attribute is computed.
+
+        :return: shortest_path attribute for every node.
+            The keys correspond to source, while as value a dictionary keyed
+            by target and valued by the source-target shortest path.
+        :rtype: dict
         """
 
         shortest_path = nx.get_node_attributes(self, 'shortest_path')
@@ -160,6 +258,11 @@ class GeneralGraph(nx.DiGraph):
         """
 
         Shortest path length.
+
+        :return: shortest_path_length attribute for every node.
+            The keys correspond to source, while as value a dictionary keyed
+            by target and valued by the source-target shortest path length.
+        :rtype: dict
         """
 
         shortest_path_length = nx.get_node_attributes(self,
@@ -179,6 +282,11 @@ class GeneralGraph(nx.DiGraph):
         Efficiency of the graph.
         Returns the efficiency if already stored in the nodes.
         Otherwise, the attribute is computed.
+
+        :return: efficiency attribute for every node.
+            The keys correspond to source, while as value a dictionary keyed
+            by target and valued by the source-target efficiency.
+        :rtype: dict
         """
 
         efficiency = nx.get_node_attributes(self, 'efficiency')
@@ -195,6 +303,9 @@ class GeneralGraph(nx.DiGraph):
         Nodal efficiency of the graph.
         Returns the nodal efficiency if already stored in the nodes.
         Otherwise, the attribute is computed.
+
+        :return: nodal_efficiency attribute for every node.
+        :rtype: dict
         """
 
         nodal_efficiency = nx.get_node_attributes(self, 'nodal_efficiency')
@@ -211,6 +322,9 @@ class GeneralGraph(nx.DiGraph):
         Local efficiency of the graph.
         Returns the local efficiency if already stored in the nodes.
         Otherwise, the attribute is computed.
+
+        :return: local_efficiency attribute for every node.
+        :rtype: dict
         """
 
         local_efficiency = nx.get_node_attributes(self, 'local_efficiency')
@@ -228,6 +342,10 @@ class GeneralGraph(nx.DiGraph):
 
         .. note:: The average global efficiency of a graph is the average
             efficiency of all pairs of nodes.
+
+        :return: global_efficiency attribute for every node.
+        :rtype: float
+        :raises: ValueError
         """
 
         graph_size = len(list(self))
@@ -244,6 +362,9 @@ class GeneralGraph(nx.DiGraph):
         Betweenness centrality of the graph.
         Returns the betweenness centrality if already stored in the nodes.
         Otherwise, the attribute is computed.
+
+        :return: betweenness_centrality attribute for every node.
+        :rtype: dict
         """
 
         betweenness_centrality = nx.get_node_attributes(self,
@@ -262,6 +383,9 @@ class GeneralGraph(nx.DiGraph):
         Closeness centrality of the graph.
         Returns the closeness centrality if already stored in the nodes.
         Otherwise, the attribute is computed.
+
+        :return: closeness_centrality attribute for every node.
+        :rtype: dict
         """
 
         closeness_centrality = nx.get_node_attributes(self,
@@ -280,6 +404,9 @@ class GeneralGraph(nx.DiGraph):
         Degree centrality of the graph.
         Returns the degree centrality if already stored in the nodes.
         Otherwise, the attribute is computed.
+
+        :return: degree_centrality attribute for every node.
+        :rtype: dict
         """
 
         degree_centrality = nx.get_node_attributes(self, 'degree_centrality')
@@ -297,6 +424,9 @@ class GeneralGraph(nx.DiGraph):
         In-degree centrality of the graph.
         Returns the in-degree centrality if already stored in the nodes.
         Otherwise, the attribute is computed.
+
+        :return: indegree_centrality attribute for every node.
+        :rtype: dict
         """
 
         indegree_centrality = nx.get_node_attributes(self,
@@ -315,6 +445,9 @@ class GeneralGraph(nx.DiGraph):
         Out-degree centrality of the graph.
         Returns the out-degree centrality if already stored in the nodes.
         Otherwise, the attribute is computed.
+
+        :return: outdegree_centrality attribute for every node.
+        :rtype: dict
         """
 
         outdegree_centrality = nx.get_node_attributes(self,
@@ -332,7 +465,7 @@ class GeneralGraph(nx.DiGraph):
         Delete attributes for all nodes in the graph.
 
         :param list attributes_to_remove: a list of strings
-            with all the attributes we want to remove
+            with all the attributes to remove.
         """
 
         for attribute in attributes_to_remove:
@@ -346,13 +479,13 @@ class GeneralGraph(nx.DiGraph):
         matrix, and populate the dictionary of shortest paths.
 
         :param list nodes: list of nodes for which to compute the
-            shortest path between them and all the other nodes
-        :param numpy.ndarray predecessors: matrix of predecessors,
-            computed with Floyd Warshall APSP algorithm
+            shortest path between them and all the other nodes.
+        :param numpy.ndarray predecessor: matrix of predecessors,
+            computed with Floyd Warshall APSP algorithm.
 
         :return: nested dictionary with key corresponding to
             source, while as value a dictionary keyed by target and valued
-            by the source-target shortest path
+            by the source-target shortest path.
         :rtype: dict
         """
 
@@ -401,7 +534,11 @@ class GeneralGraph(nx.DiGraph):
         matrix indices (and viceversa) is also exploited.
 
         .. note:: In order for the ids relation to be bijective,
-            'Mark' attribute must be unique for each node.
+            'mark' attribute must be unique for each node.
+
+        :return: matrix of distances;
+            matrix of predecessors.
+        :rtype: numpy.ndarray, numpy.ndarray
         """
 
         self.H = nx.convert_node_labels_to_integers(
@@ -426,15 +563,15 @@ class GeneralGraph(nx.DiGraph):
         Floyd Warshall's APSP inner iteration.
         Distance matrix is intended to take edges weight into account.
 
-        :param dist: matrix of distances
-        :type dist: numpy.ndarray or multiprocessing.sharedctypes.RawArray
-        :param pred: matrix of predecessors
-        :type pred: numpy.ndarray or multiprocessing.sharedctypes.RawArray
-        :param int init: starting column of numpy matrix slice
-        :param int stop: ending column of numpy matrix slice
+        :param distance: matrix of distances.
+        :type distance: numpy.ndarray or multiprocessing.sharedctypes.RawArray
+        :param predecessor: matrix of predecessors.
+        :type predecessor: numpy.ndarray or multiprocessing.sharedctypes.RawArray
+        :param int init: starting column of numpy matrix slice.
+        :param int stop: ending column of numpy matrix slice.
         :param multiprocessing.synchronize.Barrier barrier:
             multiprocessing barrier to moderate writing on
-            distance and predecessors matrices
+            distance and predecessors matrices, default to None.
         """
 
         n = distance.shape[0]
@@ -464,6 +601,14 @@ class GeneralGraph(nx.DiGraph):
         .. note:: Edges weight is taken into account in the distance matrix.
             Edge weight attributes must be numerical. Distances are calculated
             as sums of weighted edges traversed.
+
+        :return: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path;
+            nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path length.
+        :rtype: dict, dict
         """
 
         distance, predecessor = self.floyd_warshall_initialization()
@@ -502,6 +647,14 @@ class GeneralGraph(nx.DiGraph):
         .. note:: Edges weight is taken into account.
             Edge weight attributes must be numerical.
             Distances are calculated as sums of weighted edges traversed.
+
+        :return: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path;
+            nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path length.
+        :rtype: dict, dict
         """
 
         shortest_path = {}
@@ -523,6 +676,14 @@ class GeneralGraph(nx.DiGraph):
 
         .. note:: Edge weights of the graph are taken into account
             in the computation.
+
+        :return: nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path;
+            nested dictionary with key corresponding to
+            source, while as value a dictionary keyed by target and valued
+            by the source-target shortest path length.
+        :rtype: dict, dict
         """
 
         n_of_nodes = self.order()
@@ -546,14 +707,14 @@ class GeneralGraph(nx.DiGraph):
         flowing from one node to the others.
 
         :param list nodes: list of nodes for which to compute the
-            efficiency between them and all the other nodes
+            efficiency between them and all the other nodes.
         :param dict shortest_path_length: nested dictionary with key
             corresponding to source, while as value a dictionary keyed by target
-            and valued by the source-target efficiency
+            and valued by the source-target shortest path length.
 
         :return: nested dictionary with key corresponding to
             source, while as value a dictionary keyed by target and valued
-            by the source-target efficiency
+            by the source-target efficiency.
         :rtype: dict
         """
 
@@ -579,6 +740,11 @@ class GeneralGraph(nx.DiGraph):
         .. note:: The efficiency of a path connecting two nodes is defined
             as the inverse of the path length, if the path has length non-zero,
             and zero otherwise.
+
+        :return: efficiency attribute computed for every node.
+            The keys correspond to source, while as value a dictionary keyed
+            by target and valued by the source-target efficiency.
+        :rtype: dict
         """
 
         shortest_path_length = self.shortest_path_length
@@ -591,14 +757,15 @@ class GeneralGraph(nx.DiGraph):
         Compute nodal efficiency, starting from efficiency attribute.
 
         :param list nodes: list of nodes for which to compute the
-            efficiency between them and all the other nodes
+            efficiency between them and all the other nodes.
         :param dict efficiency: nested dictionary with key corresponding to
             source, while as value a dictionary keyed by target and valued
-            by the source-target efficiency
-        :param int graph_size: graph size
+            by the source-target efficiency.
+        :param int graph_size: graph size.
 
-        :return: nodal efficiency dictionary keyed by node
+        :return: nodal efficiency dictionary keyed by node.
         :rtype: dict
+        :raises: ValueError
         """
 
         if graph_size <= 1:
@@ -620,6 +787,9 @@ class GeneralGraph(nx.DiGraph):
         .. note:: The nodal efficiency of the node is equal to zero
             for a node without any outgoing path and equal to one if from it
             we can reach each node of the digraph.
+
+        :return: nodal efficiency computed for every node.
+        :rtype: dict
         """
 
         graph_size = len(list(self))
@@ -634,9 +804,10 @@ class GeneralGraph(nx.DiGraph):
         Compute local efficiency, starting from nodal efficiency attribute.
 
         :param list nodes: list of nodes for which to compute the
-            efficiency between them and all the other nodes
+            efficiency between them and all the other nodes.
+        :param dict nodal_efficiency: nodal efficiency dictionary keyed by node.
 
-        :return: local efficiency dictionary keyed by node
+        :return: local efficiency dictionary keyed by node.
         :rtype: dict
         """
 
@@ -669,8 +840,11 @@ class GeneralGraph(nx.DiGraph):
             when v is removed. Equivalently, local efficiency measures
             the resilience of the digraph to the perturbation of node removal,
             i.e. if we remove a node, how efficiently its first-order outgoing
-            neighbors can communicate.
+            neighbors can communicate. 
             It is in the range [0, 1].
+
+        :return: local efficiency computed for every node.
+        :rtype: dict
         """
 
         nodal_efficiency = self.nodal_efficiency
@@ -684,9 +858,12 @@ class GeneralGraph(nx.DiGraph):
         Collect the shortest paths that contain at least two nodes.
 
         :param list nodes: list of nodes for which to compute the
-            list of shortest paths
+            list of shortest paths.
+        :param dict shortest_path: nested dictionary with key
+            corresponding to source, while as value a dictionary keyed by target
+            and valued by the source-target shortest path.
 
-        :return: list of shortest paths
+        :return: list of shortest paths.
         :rtype: list
         """
 
@@ -706,12 +883,12 @@ class GeneralGraph(nx.DiGraph):
         Compute betweenness centrality, from shortest path list. 
 
         :param list nodes: list of nodes for which to compute the
-            efficiency between them and all the other nodes
+            efficiency between them and all the other nodes.
         :param tot_shortest_paths_list: list of shortest paths
-            with at least two nodes
-        :type tot_shortest_path_list: list or multiprocessing.managers.list
+            with at least two nodes.
+        :type tot_shortest_paths_list: list or multiprocessing.managers.list
 
-        :return: between centrality dictionary keyed by node
+        :return: between centrality dictionary keyed by node.
         :rtype: dict
         """
 
@@ -739,6 +916,9 @@ class GeneralGraph(nx.DiGraph):
             Nodes with the highest betweenness centrality hold the higher level
             of control on the information flowing between different nodes in
             the network, because more information will pass through them.
+
+        :return: betweenness centrality computed for every node.
+        :rtype: dict
         """
 
         shortest_path = self.shortest_path
@@ -756,14 +936,18 @@ class GeneralGraph(nx.DiGraph):
         Compute betweenness centrality, from shortest path list. 
 
         :param list nodes: list of nodes for which to compute the
-            efficiency between them and all the other nodes
+            efficiency between them and all the other nodes.
+        :param dict shortest_path: nested dictionary with key.
+            corresponding to source, while as value a dictionary keyed by target
+            and valued by the source-target shortest path.
         :param tot_shortest_paths_list: list of shortest paths
-            with at least two nodes
+            with at least two nodes.
         :type tot_shortest_paths_list: list or multiprocessing.managers.list
-        :param int graph_size: graph size
+        :param int graph_size: graph size.
 
-        :return: closeness centrality dictionary keyed by node
+        :return: closeness centrality dictionary keyed by node.
         :rtype: dict
+        :raises: ValueError
         """
 
         if graph_size <= 1:
@@ -791,7 +975,7 @@ class GeneralGraph(nx.DiGraph):
     def compute_closeness_centrality(self):
         """
 
-        Closeness centrality calculation
+        Closeness centrality calculation.
 
         .. note:: Closeness centrality measures the reciprocal of the
             average shortest path distance from a node to all other reachable
@@ -799,6 +983,9 @@ class GeneralGraph(nx.DiGraph):
             it is to all other nodes. This measure allows to identify good
             broadcasters, that is key elements in a graph, depicting how
             closely the nodes are connected with each other.
+
+        :return: closeness centrality computed for every node.
+        :rtype: dict
         """
 
         graph_size = len(list(self))
@@ -817,11 +1004,12 @@ class GeneralGraph(nx.DiGraph):
         Compute degree centrality.
 
         :param list nodes: list of nodes for which to compute the
-            efficiency between them and all the other nodes
-        :param int graph_size: graph size
+            efficiency between them and all the other nodes.
+        :param int graph_size: graph size.
 
-        :return: degree centrality dictionary keyed by node
+        :return: degree centrality dictionary keyed by node.
         :rtype: dict
+        :raises: ValueError
         """
 
         if graph_size <= 1:
@@ -846,6 +1034,9 @@ class GeneralGraph(nx.DiGraph):
             occupying a strategic position that serves as a source or conduit
             for large volumes of flux transactions with other nodes.
             A node with high degree centrality is a node with many dependencies.
+
+        :return: degree centrality computed for every node.
+        :rtype: dict
         """
 
         graph_size = len(list(self))
@@ -859,11 +1050,12 @@ class GeneralGraph(nx.DiGraph):
         Compute in-degree centrality.
 
         :param list nodes: list of nodes for which to compute the
-            efficiency between them and all the other nodes
-        :param int graph_size: graph size
+            efficiency between them and all the other nodes.
+        :param int graph_size: graph size.
 
-        :return: in-degree centrality dictionary keyed by node
+        :return: in-degree centrality dictionary keyed by node.
         :rtype: dict
+        :raises: ValueError
         """
 
         if graph_size <= 1:
@@ -885,6 +1077,9 @@ class GeneralGraph(nx.DiGraph):
         .. note:: In-degree centrality is measured by the number of edges
             ending at the node in a directed graph. Nodes with high in-degree
             centrality are called cascade resulting nodes.
+
+        :return: in-degree centrality computed for every node.
+        :rtype: dict
         """
 
         graph_size = len(list(self))
@@ -898,11 +1093,12 @@ class GeneralGraph(nx.DiGraph):
         Compute out-degree centrality.
 
         :param list nodes: list of nodes for which to compute the
-            efficiency between them and all the other nodes
-        :param int graph_size: graph size
+            efficiency between them and all the other nodes.
+        :param int graph_size: graph size.
 
-        :return: out-degree dictionary keyed by node
+        :return: out-degree dictionary keyed by node.
         :rtype: dict
+        :raises: ValueError
         """
 
         if graph_size <= 1:
@@ -924,6 +1120,9 @@ class GeneralGraph(nx.DiGraph):
         .. note:: Outdegree centrality is measured by the number of edges
             starting from a node in a directed graph. Nodes with high outdegree
             centrality are called cascade inititing nodes.
+
+        :return: out-degree centrality computed for every node.
+        :rtype: dict
         """
 
         graph_size = len(list(self))
@@ -937,9 +1136,9 @@ class GeneralGraph(nx.DiGraph):
         Compute service for every node,
         together with edge splitting.
 
-        :param graph: Graph where the service is updated
-        :type graph: networkx.DiGraph
-        :param str servicename: service to populate
+        :return: computed service computed for every node;
+            splitting computed for every edge.
+        :rtype: dict, dict
         """
 
         usr_per_node = {node: 0. for node in self}

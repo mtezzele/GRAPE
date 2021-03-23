@@ -27,7 +27,10 @@ class FaultDiagnosis():
 
         Create an input graph, with the structure contained in the input file.
 
-        :param str filename: input file in CSV format
+        :param str filename: input file in CSV format.
+        :param parallel: flag for parallel graph creation,
+            default to False.
+        :type parallel: bool, optional
         """
 
         if parallel:
@@ -46,7 +49,7 @@ class FaultDiagnosis():
     def check_input_with_gephi(self):
         """
 
-        Write list of nodes and list of edges csv files
+        Write list of nodes and list of edges CSV format files,
         to visualize the input with Gephi.
         """
 
@@ -216,11 +219,11 @@ class FaultDiagnosis():
         Nodes are not deleted if perturbation resistant.
         Moreover, valves are not deleted if encountered
         during the propagation of a the perturbation.
-        They are deleted, instead, if object of node deletion
-        themselves.
+        They are deleted, instead, if object of node deletion themselves.
 
-        :param str node: the id of the node to remove
-        :param visited: list of nodes already visited
+        :param str node: the id of the node to remove.
+        :param visited: list of nodes already visited,
+            default to None.
         :type visited: set, optional
         """
 
@@ -309,8 +312,9 @@ class FaultDiagnosis():
         in attribute_list.
 
         :param list attribute_list: list of attributes to be updated
-            to the DataFrame
-        :param prefix: prefix to be added to column name
+            to the output DataFrame.
+        :param prefix: prefix to be added to column name,
+            default to empty string.
         :type prefix: str, optional
         """
 
@@ -323,7 +327,7 @@ class FaultDiagnosis():
         Update the status of the elements in the damaged areas
         after the propagation of the perturbation.
 
-        :param list damaged_areas: area(s) in which to update the status
+        :param list damaged_areas: area(s) in which to update the status.
         """
 
         self.df['mark_status'].fillna('NOT_ACTIVE', inplace=True)
@@ -336,9 +340,9 @@ class FaultDiagnosis():
 
         Delete a node in the graph.
 
-        :param str node: the id of the node to remove
+        :param str node: the id of the node to remove.
 
-        .. note:: the node id must be contained in the graph.
+        .. warning:: the node id must be contained in the graph.
             No check is done within this function.
         """
 
@@ -355,15 +359,15 @@ class FaultDiagnosis():
         """
 
         Simulate a perturbation of one or multiple nodes.
-        Nodes' 'IntermediateStatus', 'FinalStatus', 'Mark_Status'
-        and 'Status_Area' attributes are evaluated.
 
         :param list perturbed_nodes: nodes(s) involved in the
-            perturbing event
+            perturbing event.
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
             component(s) and may be affect nearby areas.
+
+        :raises: SystemExit
         """
 
         for node in perturbed_nodes:
@@ -406,15 +410,15 @@ class FaultDiagnosis():
         """
 
         Simulate a perturbation in one or multiple areas.
-        Nodes' 'IntermediateStatus', 'FinalStatus', 'Mark_Status'
-        and 'Status_Area' attributes are evaluated.
 
         :param list perturbed_areas: area(s) involved in the
-            perturbing event
+            perturbing event.
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
-            component(s) and may be affect nearby areas
+            component(s) and may be affect nearby areas.
+
+        :raises: SystemExit
         """
 
         nodes_in_area = []
@@ -462,11 +466,11 @@ class FaultDiagnosis():
     def graph_characterization_to_file(self, filename):
         """
 
-        Write to file graph characterization
-        after the perturbation.
+        Write to file graph characterization after the perturbation.
+        File is written in CSV format.
 
         :param str filename: output file name where to print the
-            graph characterization
+            graph characterization.
         """
 
         self.df.reset_index(inplace=True)
