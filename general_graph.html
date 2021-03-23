@@ -1,0 +1,1353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>GeneralGraph &mdash; GRAPE 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="grape.general_graph.GeneralGraph" href="_summaries/grape.general_graph.GeneralGraph.html" />
+    <link rel="prev" title="Code Documentation" href="code.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GRAPE
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="code.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GeneralGraph</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.html">grape.general_graph.GeneralGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.load.html">grape.general_graph.GeneralGraph.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.construct_path_kernel.html">grape.general_graph.GeneralGraph.construct_path_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.floyd_warshall_initialization.html">grape.general_graph.GeneralGraph.floyd_warshall_initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.floyd_warshall_kernel.html">grape.general_graph.GeneralGraph.floyd_warshall_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.nodal_efficiency.html">grape.general_graph.GeneralGraph.nodal_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.local_efficiency.html">grape.general_graph.GeneralGraph.local_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.global_efficiency.html">grape.general_graph.GeneralGraph.global_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.betweenness_centrality.html">grape.general_graph.GeneralGraph.betweenness_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.closeness_centrality.html">grape.general_graph.GeneralGraph.closeness_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.degree_centrality.html">grape.general_graph.GeneralGraph.degree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.indegree_centrality.html">grape.general_graph.GeneralGraph.indegree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.outdegree_centrality.html">grape.general_graph.GeneralGraph.outdegree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.calculate_shortest_path.html">grape.general_graph.GeneralGraph.calculate_shortest_path</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LICENSE.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GRAPE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="code.html">Code Documentation</a> &raquo;</li>
+        
+      <li>GeneralGraph</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/general_graph.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-grape.general_graph">
+<span id="generalgraph"></span><h1>GeneralGraph<a class="headerlink" href="#module-grape.general_graph" title="Permalink to this headline">¶</a></h1>
+<p>GeneralGraph for directed graphs (DiGraph) module</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.html#grape.general_graph.GeneralGraph" title="grape.general_graph.GeneralGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph</span></code></a></p></td>
+<td><p>Class GeneralGraph for directed graphs (DiGraph).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.load.html#grape.general_graph.GeneralGraph.load" title="grape.general_graph.GeneralGraph.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.load</span></code></a></p></td>
+<td><p>Load input file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.check_input_with_gephi</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.construct_path</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.construct_path_kernel.html#grape.general_graph.GeneralGraph.construct_path_kernel" title="grape.general_graph.GeneralGraph.construct_path_kernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.construct_path_kernel</span></code></a></p></td>
+<td><p>Reconstruct source-target paths starting from predecessors matrix, and populate the dictionary of shortest paths.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.construct_path_iteration_parallel</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.compute_efficiency_kernel</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.compute_efficiency_iteration_parallel</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.floyd_warshall_initialization.html#grape.general_graph.GeneralGraph.floyd_warshall_initialization" title="grape.general_graph.GeneralGraph.floyd_warshall_initialization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.floyd_warshall_initialization</span></code></a></p></td>
+<td><p>Initialization of Floyd Warshall APSP algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.floyd_warshall_kernel.html#grape.general_graph.GeneralGraph.floyd_warshall_kernel" title="grape.general_graph.GeneralGraph.floyd_warshall_kernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.floyd_warshall_kernel</span></code></a></p></td>
+<td><p>Floyd Warshall’s APSP inner iteration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.floyd_warshall_predecessor_and_distance_parallel</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.floyd_warshall_predecessor_and_distance_serial</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.single_source_shortest_path_serial</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.single_source_shortest_path_parallel</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.chunk_it</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.parallel_wrapper_proc</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.nodal_efficiency.html#grape.general_graph.GeneralGraph.nodal_efficiency" title="grape.general_graph.GeneralGraph.nodal_efficiency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.nodal_efficiency</span></code></a></p></td>
+<td><p>Nodal efficiency of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.local_efficiency.html#grape.general_graph.GeneralGraph.local_efficiency" title="grape.general_graph.GeneralGraph.local_efficiency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.local_efficiency</span></code></a></p></td>
+<td><p>Local efficiency of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.global_efficiency.html#grape.general_graph.GeneralGraph.global_efficiency" title="grape.general_graph.GeneralGraph.global_efficiency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.global_efficiency</span></code></a></p></td>
+<td><p>Average global efficiency of the whole graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.betweenness_centrality.html#grape.general_graph.GeneralGraph.betweenness_centrality" title="grape.general_graph.GeneralGraph.betweenness_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.betweenness_centrality</span></code></a></p></td>
+<td><p>Betweenness centrality of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.closeness_centrality.html#grape.general_graph.GeneralGraph.closeness_centrality" title="grape.general_graph.GeneralGraph.closeness_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.closeness_centrality</span></code></a></p></td>
+<td><p>Closeness centrality of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.degree_centrality.html#grape.general_graph.GeneralGraph.degree_centrality" title="grape.general_graph.GeneralGraph.degree_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.degree_centrality</span></code></a></p></td>
+<td><p>Degree centrality of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.indegree_centrality.html#grape.general_graph.GeneralGraph.indegree_centrality" title="grape.general_graph.GeneralGraph.indegree_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.indegree_centrality</span></code></a></p></td>
+<td><p>In-degree centrality of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.outdegree_centrality.html#grape.general_graph.GeneralGraph.outdegree_centrality" title="grape.general_graph.GeneralGraph.outdegree_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.outdegree_centrality</span></code></a></p></td>
+<td><p>Out-degree centrality of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.general_graph.GeneralGraph.calculate_shortest_path.html#grape.general_graph.GeneralGraph.calculate_shortest_path" title="grape.general_graph.GeneralGraph.calculate_shortest_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.calculate_shortest_path</span></code></a></p></td>
+<td><p>Choose the most appropriate way to compute the all-pairs shortest path depending on graph size and density.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.check_before</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.check_after</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.rm_nodes</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.merge_lists</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.update_areas</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.delete_a_node</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.simulate_multi_area_perturbation</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.update_status</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.service_paths_to_file</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneralGraph.graph_characterization_to_file</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-name descname">GeneralGraph</code><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">networkx.classes.digraph.DiGraph</span></code></p>
+<p>Class GeneralGraph for directed graphs (DiGraph).</p>
+<p>Constructs a new graph given an input file.
+A DiGraph stores nodes and edges with optional data or attributes.
+DiGraphs hold directed edges.
+Nodes can be arbitrary python objects with optional key/value attributes.
+Edges are represented  as links between nodes with optional key/value
+attributes.</p>
+<p>Initialize a graph with edges, name, or graph attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>incoming_graph_data</strong> (<em>input graph</em><em> (</em><em>optional</em><em>, </em><em>default: None</em><em>)</em>) – Data to initialize graph.  If None (default) an empty
+graph is created.  The data can be an edge list, or any
+NetworkX graph object.  If the corresponding optional Python
+packages are installed the data can also be a NumPy matrix
+or 2d ndarray, a SciPy sparse matrix, or a PyGraphviz graph.</p></li>
+<li><p><strong>attr</strong> (<em>keyword arguments</em><em>, </em><em>optional</em><em> (</em><em>default= no attributes</em><em>)</em>) – Attributes to add to graph as key=value pairs.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">convert</span></code></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>  <span class="c1"># or DiGraph, MultiGraph, MultiDiGraph, etc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my graph&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]</span>  <span class="c1"># list of edges</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Arbitrary graph attribute pairs (key=value) may be assigned</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="s2">&quot;Friday&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">.</span><span class="n">graph</span>
+<span class="go">{&#39;day&#39;: &#39;Friday&#39;}</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">area</code></dt>
+<dd><p>area attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">betweenness_centrality</code></dt>
+<dd><p>Betweenness centrality of the graph.
+Returns the betweenness centrality if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>betweenness_centrality attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">betweenness_centrality_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">tot_shortest_paths_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.betweenness_centrality_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute betweenness centrality, from shortest path list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+efficiency between them and all the other nodes.</p></li>
+<li><p><strong>tot_shortest_paths_list</strong> (<em>list</em><em> or </em><em>multiprocessing.managers.list</em>) – list of shortest paths
+with at least two nodes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>between centrality dictionary keyed by node.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">calculate_shortest_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.calculate_shortest_path"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Choose the most appropriate way to compute the all-pairs shortest
+path depending on graph size and density.
+For a dense graph choose Floyd Warshall algorithm.
+For a sparse graph choose SSSP algorithm based on Dijkstra’s method.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Edge weights of the graph are taken into account
+in the computation.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target shortest path;
+nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target shortest path length.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a>, <a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">clear_data</code><span class="sig-paren">(</span><em class="sig-param">attributes_to_remove</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.clear_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Delete attributes for all nodes in the graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>attributes_to_remove</strong> (<em>list</em>) – a list of strings
+with all the attributes to remove.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">closeness_centrality</code></dt>
+<dd><p>Closeness centrality of the graph.
+Returns the closeness centrality if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>closeness_centrality attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">closeness_centrality_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">shortest_path_length</em>, <em class="sig-param">tot_shortest_paths_list</em>, <em class="sig-param">graph_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.closeness_centrality_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute betweenness centrality, from shortest path list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+efficiency between them and all the other nodes.</p></li>
+<li><p><strong>shortest_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – nested dictionary with key.
+corresponding to source, while as value a dictionary keyed by target
+and valued by the source-target shortest path.</p></li>
+<li><p><strong>tot_shortest_paths_list</strong> (<em>list</em><em> or </em><em>multiprocessing.managers.list</em>) – list of shortest paths
+with at least two nodes.</p></li>
+<li><p><strong>graph_size</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – graph size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>closeness centrality dictionary keyed by node.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p>ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_betweenness_centrality</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_betweenness_centrality"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Betweenness_centrality calculation</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Betweenness centrality is an index of the relative importance
+of a node and it is defined by the number of shortest paths that run
+through it.
+Nodes with the highest betweenness centrality hold the higher level
+of control on the information flowing between different nodes in
+the network, because more information will pass through them.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>betweenness centrality computed for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_closeness_centrality</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_closeness_centrality"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Closeness centrality calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Closeness centrality measures the reciprocal of the
+average shortest path distance from a node to all other reachable
+nodes in the graph. Thus, the more central a node is, the closer
+it is to all other nodes. This measure allows to identify good
+broadcasters, that is key elements in a graph, depicting how
+closely the nodes are connected with each other.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>closeness centrality computed for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_degree_centrality</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_degree_centrality"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Degree centrality measure of each node calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Degree centrality is a simple centrality measure that counts
+how many neighbors a node has in an undirected graph.
+The more neighbors the node has the most important it is,
+occupying a strategic position that serves as a source or conduit
+for large volumes of flux transactions with other nodes.
+A node with high degree centrality is a node with many dependencies.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>degree centrality computed for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_efficiency</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_efficiency"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Efficiency calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The efficiency of a path connecting two nodes is defined
+as the inverse of the path length, if the path has length non-zero,
+and zero otherwise.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>efficiency attribute computed for every node.
+The keys correspond to source, while as value a dictionary keyed
+by target and valued by the source-target efficiency.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_indegree_centrality</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_indegree_centrality"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>In-degree centrality calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In-degree centrality is measured by the number of edges
+ending at the node in a directed graph. Nodes with high in-degree
+centrality are called cascade resulting nodes.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>in-degree centrality computed for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_local_efficiency</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_local_efficiency"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Local efficiency calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The local efficiency shows the efficiency of the connections
+between the first-order outgoing neighbors of node v
+when v is removed. Equivalently, local efficiency measures
+the resilience of the digraph to the perturbation of node removal,
+i.e. if we remove a node, how efficiently its first-order outgoing
+neighbors can communicate.
+It is in the range [0, 1].</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>local efficiency computed for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_nodal_efficiency</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_nodal_efficiency"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Nodal efficiency calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The nodal efficiency of the node is equal to zero
+for a node without any outgoing path and equal to one if from it
+we can reach each node of the digraph.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>nodal efficiency computed for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_outdegree_centrality</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_outdegree_centrality"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Outdegree centrality calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Outdegree centrality is measured by the number of edges
+starting from a node in a directed graph. Nodes with high outdegree
+centrality are called cascade inititing nodes.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>out-degree centrality computed for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">compute_service</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.compute_service"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute service for every node,
+together with edge splitting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>computed service computed for every node;
+splitting computed for every edge.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a>, <a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">construct_path_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">predecessor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.construct_path_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reconstruct source-target paths starting from predecessors
+matrix, and populate the dictionary of shortest paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+shortest path between them and all the other nodes.</p></li>
+<li><p><strong>predecessor</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><em>numpy.ndarray</em></a>) – matrix of predecessors,
+computed with Floyd Warshall APSP algorithm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target shortest path.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">degree_centrality</code></dt>
+<dd><p>Degree centrality of the graph.
+Returns the degree centrality if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>degree_centrality attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">degree_centrality_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">graph_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.degree_centrality_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute degree centrality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+efficiency between them and all the other nodes.</p></li>
+<li><p><strong>graph_size</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – graph size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>degree centrality dictionary keyed by node.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p>ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">description</code></dt>
+<dd><p>description attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">dijkstra_single_source_shortest_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.dijkstra_single_source_shortest_path"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Serial SSSP algorithm based on Dijkstra’s method.
+The nested dictionaries for shortest-path, length of the paths and
+efficiency attributes are evaluated.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Edges weight is taken into account.
+Edge weight attributes must be numerical.
+Distances are calculated as sums of weighted edges traversed.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target shortest path;
+nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target shortest path length.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a>, <a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">efficiency</code></dt>
+<dd><p>Efficiency of the graph.
+Returns the efficiency if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>efficiency attribute for every node.
+The keys correspond to source, while as value a dictionary keyed
+by target and valued by the source-target efficiency.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">efficiency_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">shortest_path_length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.efficiency_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute efficiency, starting from path length attribute.
+Efficiency is a measure of how good is the exchange of commodities
+flowing from one node to the others.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+efficiency between them and all the other nodes.</p></li>
+<li><p><strong>shortest_path_length</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – nested dictionary with key
+corresponding to source, while as value a dictionary keyed by target
+and valued by the source-target shortest path length.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target efficiency.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">father_condition</code></dt>
+<dd><p>father_condition attribute for every edge.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">final_status</code></dt>
+<dd><p>final_status attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">floyd_warshall_initialization</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.floyd_warshall_initialization"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Initialization of Floyd Warshall APSP algorithm.
+The distancy matrix is mutuated by NetworkX graph adjacency
+matrix, while the predecessors matrix is initialized
+with node fathers.
+The conversion between the labels (ids) in the graph and Numpy
+matrix indices (and viceversa) is also exploited.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In order for the ids relation to be bijective,
+‘mark’ attribute must be unique for each node.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>matrix of distances;
+matrix of predecessors.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)">numpy.ndarray</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">floyd_warshall_kernel</code><span class="sig-paren">(</span><em class="sig-param">distance</em>, <em class="sig-param">predecessor</em>, <em class="sig-param">init</em>, <em class="sig-param">stop</em>, <em class="sig-param">barrier=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.floyd_warshall_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Floyd Warshall’s APSP inner iteration.
+Distance matrix is intended to take edges weight into account.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><em>numpy.ndarray</em></a><em> or </em><em>multiprocessing.sharedctypes.RawArray</em>) – matrix of distances.</p></li>
+<li><p><strong>predecessor</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><em>numpy.ndarray</em></a><em> or </em><em>multiprocessing.sharedctypes.RawArray</em>) – matrix of predecessors.</p></li>
+<li><p><strong>init</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – starting column of numpy matrix slice.</p></li>
+<li><p><strong>stop</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – ending column of numpy matrix slice.</p></li>
+<li><p><strong>barrier</strong> (<em>multiprocessing.synchronize.Barrier</em>) – multiprocessing barrier to moderate writing on
+distance and predecessors matrices, default to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">floyd_warshall_predecessor_and_distance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.floyd_warshall_predecessor_and_distance"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Serial Floyd Warshall’s APSP algorithm. The predecessors
+and distance matrices are evaluated, together with the nested
+dictionaries for shortest-path, length of the paths and
+efficiency attributes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Edges weight is taken into account in the distance matrix.
+Edge weight attributes must be numerical. Distances are calculated
+as sums of weighted edges traversed.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target shortest path;
+nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target shortest path length.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a>, <a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">global_efficiency</code></dt>
+<dd><p>Average global efficiency of the whole graph.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The average global efficiency of a graph is the average
+efficiency of all pairs of nodes.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>global_efficiency attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)">float</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">indegree_centrality</code></dt>
+<dd><p>In-degree centrality of the graph.
+Returns the in-degree centrality if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>indegree_centrality attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">indegree_centrality_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">graph_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.indegree_centrality_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute in-degree centrality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+efficiency between them and all the other nodes.</p></li>
+<li><p><strong>graph_size</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – graph size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>in-degree centrality dictionary keyed by node.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p>ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">init_status</code></dt>
+<dd><p>init_status attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">initial_service</code></dt>
+<dd><p>initial_service attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">intermediate_status</code></dt>
+<dd><p>intermediate_status attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.load"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load input file. Input file must be in CSV format.
+Each line corresponds to a node/element description,
+with the relative hierarchy, together with the list
+of all the node attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – input file in CSV format.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame containing the following attributes: mark, area,
+perturbation_resistant, init_status, description;
+DataFrame containing mark and father_mark attribute.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.3)">pandas.DataFrame</a>, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.3)">pandas.DataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">local_efficiency</code></dt>
+<dd><p>Local efficiency of the graph.
+Returns the local efficiency if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>local_efficiency attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">local_efficiency_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">nodal_efficiency</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.local_efficiency_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute local efficiency, starting from nodal efficiency attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+efficiency between them and all the other nodes.</p></li>
+<li><p><strong>nodal_efficiency</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – nodal efficiency dictionary keyed by node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>local efficiency dictionary keyed by node.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">mark</code></dt>
+<dd><p>mark attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">mark_status</code></dt>
+<dd><p>mark_status attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">nodal_efficiency</code></dt>
+<dd><p>Nodal efficiency of the graph.
+Returns the nodal efficiency if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>nodal_efficiency attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">nodal_efficiency_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">efficiency</em>, <em class="sig-param">graph_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.nodal_efficiency_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute nodal efficiency, starting from efficiency attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+efficiency between them and all the other nodes.</p></li>
+<li><p><strong>efficiency</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – nested dictionary with key corresponding to
+source, while as value a dictionary keyed by target and valued
+by the source-target efficiency.</p></li>
+<li><p><strong>graph_size</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – graph size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>nodal efficiency dictionary keyed by node.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p>ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">outdegree_centrality</code></dt>
+<dd><p>Out-degree centrality of the graph.
+Returns the out-degree centrality if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>outdegree_centrality attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">outdegree_centrality_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">graph_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.outdegree_centrality_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute out-degree centrality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+efficiency between them and all the other nodes.</p></li>
+<li><p><strong>graph_size</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – graph size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>out-degree dictionary keyed by node.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p>ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">perturbation_resistant</code></dt>
+<dd><p>perturbation_resistant attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">service</code></dt>
+<dd><p>Computed service.
+Returns the computed service if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>service attribute for every node.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">shortest_path</code></dt>
+<dd><p>Shortest existing paths between all node pairs.
+Returns the shortest path if already stored in the nodes.
+Otherwise, the attribute is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>shortest_path attribute for every node.
+The keys correspond to source, while as value a dictionary keyed
+by target and valued by the source-target shortest path.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">shortest_path_length</code></dt>
+<dd><p>Shortest path length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>shortest_path_length attribute for every node.
+The keys correspond to source, while as value a dictionary keyed
+by target and valued by the source-target shortest path length.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">shortest_path_list_kernel</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">shortest_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.shortest_path_list_kernel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Collect the shortest paths that contain at least two nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes for which to compute the
+list of shortest paths.</p></li>
+<li><p><strong>shortest_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – nested dictionary with key
+corresponding to source, while as value a dictionary keyed by target
+and valued by the source-target shortest path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of shortest paths.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">status_area</code></dt>
+<dd><p>status_area attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">type</code></dt>
+<dd><p>type attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">weight</code></dt>
+<dd><p>weight attribute for every edge.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="_summaries/grape.general_graph.GeneralGraph.html" class="btn btn-neutral float-right" title="grape.general_graph.GeneralGraph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="code.html" class="btn btn-neutral float-left" title="Code Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2019, GRAPE contributors.
+      <span class="lastupdated">
+        Last updated on Mar 23, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

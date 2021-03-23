@@ -1,0 +1,1384 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>grape.general_graph &mdash; GRAPE 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GRAPE
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../code.html">Code Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../LICENSE.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GRAPE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>grape.general_graph</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for grape.general_graph</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;GeneralGraph for directed graphs (DiGraph) module&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GeneralGraph"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph">[docs]</a><span class="k">class</span> <span class="nc">GeneralGraph</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class GeneralGraph for directed graphs (DiGraph).</span>
+
+<span class="sd">    Constructs a new graph given an input file.</span>
+<span class="sd">    A DiGraph stores nodes and edges with optional data or attributes.</span>
+<span class="sd">    DiGraphs hold directed edges.</span>
+<span class="sd">    Nodes can be arbitrary python objects with optional key/value attributes.</span>
+<span class="sd">    Edges are represented  as links between nodes with optional key/value</span>
+<span class="sd">    attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GeneralGraph.__init__"><a class="viewcode-back" href="../../_summaries/grape.general_graph.GeneralGraph.html#grape.general_graph.GeneralGraph.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.load"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Load input file. Input file must be in CSV format.</span>
+<span class="sd">        Each line corresponds to a node/element description,</span>
+<span class="sd">        with the relative hierarchy, together with the list</span>
+<span class="sd">        of all the node attributes.</span>
+
+<span class="sd">        :param str filename: input file in CSV format.</span>
+
+<span class="sd">        :return: DataFrame containing the following attributes: mark, area,</span>
+<span class="sd">            perturbation_resistant, init_status, description;</span>
+<span class="sd">            DataFrame containing mark and father_mark attribute.</span>
+<span class="sd">        :rtype: pandas.DataFrame, pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">conv</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mark&#39;</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;father_mark&#39;</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                <span class="s1">&#39;perturbation_resistant&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;init_status&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">}</span>
+        <span class="n">graph_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">converters</span><span class="o">=</span><span class="n">conv</span><span class="p">,</span> <span class="n">keep_default_na</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">graph_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+
+            <span class="n">edge_weight</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+            <span class="n">father_mark</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;father_mark&#39;</span><span class="p">)</span>
+            <span class="n">edge_father_condition</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;father_condition&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;mark&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">row</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">father_mark</span> <span class="o">!=</span> <span class="s1">&#39;NULL&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span>
+                    <span class="n">father_mark</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;mark&#39;</span><span class="p">],</span>
+                    <span class="n">father_condition</span><span class="o">=</span><span class="n">edge_father_condition</span><span class="p">,</span>
+                    <span class="n">weight</span><span class="o">=</span><span class="n">edge_weight</span><span class="p">)</span>
+
+        <span class="n">graph_edges_df</span> <span class="o">=</span> <span class="n">graph_df</span><span class="p">[[</span><span class="s1">&#39;mark&#39;</span><span class="p">,</span> <span class="s1">&#39;father_mark&#39;</span><span class="p">]]</span>
+
+        <span class="n">graph_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;father_condition&#39;</span><span class="p">,</span> <span class="s1">&#39;father_mark&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;initial_service&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">graph_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">graph_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;mark&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s1">&#39;intermediate_status&#39;</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s1">&#39;final_status&#39;</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;AVAILABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;status_area&#39;</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ACTIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;Mark_Status&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">node_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">node_type</span> <span class="o">==</span> <span class="s1">&#39;SOURCE&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">node_type</span> <span class="o">==</span> <span class="s1">&#39;USER&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">graph_df</span><span class="p">,</span> <span class="n">graph_edges_df</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mark</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: mark attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mark&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: area attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;area&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">perturbation_resistant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: perturbation_resistant attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;perturbation_resistant&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: description attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">init_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: init_status attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;init_status&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">intermediate_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: intermediate_status attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;intermediate_status&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">final_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: final_status attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;final_status&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mark_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: mark_status attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mark_status&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">status_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: status_area attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;status_area&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">father_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: father_condition attribute for every edge.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_edge_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;father_condition&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: weight attribute for every edge.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_edge_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: type attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">initial_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: initial_service attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;initial_service&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Computed service.</span>
+<span class="sd">        Returns the computed service if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: service attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">computed_service</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;computed_service&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">computed_service</span><span class="p">:</span> <span class="k">return</span> <span class="n">computed_service</span>
+
+        <span class="n">computed_service</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_service</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">computed_service</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;computed_service&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">computed_service</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shortest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Shortest existing paths between all node pairs.</span>
+<span class="sd">        Returns the shortest path if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: shortest_path attribute for every node.</span>
+<span class="sd">            The keys correspond to source, while as value a dictionary keyed</span>
+<span class="sd">            by target and valued by the source-target shortest path.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shortest_path</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;shortest_path&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shortest_path</span><span class="p">:</span> <span class="k">return</span> <span class="n">shortest_path</span>
+
+        <span class="n">shortest_path</span><span class="p">,</span> <span class="n">shortest_path_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_shortest_path</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortest_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;shortest_path&#39;</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortest_path_length</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;shortest_path_length&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">shortest_path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shortest_path_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Shortest path length.</span>
+
+<span class="sd">        :return: shortest_path_length attribute for every node.</span>
+<span class="sd">            The keys correspond to source, while as value a dictionary keyed</span>
+<span class="sd">            by target and valued by the source-target shortest path length.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shortest_path_length</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="s1">&#39;shortest_path_length&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shortest_path_length</span><span class="p">:</span> <span class="k">return</span> <span class="n">shortest_path_length</span>
+
+        <span class="n">shortest_path</span><span class="p">,</span> <span class="n">shortest_path_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_shortest_path</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortest_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;shortest_path&#39;</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortest_path_length</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;shortest_path_length&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">shortest_path_length</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Efficiency of the graph.</span>
+<span class="sd">        Returns the efficiency if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: efficiency attribute for every node.</span>
+<span class="sd">            The keys correspond to source, while as value a dictionary keyed</span>
+<span class="sd">            by target and valued by the source-target efficiency.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">efficiency</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;efficiency&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">efficiency</span><span class="p">:</span> <span class="k">return</span> <span class="n">efficiency</span>
+
+        <span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_efficiency</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">efficiency</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;efficiency&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">efficiency</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nodal_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Nodal efficiency of the graph.</span>
+<span class="sd">        Returns the nodal efficiency if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: nodal_efficiency attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">nodal_efficiency</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;nodal_efficiency&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nodal_efficiency</span><span class="p">:</span> <span class="k">return</span> <span class="n">nodal_efficiency</span>
+
+        <span class="n">nodal_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_nodal_efficiency</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodal_efficiency</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;nodal_efficiency&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nodal_efficiency</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">local_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Local efficiency of the graph.</span>
+<span class="sd">        Returns the local efficiency if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: local_efficiency attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">local_efficiency</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;local_efficiency&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">local_efficiency</span><span class="p">:</span> <span class="k">return</span> <span class="n">local_efficiency</span>
+
+        <span class="n">local_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_local_efficiency</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_efficiency</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;local_efficiency&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">local_efficiency</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">global_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Average global efficiency of the whole graph.</span>
+
+<span class="sd">        .. note:: The average global efficiency of a graph is the average</span>
+<span class="sd">            efficiency of all pairs of nodes.</span>
+
+<span class="sd">        :return: global_efficiency attribute for every node.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        :raises: ValueError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">graph_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">graph_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Graph size must equal or larger than 2.&#39;</span><span class="p">)</span>
+
+        <span class="n">nodal_efficiency_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodal_efficiency</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">nodal_efficiency_values</span><span class="p">)</span> <span class="o">/</span> <span class="n">graph_size</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">betweenness_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Betweenness centrality of the graph.</span>
+<span class="sd">        Returns the betweenness centrality if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: betweenness_centrality attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">betweenness_centrality</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="s1">&#39;betweenness_centrality&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">betweenness_centrality</span><span class="p">:</span> <span class="k">return</span> <span class="n">betweenness_centrality</span>
+
+        <span class="n">betweenness_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_betweenness_centrality</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">betweenness_centrality</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;betweenness_centrality&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">betweenness_centrality</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">closeness_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Closeness centrality of the graph.</span>
+<span class="sd">        Returns the closeness centrality if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: closeness_centrality attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">closeness_centrality</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="s1">&#39;closeness_centrality&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">closeness_centrality</span><span class="p">:</span> <span class="k">return</span> <span class="n">closeness_centrality</span>
+
+        <span class="n">closeness_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_closeness_centrality</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">closeness_centrality</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;closeness_centrality&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">closeness_centrality</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">degree_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Degree centrality of the graph.</span>
+<span class="sd">        Returns the degree centrality if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: degree_centrality attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">degree_centrality</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;degree_centrality&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">degree_centrality</span><span class="p">:</span> <span class="k">return</span> <span class="n">degree_centrality</span>
+
+        <span class="n">degree_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_degree_centrality</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree_centrality</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;degree_centrality&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">degree_centrality</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">indegree_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        In-degree centrality of the graph.</span>
+<span class="sd">        Returns the in-degree centrality if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: indegree_centrality attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">indegree_centrality</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="s1">&#39;indegree_centrality&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">indegree_centrality</span><span class="p">:</span> <span class="k">return</span> <span class="n">indegree_centrality</span>
+
+        <span class="n">indegree_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_indegree_centrality</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indegree_centrality</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;indegree_centrality&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">indegree_centrality</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outdegree_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Out-degree centrality of the graph.</span>
+<span class="sd">        Returns the out-degree centrality if already stored in the nodes.</span>
+<span class="sd">        Otherwise, the attribute is computed.</span>
+
+<span class="sd">        :return: outdegree_centrality attribute for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">outdegree_centrality</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="s1">&#39;outdegree_centrality&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">outdegree_centrality</span><span class="p">:</span> <span class="k">return</span> <span class="n">outdegree_centrality</span>
+
+        <span class="n">outdegree_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_outdegree_centrality</span><span class="p">()</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outdegree_centrality</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;outdegree_centrality&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outdegree_centrality</span>
+
+<div class="viewcode-block" id="GeneralGraph.clear_data"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.clear_data">[docs]</a>    <span class="k">def</span> <span class="nf">clear_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes_to_remove</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Delete attributes for all nodes in the graph.</span>
+
+<span class="sd">        :param list attributes_to_remove: a list of strings</span>
+<span class="sd">            with all the attributes to remove.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes_to_remove</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">attribute</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.construct_path_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.construct_path_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">construct_path_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">predecessor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Reconstruct source-target paths starting from predecessors</span>
+<span class="sd">        matrix, and populate the dictionary of shortest paths.</span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            shortest path between them and all the other nodes.</span>
+<span class="sd">        :param numpy.ndarray predecessor: matrix of predecessors,</span>
+<span class="sd">            computed with Floyd Warshall APSP algorithm.</span>
+
+<span class="sd">        :return: nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target shortest path.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shortest_paths</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            
+            <span class="n">all_targets_paths</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">)):</span>
+
+                <span class="n">source</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">j</span>
+
+                <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="n">target</span><span class="p">:</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">source</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">predecessor</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="n">curr</span> <span class="o">=</span> <span class="n">predecessor</span><span class="p">[</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">curr</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+                        <span class="n">curr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">curr</span><span class="p">)</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">curr</span><span class="p">)]</span>
+                        <span class="k">while</span> <span class="n">curr</span> <span class="o">!=</span> <span class="n">source</span><span class="p">:</span>
+                            <span class="n">curr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">predecessor</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">source</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">curr</span><span class="p">)])</span>
+                            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+                <span class="n">all_targets_paths</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span> <span class="o">=</span> <span class="n">path</span>
+
+            <span class="n">shortest_paths</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">all_targets_paths</span>
+
+        <span class="k">return</span> <span class="n">shortest_paths</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.floyd_warshall_initialization"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.floyd_warshall_initialization">[docs]</a>    <span class="k">def</span> <span class="nf">floyd_warshall_initialization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Initialization of Floyd Warshall APSP algorithm.</span>
+<span class="sd">        The distancy matrix is mutuated by NetworkX graph adjacency</span>
+<span class="sd">        matrix, while the predecessors matrix is initialized</span>
+<span class="sd">        with node fathers.</span>
+<span class="sd">        The conversion between the labels (ids) in the graph and Numpy</span>
+<span class="sd">        matrix indices (and viceversa) is also exploited.</span>
+
+<span class="sd">        .. note:: In order for the ids relation to be bijective,</span>
+<span class="sd">            &#39;mark&#39; attribute must be unique for each node.</span>
+
+<span class="sd">        :return: matrix of distances;</span>
+<span class="sd">            matrix of predecessors.</span>
+<span class="sd">        :rtype: numpy.ndarray, numpy.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">convert_node_labels_to_integers</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">first_label</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">label_attribute</span><span class="o">=</span><span class="s1">&#39;mark_ids&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="s1">&#39;mark_ids&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ids_reversed</span> <span class="o">=</span> <span class="p">{</span> <span class="n">value</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">}</span>
+
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">nodelist</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">)),</span>
+            <span class="n">nonedge</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+        <span class="n">predecessor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
+            <span class="n">predecessor</span><span class="p">[</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span>
+
+        <span class="k">return</span> <span class="n">distance</span><span class="p">,</span> <span class="n">predecessor</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.floyd_warshall_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.floyd_warshall_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">floyd_warshall_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">predecessor</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span>
+        <span class="n">barrier</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Floyd Warshall&#39;s APSP inner iteration.</span>
+<span class="sd">        Distance matrix is intended to take edges weight into account.</span>
+
+<span class="sd">        :param distance: matrix of distances.</span>
+<span class="sd">        :type distance: numpy.ndarray or multiprocessing.sharedctypes.RawArray</span>
+<span class="sd">        :param predecessor: matrix of predecessors.</span>
+<span class="sd">        :type predecessor: numpy.ndarray or multiprocessing.sharedctypes.RawArray</span>
+<span class="sd">        :param int init: starting column of numpy matrix slice.</span>
+<span class="sd">        :param int stop: ending column of numpy matrix slice.</span>
+<span class="sd">        :param multiprocessing.synchronize.Barrier barrier:</span>
+<span class="sd">            multiprocessing barrier to moderate writing on</span>
+<span class="sd">            distance and predecessors matrices, default to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>  <span class="c1"># k</span>
+            <span class="n">distance_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="n">w</span><span class="p">],</span> <span class="n">distance</span><span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="p">:]),</span>
+                    <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">init</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span>
+                <span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:],</span> <span class="n">distance_copy</span><span class="p">)</span>
+            <span class="n">predecessor</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:][</span><span class="o">~</span><span class="n">diff</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">predecessor</span><span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="p">:],</span>
+                <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">init</span><span class="p">,</span> <span class="mi">1</span><span class="p">))[</span><span class="o">~</span><span class="n">diff</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">barrier</span><span class="p">:</span>
+            <span class="n">barrier</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.floyd_warshall_predecessor_and_distance"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.floyd_warshall_predecessor_and_distance">[docs]</a>    <span class="k">def</span> <span class="nf">floyd_warshall_predecessor_and_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Serial Floyd Warshall&#39;s APSP algorithm. The predecessors</span>
+<span class="sd">        and distance matrices are evaluated, together with the nested</span>
+<span class="sd">        dictionaries for shortest-path, length of the paths and</span>
+<span class="sd">        efficiency attributes.</span>
+
+<span class="sd">        .. note:: Edges weight is taken into account in the distance matrix.</span>
+<span class="sd">            Edge weight attributes must be numerical. Distances are calculated</span>
+<span class="sd">            as sums of weighted edges traversed.</span>
+
+<span class="sd">        :return: nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target shortest path;</span>
+<span class="sd">            nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target shortest path length.</span>
+<span class="sd">        :rtype: dict, dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">distance</span><span class="p">,</span> <span class="n">predecessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">floyd_warshall_initialization</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">floyd_warshall_kernel</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">predecessor</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">distance</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">all_shortest_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_path_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">),</span>
+            <span class="n">predecessor</span><span class="p">)</span>
+
+        <span class="n">nonempty_shortest_path</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">all_shortest_path</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">nonempty_shortest_path</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">all_shortest_path</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span>
+            <span class="p">}</span>
+
+        <span class="n">shortest_path_length</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">):</span>
+
+            <span class="n">shortest_path_length</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nonempty_shortest_path</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">length_path</span> <span class="o">=</span> <span class="n">distance</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ids_reversed</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">ids_reversed</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]]</span>
+                <span class="n">shortest_path_length</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span>  <span class="n">length_path</span>
+
+        <span class="k">return</span> <span class="n">nonempty_shortest_path</span><span class="p">,</span> <span class="n">shortest_path_length</span> </div>
+
+<div class="viewcode-block" id="GeneralGraph.dijkstra_single_source_shortest_path"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.dijkstra_single_source_shortest_path">[docs]</a>    <span class="k">def</span> <span class="nf">dijkstra_single_source_shortest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Serial SSSP algorithm based on Dijkstra’s method.</span>
+<span class="sd">        The nested dictionaries for shortest-path, length of the paths and</span>
+<span class="sd">        efficiency attributes are evaluated.</span>
+
+<span class="sd">        .. note:: Edges weight is taken into account.</span>
+<span class="sd">            Edge weight attributes must be numerical.</span>
+<span class="sd">            Distances are calculated as sums of weighted edges traversed.</span>
+
+<span class="sd">        :return: nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target shortest path;</span>
+<span class="sd">            nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target shortest path length.</span>
+<span class="sd">        :rtype: dict, dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shortest_path</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">shortest_path_length</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">sssps</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">nx</span><span class="o">.</span><span class="n">single_source_dijkstra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">))</span>
+            <span class="n">shortest_path</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">sssps</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">shortest_path_length</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">sssps</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">shortest_path</span><span class="p">,</span> <span class="n">shortest_path_length</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.calculate_shortest_path"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.calculate_shortest_path">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_shortest_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Choose the most appropriate way to compute the all-pairs shortest</span>
+<span class="sd">        path depending on graph size and density.</span>
+<span class="sd">        For a dense graph choose Floyd Warshall algorithm.</span>
+<span class="sd">        For a sparse graph choose SSSP algorithm based on Dijkstra&#39;s method.</span>
+
+<span class="sd">        .. note:: Edge weights of the graph are taken into account</span>
+<span class="sd">            in the computation.</span>
+
+<span class="sd">        :return: nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target shortest path;</span>
+<span class="sd">            nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target shortest path length.</span>
+<span class="sd">        :rtype: dict, dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n_of_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
+        <span class="n">graph_density</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">density</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;In the graph are present </span><span class="si">{n_of_nodes}</span><span class="s1"> nodes&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">graph_density</span> <span class="o">&lt;=</span> <span class="mf">0.000001</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The graph is sparse, density = </span><span class="si">{graph_density}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">shpath</span><span class="p">,</span> <span class="n">shpath_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dijkstra_single_source_shortest_path</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The graph is dense, density = </span><span class="si">{graph_density}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">shpath</span><span class="p">,</span> <span class="n">shpath_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">floyd_warshall_predecessor_and_distance</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">shpath</span><span class="p">,</span> <span class="n">shpath_len</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.efficiency_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.efficiency_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">efficiency_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shortest_path_length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute efficiency, starting from path length attribute.</span>
+<span class="sd">        Efficiency is a measure of how good is the exchange of commodities</span>
+<span class="sd">        flowing from one node to the others.</span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            efficiency between them and all the other nodes.</span>
+<span class="sd">        :param dict shortest_path_length: nested dictionary with key</span>
+<span class="sd">            corresponding to source, while as value a dictionary keyed by target</span>
+<span class="sd">            and valued by the source-target shortest path length.</span>
+
+<span class="sd">        :return: nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target efficiency.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dict_efficiency</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">dict_efficiency</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">length_path</span> <span class="ow">in</span> <span class="n">shortest_path_length</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">length_path</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">efficiency</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">length_path</span>
+                    <span class="n">dict_efficiency</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">efficiency</span><span class="p">})</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">efficiency</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">dict_efficiency</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">efficiency</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">dict_efficiency</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_efficiency"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_efficiency">[docs]</a>    <span class="k">def</span> <span class="nf">compute_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Efficiency calculation.</span>
+
+<span class="sd">        .. note:: The efficiency of a path connecting two nodes is defined</span>
+<span class="sd">            as the inverse of the path length, if the path has length non-zero,</span>
+<span class="sd">            and zero otherwise.</span>
+
+<span class="sd">        :return: efficiency attribute computed for every node.</span>
+<span class="sd">            The keys correspond to source, while as value a dictionary keyed</span>
+<span class="sd">            by target and valued by the source-target efficiency.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shortest_path_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path_length</span>
+        <span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">efficiency_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">shortest_path_length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">efficiency</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.nodal_efficiency_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.nodal_efficiency_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">nodal_efficiency_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">efficiency</span><span class="p">,</span> <span class="n">graph_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute nodal efficiency, starting from efficiency attribute.</span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            efficiency between them and all the other nodes.</span>
+<span class="sd">        :param dict efficiency: nested dictionary with key corresponding to</span>
+<span class="sd">            source, while as value a dictionary keyed by target and valued</span>
+<span class="sd">            by the source-target efficiency.</span>
+<span class="sd">        :param int graph_size: graph size.</span>
+
+<span class="sd">        :return: nodal efficiency dictionary keyed by node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        :raises: ValueError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">graph_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Graph size must equal or larger than 2.&#39;</span><span class="p">)</span>
+
+        <span class="n">dict_nodal_efficiency</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">sum_efficiencies</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">efficiency</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">dict_nodal_efficiency</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_efficiencies</span> <span class="o">/</span> <span class="p">(</span><span class="n">graph_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dict_nodal_efficiency</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_nodal_efficiency"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_nodal_efficiency">[docs]</a>    <span class="k">def</span> <span class="nf">compute_nodal_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Nodal efficiency calculation.</span>
+
+<span class="sd">        .. note:: The nodal efficiency of the node is equal to zero</span>
+<span class="sd">            for a node without any outgoing path and equal to one if from it</span>
+<span class="sd">            we can reach each node of the digraph.</span>
+
+<span class="sd">        :return: nodal efficiency computed for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">graph_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">efficiency</span>
+        <span class="n">nodal_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodal_efficiency_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">efficiency</span><span class="p">,</span>
+            <span class="n">graph_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nodal_efficiency</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.local_efficiency_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.local_efficiency_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">local_efficiency_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">nodal_efficiency</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute local efficiency, starting from nodal efficiency attribute.</span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            efficiency between them and all the other nodes.</span>
+<span class="sd">        :param dict nodal_efficiency: nodal efficiency dictionary keyed by node.</span>
+
+<span class="sd">        :return: local efficiency dictionary keyed by node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dict_local_efficiency</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">subgraph</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+            <span class="n">denominator_subg</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">subgraph</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">denominator_subg</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">sum_efficiencies</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">subgraph</span><span class="p">):</span>
+                    <span class="n">kv_efficiency</span> <span class="o">=</span> <span class="n">nodal_efficiency</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+                    <span class="n">sum_efficiencies</span> <span class="o">=</span> <span class="n">sum_efficiencies</span> <span class="o">+</span> <span class="n">kv_efficiency</span>
+
+                <span class="n">dict_local_efficiency</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_efficiencies</span> <span class="o">/</span> <span class="n">denominator_subg</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dict_local_efficiency</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="k">return</span> <span class="n">dict_local_efficiency</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_local_efficiency"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_local_efficiency">[docs]</a>    <span class="k">def</span> <span class="nf">compute_local_efficiency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Local efficiency calculation.</span>
+
+<span class="sd">        .. note:: The local efficiency shows the efficiency of the connections</span>
+<span class="sd">            between the first-order outgoing neighbors of node v</span>
+<span class="sd">            when v is removed. Equivalently, local efficiency measures</span>
+<span class="sd">            the resilience of the digraph to the perturbation of node removal,</span>
+<span class="sd">            i.e. if we remove a node, how efficiently its first-order outgoing</span>
+<span class="sd">            neighbors can communicate. </span>
+<span class="sd">            It is in the range [0, 1].</span>
+
+<span class="sd">        :return: local efficiency computed for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">nodal_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodal_efficiency</span>
+        <span class="n">local_efficiency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_efficiency_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="n">nodal_efficiency</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">local_efficiency</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.shortest_path_list_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.shortest_path_list_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">shortest_path_list_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shortest_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Collect the shortest paths that contain at least two nodes.</span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            list of shortest paths.</span>
+<span class="sd">        :param dict shortest_path: nested dictionary with key</span>
+<span class="sd">            corresponding to source, while as value a dictionary keyed by target</span>
+<span class="sd">            and valued by the source-target shortest path.</span>
+
+<span class="sd">        :return: list of shortest paths.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">tot_shortest_paths_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">node_tot_shortest_paths</span> <span class="o">=</span> <span class="n">shortest_path</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">node_tot_shortest_paths</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">tot_shortest_paths_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tot_shortest_paths_list</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.betweenness_centrality_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.betweenness_centrality_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">betweenness_centrality_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">tot_shortest_paths_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute betweenness centrality, from shortest path list. </span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            efficiency between them and all the other nodes.</span>
+<span class="sd">        :param tot_shortest_paths_list: list of shortest paths</span>
+<span class="sd">            with at least two nodes.</span>
+<span class="sd">        :type tot_shortest_paths_list: list or multiprocessing.managers.list</span>
+
+<span class="sd">        :return: between centrality dictionary keyed by node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">dict_bet_cen</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">shortest_paths_with_node</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">tot_shortest_paths_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">shortest_paths_with_node</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+            <span class="n">n_shpaths_with_node</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shortest_paths_with_node</span><span class="p">)</span>
+            <span class="n">dict_bet_cen</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_shpaths_with_node</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tot_shortest_paths_list</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dict_bet_cen</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_betweenness_centrality"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_betweenness_centrality">[docs]</a>    <span class="k">def</span> <span class="nf">compute_betweenness_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Betweenness_centrality calculation</span>
+
+<span class="sd">        .. note:: Betweenness centrality is an index of the relative importance</span>
+<span class="sd">            of a node and it is defined by the number of shortest paths that run</span>
+<span class="sd">            through it.</span>
+<span class="sd">            Nodes with the highest betweenness centrality hold the higher level</span>
+<span class="sd">            of control on the information flowing between different nodes in</span>
+<span class="sd">            the network, because more information will pass through them.</span>
+
+<span class="sd">        :return: betweenness centrality computed for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shortest_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path</span>
+        <span class="n">tot_shortest_paths_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path_list_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="n">shortest_path</span><span class="p">)</span>
+
+        <span class="n">betweenness_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">betweenness_centrality_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="n">tot_shortest_paths_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">betweenness_centrality</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.closeness_centrality_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.closeness_centrality_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">closeness_centrality_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">shortest_path_length</span><span class="p">,</span>
+        <span class="n">tot_shortest_paths_list</span><span class="p">,</span> <span class="n">graph_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute betweenness centrality, from shortest path list. </span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            efficiency between them and all the other nodes.</span>
+<span class="sd">        :param dict shortest_path: nested dictionary with key.</span>
+<span class="sd">            corresponding to source, while as value a dictionary keyed by target</span>
+<span class="sd">            and valued by the source-target shortest path.</span>
+<span class="sd">        :param tot_shortest_paths_list: list of shortest paths</span>
+<span class="sd">            with at least two nodes.</span>
+<span class="sd">        :type tot_shortest_paths_list: list or multiprocessing.managers.list</span>
+<span class="sd">        :param int graph_size: graph size.</span>
+
+<span class="sd">        :return: closeness centrality dictionary keyed by node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        :raises: ValueError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">graph_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Graph size must equal or larger than 2.&#39;</span><span class="p">)</span>
+
+        <span class="n">dict_closeness_centrality</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">totsp</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">sp_with_node</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">tot_shortest_paths_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">==</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">sp_with_node</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+                    <span class="n">length_path</span> <span class="o">=</span> <span class="n">shortest_path_length</span><span class="p">[</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+                    <span class="n">totsp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">length_path</span><span class="p">)</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">totsp</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">graph_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">totsp</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dict_closeness_centrality</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">totsp</span><span class="p">)</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">totsp</span><span class="p">))</span> <span class="o">*</span> <span class="n">norm</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dict_closeness_centrality</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">dict_closeness_centrality</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_closeness_centrality"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_closeness_centrality">[docs]</a>    <span class="k">def</span> <span class="nf">compute_closeness_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Closeness centrality calculation.</span>
+
+<span class="sd">        .. note:: Closeness centrality measures the reciprocal of the</span>
+<span class="sd">            average shortest path distance from a node to all other reachable</span>
+<span class="sd">            nodes in the graph. Thus, the more central a node is, the closer</span>
+<span class="sd">            it is to all other nodes. This measure allows to identify good</span>
+<span class="sd">            broadcasters, that is key elements in a graph, depicting how</span>
+<span class="sd">            closely the nodes are connected with each other.</span>
+
+<span class="sd">        :return: closeness centrality computed for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">graph_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">shortest_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path</span>
+        <span class="n">shortest_path_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path_length</span>
+        <span class="n">tot_shortest_paths_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path_list_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="n">shortest_path</span><span class="p">)</span>
+
+        <span class="n">closeness_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">closeness_centrality_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="n">shortest_path_length</span><span class="p">,</span> <span class="n">tot_shortest_paths_list</span><span class="p">,</span> <span class="n">graph_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">closeness_centrality</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.degree_centrality_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.degree_centrality_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">degree_centrality_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">graph_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute degree centrality.</span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            efficiency between them and all the other nodes.</span>
+<span class="sd">        :param int graph_size: graph size.</span>
+
+<span class="sd">        :return: degree centrality dictionary keyed by node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        :raises: ValueError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">graph_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Graph size must equal or larger than 2.&#39;</span><span class="p">)</span>
+
+        <span class="n">dict_degree_centrality</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">num_neighbor_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+            <span class="n">dict_degree_centrality</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_neighbor_nodes</span> <span class="o">/</span> <span class="p">(</span><span class="n">graph_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dict_degree_centrality</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_degree_centrality"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_degree_centrality">[docs]</a>    <span class="k">def</span> <span class="nf">compute_degree_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Degree centrality measure of each node calculation.</span>
+
+<span class="sd">        .. note:: Degree centrality is a simple centrality measure that counts</span>
+<span class="sd">            how many neighbors a node has in an undirected graph.</span>
+<span class="sd">            The more neighbors the node has the most important it is,</span>
+<span class="sd">            occupying a strategic position that serves as a source or conduit</span>
+<span class="sd">            for large volumes of flux transactions with other nodes.</span>
+<span class="sd">            A node with high degree centrality is a node with many dependencies.</span>
+
+<span class="sd">        :return: degree centrality computed for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">graph_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">degree_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">degree_centrality_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="n">graph_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">degree_centrality</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.indegree_centrality_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.indegree_centrality_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">indegree_centrality_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">graph_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute in-degree centrality.</span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            efficiency between them and all the other nodes.</span>
+<span class="sd">        :param int graph_size: graph size.</span>
+
+<span class="sd">        :return: in-degree centrality dictionary keyed by node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        :raises: ValueError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">graph_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Graph size must equal or larger than 2.&#39;</span><span class="p">)</span>
+
+        <span class="n">dict_indegree_centrality</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">num_incoming_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_degree</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+            <span class="n">dict_indegree_centrality</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_incoming_nodes</span> <span class="o">/</span> <span class="p">(</span><span class="n">graph_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dict_indegree_centrality</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_indegree_centrality"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_indegree_centrality">[docs]</a>    <span class="k">def</span> <span class="nf">compute_indegree_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        In-degree centrality calculation.</span>
+
+<span class="sd">        .. note:: In-degree centrality is measured by the number of edges</span>
+<span class="sd">            ending at the node in a directed graph. Nodes with high in-degree</span>
+<span class="sd">            centrality are called cascade resulting nodes.</span>
+
+<span class="sd">        :return: in-degree centrality computed for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">graph_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">indegree_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indegree_centrality_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="n">graph_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">indegree_centrality</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.outdegree_centrality_kernel"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.outdegree_centrality_kernel">[docs]</a>    <span class="k">def</span> <span class="nf">outdegree_centrality_kernel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">graph_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute out-degree centrality.</span>
+
+<span class="sd">        :param list nodes: list of nodes for which to compute the</span>
+<span class="sd">            efficiency between them and all the other nodes.</span>
+<span class="sd">        :param int graph_size: graph size.</span>
+
+<span class="sd">        :return: out-degree dictionary keyed by node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        :raises: ValueError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">graph_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Graph size must equal or larger than 2.&#39;</span><span class="p">)</span>
+
+        <span class="n">dict_outdegree_cen</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">num_outcoming_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_degree</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">)</span>
+            <span class="n">dict_outdegree_cen</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_outcoming_nodes</span> <span class="o">/</span> <span class="p">(</span><span class="n">graph_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dict_outdegree_cen</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_outdegree_centrality"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_outdegree_centrality">[docs]</a>    <span class="k">def</span> <span class="nf">compute_outdegree_centrality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Outdegree centrality calculation.</span>
+
+<span class="sd">        .. note:: Outdegree centrality is measured by the number of edges</span>
+<span class="sd">            starting from a node in a directed graph. Nodes with high outdegree</span>
+<span class="sd">            centrality are called cascade inititing nodes.</span>
+
+<span class="sd">        :return: out-degree centrality computed for every node.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">graph_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">outdegree_centrality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outdegree_centrality_kernel</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="n">graph_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outdegree_centrality</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.compute_service"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.compute_service">[docs]</a>    <span class="k">def</span> <span class="nf">compute_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Compute service for every node,</span>
+<span class="sd">        together with edge splitting.</span>
+
+<span class="sd">        :return: computed service computed for every node;</span>
+<span class="sd">            splitting computed for every edge.</span>
+<span class="sd">        :rtype: dict, dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">usr_per_node</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="mf">0.</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">}</span>
+        <span class="n">splitting</span> <span class="o">=</span> <span class="p">{</span><span class="n">edge</span><span class="p">:</span> <span class="mf">0.</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">()}</span>
+        <span class="n">computed_service</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="mf">0.</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">}</span>
+        <span class="n">initial_service</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_service</span>
+        <span class="n">shortest_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path</span>
+
+        <span class="n">usr_per_source</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">s</span><span class="p">:</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="k">if</span> <span class="n">nx</span><span class="o">.</span><span class="n">has_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">u</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">usr_per_source</span><span class="p">[</span><span class="n">s</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">u</span><span class="p">]:</span>
+                    <span class="n">usr_per_node</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">1.</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">usr_per_source</span><span class="p">[</span><span class="n">s</span><span class="p">]:</span>
+                <span class="n">computed_service</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">+=</span> <span class="n">initial_service</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">usr_per_source</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
+
+        <span class="c1">#Cycle just on the edges contained in source-user shortest paths</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">usr_per_source</span><span class="p">[</span><span class="n">s</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shortest_path</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">u</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+
+                    <span class="n">head</span> <span class="o">=</span> <span class="n">shortest_path</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">u</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="n">tail</span> <span class="o">=</span> <span class="n">shortest_path</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">u</span><span class="p">][</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">splitting</span><span class="p">[(</span><span class="n">head</span><span class="p">,</span> <span class="n">tail</span><span class="p">)]</span> <span class="o">+=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">usr_per_node</span><span class="p">[</span><span class="n">head</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">computed_service</span><span class="p">,</span> <span class="n">splitting</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2019, GRAPE contributors.
+      <span class="lastupdated">
+        Last updated on Mar 23, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
