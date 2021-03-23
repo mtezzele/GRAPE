@@ -22,6 +22,6 @@ __mail__ = 'auroramaurizio1@gmail.com, teruzzi.martina@gmail.com, demo.nicola@gm
 __maintainer__ = __author__
 __status__ = "Alpha"
 
-from .general_graph import GeneralGraph
-from .parallel_general_graph import ParallelGeneralGraph
-from .fault_diagnosis import FaultDiagnosis
+from grape.general_graph import GeneralGraph
+from grape.parallel_general_graph import ParallelGeneralGraph
+from grape.fault_diagnosis import FaultDiagnosis
