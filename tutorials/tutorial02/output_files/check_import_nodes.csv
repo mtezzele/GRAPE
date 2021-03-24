@@ -1,4 +1,4 @@
-Mark,Description,InitStatus,PerturbationResistant,Area
+mark,description,init_status,perturbation_resistant,area
 1,,,0,area1
 2,isolation_A,1,1,area1
 3,isolation_A,1,1,area1

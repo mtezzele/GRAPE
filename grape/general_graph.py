@@ -70,7 +70,7 @@ class GeneralGraph(nx.DiGraph):
         nx.set_node_attributes(self, str(), 'intermediate_status')
         nx.set_node_attributes(self, str(), 'final_status')
         nx.set_node_attributes(self, 'AVAILABLE', 'status_area')
-        nx.set_node_attributes(self, 'ACTIVE', 'Mark_Status')
+        nx.set_node_attributes(self, 'ACTIVE', 'mark_status')
 
         self.source = []
         self.user = []

@@ -1,7 +1,7 @@
 from grape.general_graph import GeneralGraph
+from grape.fault_diagnosis import FaultDiagnosis
 
-g = GeneralGraph()
-g.load("input_files/TOY_graph.csv")
+F = FaultDiagnosis("./input_files/TOY_graph.csv")
 
-g.check_input_with_gephi()
-g.simulate_element_perturbation(["1"])
+F.check_input_with_gephi()
+F.simulate_element_perturbation(["1"])
