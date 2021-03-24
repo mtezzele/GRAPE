@@ -48,7 +48,7 @@ def test_nodal_efficiency_after_element_perturbation_isolating():
     In this case, we have no fault resistant nodes. However, we expect
     the same behavior due to the presence of isolating nodes '2' and '3'.
 	"""
-    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
     F.simulate_element_perturbation(["1"])
 
     nodal_eff_after_element_perturbation = {
@@ -178,7 +178,7 @@ def test_local_efficiency_after_element_perturbation_isolating():
     In this case, we have no fault resistant nodes. However, we expect
     the same behavior due to the presence of isolating nodes '2' and '3'.
 	"""
-    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
     F.simulate_element_perturbation(["1"])
 
     local_eff_after_element_perturbation = {
@@ -285,7 +285,7 @@ def test_global_efficiency_after_element_perturbation_isolating():
     In this case, we have no fault resistant nodes. However, we expect
     the same behavior due to the presence of isolating nodes '2' and '3'.
     """
-    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
     F.simulate_element_perturbation(["1"])
 
     np.testing.assert_almost_equal(F.G.global_efficiency, 0.17771187599618973,
@@ -356,7 +356,7 @@ def test_residual_service_after_element_perturbation_isolating():
     In this case, we have no fault resistant nodes. However, we expect
     the same behavior due to the presence of isolating nodes '2' and '3'.
     """
-    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
     F.simulate_element_perturbation(["1"])
 
     res_service_after_element_perturbation = {
@@ -444,3 +444,267 @@ def test_residual_service_after_multi_area_perturbation():
         np.asarray(sorted(F.G.service.values())),
         err_msg=
         "FINAL RESIDUAL SERVICE failure: perturbation in areas 1, 2, 3")
+
+class TestStatuses(TestCase):
+    """
+    Class TestStatuses to check mark_status and status_area
+    of GeneralGraph, after different possible perturbations.
+    """
+
+    def test_mark_status_after_element_perturbation(self):
+        """
+        The following test checks mark_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_element_perturbation(["1"])
+
+        mark_status_after_element_perturbation = {
+            '2': 'ACTIVE',
+            '3': 'ACTIVE',
+            '4': 'ACTIVE',
+            '5': 'ACTIVE',
+            '6': 'ACTIVE',
+            '7': 'ACTIVE',
+            '8': 'ACTIVE',
+            '9': 'ACTIVE',
+            '10': 'ACTIVE',
+            '11': 'ACTIVE',
+            '12': 'ACTIVE',
+            '13': 'ACTIVE',
+            '14': 'ACTIVE',
+            '15': 'ACTIVE',
+            '16': 'ACTIVE',
+            '17': 'ACTIVE',
+            '18': 'ACTIVE',
+            '19': 'ACTIVE'
+        }
+
+        self.assertDictEqual(
+            mark_status_after_element_perturbation,
+            F.G.mark_status,
+            msg="FINAL MARK STATUS failure: perturbation of element 1")
+
+    def test_mark_status_after_element_perturbation_isolating(self):
+        """
+        The following test checks mark_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have no fault resistant nodes. However, we expect
+        the same behavior due to the presence of isolating nodes '2' and '3'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
+        F.simulate_element_perturbation(["1"])
+
+        mark_status_after_element_perturbation = {
+            '2': 'ACTIVE',
+            '3': 'ACTIVE',
+            '4': 'ACTIVE',
+            '5': 'ACTIVE',
+            '6': 'ACTIVE',
+            '7': 'ACTIVE',
+            '8': 'ACTIVE',
+            '9': 'ACTIVE',
+            '10': 'ACTIVE',
+            '11': 'ACTIVE',
+            '12': 'ACTIVE',
+            '13': 'ACTIVE',
+            '14': 'ACTIVE',
+            '15': 'ACTIVE',
+            '16': 'ACTIVE',
+            '17': 'ACTIVE',
+            '18': 'ACTIVE',
+            '19': 'ACTIVE'
+        }
+
+        self.assertDictEqual(
+            mark_status_after_element_perturbation,
+            F.G.mark_status,
+            msg="FINAL MARK STATUS failure: perturbation of element 1")
+
+    def test_mark_status_after_single_area_perturbation(self):
+        """
+        The following test checks mark_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of a single area,
+        namely 'area 1'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_area_perturbation(["area1"])
+
+        mark_status_after_area_perturbation = {
+            '2': 'ACTIVE',
+            '3': 'ACTIVE',
+            '4': 'ACTIVE',
+            '5': 'ACTIVE',
+            '6': 'ACTIVE',
+            '7': 'ACTIVE',
+            '8': 'ACTIVE',
+            '9': 'ACTIVE',
+            '10': 'ACTIVE',
+            '11': 'ACTIVE',
+            '12': 'ACTIVE',
+            '13': 'ACTIVE',
+            '14': 'ACTIVE',
+            '15': 'ACTIVE',
+            '16': 'ACTIVE',
+            '17': 'ACTIVE',
+            '18': 'ACTIVE',
+            '19': 'ACTIVE'
+        }
+
+        self.assertDictEqual(
+            mark_status_after_area_perturbation,
+            F.G.mark_status,
+            msg="FINAL MARK STATUS failure: perturbation in area 1")
+
+    def test_mark_status_after_multi_area_perturbation(self):
+        """
+        The following test checks mark_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of multiple areas,
+        namely 'area 1', 'area 2', and 'area 3'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_area_perturbation(['area1', 'area2', 'area3'])
+
+        mark_status_after_multi_area_perturbation = {
+            '2': 'ACTIVE',
+            '3': 'ACTIVE',
+            '4': 'ACTIVE',
+            '5': 'ACTIVE',
+            '6': 'ACTIVE',
+            '7': 'ACTIVE',
+            '8': 'ACTIVE',
+        }
+
+        self.assertDictEqual(
+            mark_status_after_multi_area_perturbation,
+            F.G.mark_status,
+            msg="FINAL RESIDUAL SERVICE failure: perturbation in areas 1,2,3")
+
+    def test_status_area_after_element_perturbation(self):
+        """
+        The following test checks status_area attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_element_perturbation(["1"])
+
+        status_area_after_element_perturbation = {
+            '2': 'DAMAGED',
+            '3': 'DAMAGED',
+            '4': 'DAMAGED',
+            '5': 'DAMAGED',
+            '6': 'AVAILABLE',
+            '7': 'AVAILABLE',
+            '8': 'AVAILABLE',
+            '9': 'AVAILABLE',
+            '10': 'AVAILABLE',
+            '11': 'AVAILABLE',
+            '12': 'AVAILABLE',
+            '13': 'AVAILABLE',
+            '14': 'AVAILABLE',
+            '15': 'AVAILABLE',
+            '16': 'AVAILABLE',
+            '17': 'AVAILABLE',
+            '18': 'AVAILABLE',
+            '19': 'AVAILABLE'
+        }
+
+        self.assertDictEqual(
+            status_area_after_element_perturbation,
+            F.G.status_area,
+            msg="FINAL STATUS AREA failure: perturbation of element 1")
+
+    def test_status_area_after_element_perturbation_isolating(self):
+        """
+        The following test checks status_area attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have no fault resistant nodes. However, we expect
+        the same behavior due to the presence of isolating nodes '2' and '3'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
+        F.simulate_element_perturbation(["1"])
+
+        status_area_after_element_perturbation = {
+            '2': 'DAMAGED',
+            '3': 'DAMAGED',
+            '4': 'DAMAGED',
+            '5': 'DAMAGED',
+            '6': 'AVAILABLE',
+            '7': 'AVAILABLE',
+            '8': 'AVAILABLE',
+            '9': 'AVAILABLE',
+            '10': 'AVAILABLE',
+            '11': 'AVAILABLE',
+            '12': 'AVAILABLE',
+            '13': 'AVAILABLE',
+            '14': 'AVAILABLE',
+            '15': 'AVAILABLE',
+            '16': 'AVAILABLE',
+            '17': 'AVAILABLE',
+            '18': 'AVAILABLE',
+            '19': 'AVAILABLE'
+        }
+
+        self.assertDictEqual(
+            status_area_after_element_perturbation,
+            F.G.status_area,
+            msg="FINAL STATUS AREA failure: perturbation of element 1")
+
+    def test_status_area_after_single_area_perturbation(self):
+        """
+        The following test checks status_area attribute after a perturbation.
+        The perturbation here considered is the perturbation of a single area,
+        namely 'area 1'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_area_perturbation(["area1"])
+
+        status_area_after_area_perturbation = {
+            '2': 'DAMAGED',
+            '3': 'DAMAGED',
+            '4': 'DAMAGED',
+            '5': 'DAMAGED',
+            '6': 'AVAILABLE',
+            '7': 'AVAILABLE',
+            '8': 'AVAILABLE',
+            '9': 'AVAILABLE',
+            '10': 'AVAILABLE',
+            '11': 'AVAILABLE',
+            '12': 'AVAILABLE',
+            '13': 'AVAILABLE',
+            '14': 'AVAILABLE',
+            '15': 'AVAILABLE',
+            '16': 'AVAILABLE',
+            '17': 'AVAILABLE',
+            '18': 'AVAILABLE',
+            '19': 'AVAILABLE'
+        }
+
+        self.assertDictEqual(
+            status_area_after_area_perturbation,
+            F.G.status_area,
+            msg="FINAL STATUS AREA failure: perturbation in area 1")
+
+    def test_status_area_after_multi_area_perturbation(self):
+        """
+        The following test checks status_area attribute after a perturbation.
+        The perturbation here considered is the perturbation of multiple areas,
+        namely 'area 1', 'area 2', and 'area 3'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_area_perturbation(['area1', 'area2', 'area3'])
+
+        status_area_after_multi_area_perturbation = {
+            '2': 'DAMAGED',
+            '3': 'DAMAGED',
+            '4': 'DAMAGED',
+            '5': 'DAMAGED',
+            '6': 'AVAILABLE',
+            '7': 'AVAILABLE',
+            '8': 'AVAILABLE',
+        }
+
+        self.assertDictEqual(
+            status_area_after_multi_area_perturbation,
+            F.G.status_area,
+            msg="FINAL STATUS AREA failure: perturbation in areas 1,2,3")

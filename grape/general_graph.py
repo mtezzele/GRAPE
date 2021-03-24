@@ -171,6 +171,16 @@ class GeneralGraph(nx.DiGraph):
 
         return nx.get_node_attributes(self, 'status_area')
 
+    @status_area.setter
+    def status_area(self, status_area_dict):
+        """
+
+        :param dict status_area_dictionary: dictionary keyed by node,
+            containing the values for status_area attribute.
+        """
+
+        nx.set_node_attributes(self, status_area_dict, name='status_area')
+
     @property
     def father_condition(self):
         """

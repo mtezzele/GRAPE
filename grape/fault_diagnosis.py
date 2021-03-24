@@ -332,6 +332,14 @@ class FaultDiagnosis():
 
         self.df['mark_status'].fillna('NOT_ACTIVE', inplace=True)
 
+        old_status_area = self.G.status_area
+        new_status_area = old_status_area
+        for node in old_status_area.keys():
+            if self.G.area[node] in damaged_areas:
+                new_status_area[node] = 'DAMAGED'
+
+        self.G.status_area = new_status_area
+
         for area in damaged_areas:
             self.df.loc[self.df.area == area, 'status_area'] = 'DAMAGED'
 
@@ -427,8 +435,8 @@ class FaultDiagnosis():
 
             if area not in list(self.G.area.values()):
                 logging.debug(f'The area {area} is not in the graph')
-                print('Insert a valid area')
-                print(f'Valid areas: {set(self.G.area.values())}')
+                logging.debug('Insert a valid area')
+                logging.debug(f'Valid areas: {set(self.G.area.values())}')
                 sys.exit()
             else:
                 for idx, idx_area in self.G.area.items():
