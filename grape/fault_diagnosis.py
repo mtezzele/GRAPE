@@ -363,6 +363,50 @@ class FaultDiagnosis():
             self.damaged_areas.add(self.G.area[n])
             self.G.remove_node(n)
 
+    def apply_perturbation(self, nodes_to_delete, kind='element'):
+        """
+
+        Perturbation simulator, actually applying the perturbation
+        to all the nodes affected by the perturbation.
+
+        :param list nodes_to_delete: nodes(s) involved in the
+            perturbing event.
+        :param str kind: type of simulation, used to label output files,
+            default to 'element'
+
+        .. note:: A perturbation, depending on the considered system,
+            may spread in all directions starting from the damaged
+            component(s) and may be affect nearby areas.
+        """
+
+        self.check_before()
+
+        self.G.clear_data(['shortest_path', 'shortest_path_length',
+            'efficiency', 'nodal_efficiency', 'local_efficiency',
+            'computed_service', 'closeness_centrality',
+            'betweenness_centrality', 'indegree_centrality',
+            'outdegree_centrality', 'degree_centrality'])
+
+        for node in nodes_to_delete:
+            if node in self.G.nodes(): self.delete_a_node(node)
+
+        deleted_sources = [s for s in self.G.source if s not in list(self.G)]
+        for s in deleted_sources: self.G.source.remove(s)
+
+        deleted_users = [u for u in self.G.user if u not in list(self.G)]
+        for u in deleted_users: self.G.user.remove(u)
+
+        self.check_after()
+        self.paths_df.to_csv('service_paths_' + str(kind)+ '_perturbation.csv',
+            index=False)
+
+        status_area_fields = ['intermediate_status', 'final_status',
+            'mark_status', 'status_area']
+        self.update_output(status_area_fields)
+
+        self.update_status_areas(self.damaged_areas)
+        self.graph_characterization_to_file(str(kind) + '_perturbation.csv')
+
     def simulate_element_perturbation(self, perturbed_nodes):
         """
 
@@ -370,10 +414,6 @@ class FaultDiagnosis():
 
         :param list perturbed_nodes: nodes(s) involved in the
             perturbing event.
-
-        .. note:: A perturbation, depending on the considered system,
-            may spread in all directions starting from the damaged
-            component(s) and may be affect nearby areas.
 
         :raises: SystemExit
         """
@@ -386,33 +426,7 @@ class FaultDiagnosis():
                 logging.debug(f'Valid nodes: {self.G.nodes()}')
                 sys.exit()
 
-        self.check_before()
-
-        self.G.clear_data(['shortest_path', 'shortest_path_length',
-            'efficiency', 'nodal_efficiency', 'local_efficiency',
-            'computed_service', 'closeness_centrality',
-            'betweenness_centrality', 'indegree_centrality',
-            'outdegree_centrality', 'degree_centrality'])
-
-        for node in perturbed_nodes:
-            if node in self.G.nodes(): self.delete_a_node(node)
-
-        deleted_sources = [s for s in self.G.source if s not in list(self.G)]
-        for s in deleted_sources: self.G.source.remove(s)
-
-        deleted_users = [u for u in self.G.user if u not in list(self.G)]
-        for u in deleted_users: self.G.user.remove(u)
-
-        self.check_after()
-        self.paths_df.to_csv('service_paths_element_perturbation.csv',
-            index=False)
-
-        status_area_fields = ['intermediate_status', 'final_status',
-            'mark_status', 'status_area']
-        self.update_output(status_area_fields)
-
-        self.update_status_areas(self.damaged_areas)
-        self.graph_characterization_to_file('element_perturbation.csv')
+        self.apply_perturbation(perturbed_nodes, kind='element')
 
     def simulate_area_perturbation(self, perturbed_areas):
         """
@@ -442,34 +456,7 @@ class FaultDiagnosis():
                 for idx, idx_area in self.G.area.items():
                     if idx_area == area: nodes_in_area.append(idx)
 
-        self.check_before()
-
-        self.G.clear_data(['shortest_path', 'shortest_path_length',
-            'efficiency', 'nodal_efficiency', 'local_efficiency',
-            'computed_service', 'closeness_centrality',
-            'betweenness_centrality', 'indegree_centrality',
-            'outdegree_centrality', 'degree_centrality'])
-
-        for node in nodes_in_area:
-            if node in self.G.nodes():
-                self.delete_a_node(node)
-                nodes_in_area = list(set(nodes_in_area) - set(self.bn))
-
-        deleted_sources = [s for s in self.G.source if s not in list(self.G)]
-        for s in deleted_sources: self.G.source.remove(s)
-
-        deleted_users = [u for u in self.G.user if u not in list(self.G)]
-        for u in deleted_users: self.G.user.remove(u)
-
-        self.check_after()
-        self.paths_df.to_csv('service_paths_area_perturbation.csv', index=False)
-
-        status_area_fields = ['intermediate_status', 'final_status',
-            'mark_status', 'status_area']
-        self.update_output(status_area_fields)
-
-        self.update_status_areas(self.damaged_areas)
-        self.graph_characterization_to_file('area_perturbation.csv')
+        self.apply_perturbation(nodes_in_area, kind='area')
 
     def graph_characterization_to_file(self, filename):
         """
