@@ -72,14 +72,6 @@ class GeneralGraph(nx.DiGraph):
         nx.set_node_attributes(self, 'AVAILABLE', 'status_area')
         nx.set_node_attributes(self, 'ACTIVE', 'mark_status')
 
-        self.source = []
-        self.user = []
-        for idx, node_type in self.type.items():
-            if node_type == 'SOURCE':
-                self.source.append(idx)
-            elif node_type == 'USER':
-                self.user.append(idx)
-
         return graph_df, graph_edges_df
 
     @property
@@ -210,6 +202,26 @@ class GeneralGraph(nx.DiGraph):
         """
 
         return nx.get_node_attributes(self, 'type')
+
+    @property
+    def sources(self):
+        """
+
+        :return: list of graph sources.
+        :rtype: list
+        """
+
+        return [idx for idx in self if self.type[idx] == 'SOURCE']
+
+    @property
+    def users(self):
+        """
+
+        :return: list of graph users.
+        :rtype: list
+        """
+
+        return [idx for idx in self if self.type[idx] == 'USER']
 
     @property
     def initial_service(self):
@@ -1158,21 +1170,21 @@ class GeneralGraph(nx.DiGraph):
         shortest_path = self.shortest_path
 
         usr_per_source = {
-            s: [u for u in self.user if nx.has_path(self, s, u)]
-            for s in self.source
+            s: [u for u in self.users if nx.has_path(self, s, u)]
+            for s in self.sources
         }
 
-        for s in self.source:
+        for s in self.sources:
             for u in usr_per_source[s]:
                 for node in self.shortest_path[s][u]:
                     usr_per_node[node] += 1.
 
-        for s in self.source:
+        for s in self.sources:
             for u in usr_per_source[s]:
                 computed_service[u] += initial_service[s]/len(usr_per_source[s])
 
         #Cycle just on the edges contained in source-user shortest paths
-        for s in self.source:
+        for s in self.sources:
             for u in usr_per_source[s]:
                 for idx in range(len(shortest_path[s][u]) - 1):
 

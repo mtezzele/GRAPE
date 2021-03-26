@@ -79,8 +79,8 @@ class FaultDiagnosis():
         measure_fields = ['nodal_efficiency', 'local_efficiency', 'service']
         self.update_output(measure_fields, prefix='original_')
 
-        for source in self.G.source:
-            for user in self.G.user:
+        for source in self.G.sources:
+            for user in self.G.users:
                 if nx.has_path(self.G, source, user):
 
                     osip = list(nx.all_simple_paths(self.G, source, user))
@@ -134,8 +134,8 @@ class FaultDiagnosis():
         measure_fields = ['nodal_efficiency', 'local_efficiency', 'service']
         self.update_output(measure_fields, prefix='final_')
 
-        for source in self.G.source:
-            for user in self.G.user:
+        for source in self.G.sources:
+            for user in self.G.users:
                 if nx.has_path(self.G, source, user):
 
                     sip = list(nx.all_simple_paths(self.G, source, user))
@@ -389,12 +389,6 @@ class FaultDiagnosis():
 
         for node in nodes_to_delete:
             if node in self.G.nodes(): self.delete_a_node(node)
-
-        deleted_sources = [s for s in self.G.source if s not in list(self.G)]
-        for s in deleted_sources: self.G.source.remove(s)
-
-        deleted_users = [u for u in self.G.user if u not in list(self.G)]
-        for u in deleted_users: self.G.user.remove(u)
 
         self.check_after()
         self.paths_df.to_csv('service_paths_' + str(kind)+ '_perturbation.csv',
