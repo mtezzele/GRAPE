@@ -597,20 +597,20 @@ class GeneralGraph(nx.DiGraph):
         """
 
         n = distance.shape[0]
+
         for w in range(n):  # k
             distance_copy = copy.deepcopy(distance[init:stop, :])
             np.minimum(
                 np.reshape(
                     np.add.outer(distance[init:stop, w], distance[w, :]),
-                    (stop-init, n)),
-                distance[init:stop, :],
+                    (stop-init, n)), distance[init:stop, :],
                 distance[init:stop, :])
             diff = np.equal(distance[init:stop, :], distance_copy)
             predecessor[init:stop, :][~diff] = np.tile(predecessor[w, :],
                 (stop-init, 1))[~diff]
 
-        if barrier:
-            barrier.wait()
+            if barrier:
+                barrier.wait()
 
     def floyd_warshall_predecessor_and_distance(self):
         """
