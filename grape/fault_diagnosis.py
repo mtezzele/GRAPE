@@ -126,7 +126,7 @@ class FaultDiagnosis():
         Evaluation of fitness on individual.
         The individual is a list of conditions for the graph switches
         (True or False).
-        Edges towards successors are removed if the switch state
+        Edges connecting its predecessors are removed if the switch state
         is set to 'False'.
 
         :param list perturbed_nodes: nodes(s) involved in the
@@ -150,9 +150,9 @@ class FaultDiagnosis():
         nx.set_node_attributes(T, self.G.type, name='type')
 
         for switch, opened in zip(initial_condition.keys(), individual):
-            if not opened: # we remove edges if the switch is set to 'False'
-                for succ in list(T.successors(switch)):
-                    T.remove_edge(switch, succ)
+            if not opened:
+                for pred in list(T.predecessors(switch)):
+                    T.remove_edge(pred, switch)
 
         for node in perturbed_nodes:
             if node in T.nodes():
@@ -174,14 +174,15 @@ class FaultDiagnosis():
         :param dict initial_condition: initial status (boolean) for the graph
             switches.
         :param dict params: values for the optimizer evolutionary algorithm.
-            Dict of: {str: int, str: int, str: float}.
+            Dict of: {str: int, str: int, str: float, str: float, str: int}.
 
             'npop' -- number of individuals for each population (default to 300)
             'ngen' -- total number of generations (default to 100)
             'indpb' -- independent probability for attributes to be changed
                 (default to 0.6)
             'tresh' -- threshold for applying crossover/mutation
-            'nsel' -- number of individuals to select
+                (default to 0.5)
+            'nsel' -- number of individuals to select (default to 5)
         """
 
         logging.getLogger().setLevel(logging.INFO)
@@ -442,20 +443,21 @@ class FaultDiagnosis():
 
         Perturbation simulator, actually applying the perturbation
         to all the nodes affected by the perturbation.
-        The optimizer is run if any switch is present, and edges towards
-        successors are removed if the switch state is set to 'False'.
+        The optimizer is run if any switch is present, and edges connecting
+        its predecessors are removed if the switch state is set to 'False'.
 
         :param list perturbed_nodes: nodes(s) involved in the
             perturbing event.
         :param dict params: values for the optimizer evolutionary algorithm.
-            Dict of: {str: int, str: int, str: float}.
+            Dict of: {str: int, str: int, str: float, str: float, str: int}.
 
             'npop' -- number of individuals for each population (default to 300)
             'ngen' -- total number of generations (default to 100)
             'indpb' -- independent probability for attributes to be changed
                 (default to 0.6)
             'tresh' -- threshold for applying crossover/mutation
-            'nsel' -- number of individuals to select
+                (default to 0.5)
+            'nsel' -- number of individuals to select (default to 5)
         :param str kind: type of simulation, used to label output files,
             default to 'element'
 
@@ -480,8 +482,8 @@ class FaultDiagnosis():
 
             for switch, opened in best.items():
                 if not opened:
-                    for succ in list(self.G.successors(switch)):
-                        self.G.remove_edge(switch, succ)
+                    for pred in list(self.G.predecessors(switch)):
+                        self.G.remove_edge(pred, switch)
 
             logging.debug(f'BEST: {best}, with fitness: {np.min(res[:, 1])}')
             self.G.final_status = best
@@ -509,14 +511,15 @@ class FaultDiagnosis():
         :param list perturbed_nodes: nodes(s) involved in the
             perturbing event.
         :param dict params: values for the optimizer evolutionary algorithm.
-            Dict of: {str: int, str: int, str: float}.
+            Dict of: {str: int, str: int, str: float, str: float, str: int}.
 
             'npop' -- number of individuals for each population (default to 300)
             'ngen' -- total number of generations (default to 100)
             'indpb' -- independent probability for attributes to be changed
                 (default to 0.6)
             'tresh' -- threshold for applying crossover/mutation
-            'nsel' -- number of individuals to select
+                (default to 0.5)
+            'nsel' -- number of individuals to select (default to 5)
 
         :raises: SystemExit
         """
@@ -540,14 +543,15 @@ class FaultDiagnosis():
         :param list perturbed_areas: area(s) involved in the
             perturbing event.
         :param dict params: values for the optimizer evolutionary algorithm.
-            Dict of: {str: int, str: int, str: float}.
+            Dict of: {str: int, str: int, str: float, str: float, str: int}.
 
             'npop' -- number of individuals for each population (default to 300)
             'ngen' -- total number of generations (default to 100)
             'indpb' -- independent probability for attributes to be changed
                 (default to 0.6) 
             'tresh' -- threshold for applying crossover/mutation
-            'nsel' -- number of individuals to select
+                (default to 0.5)
+            'nsel' -- number of individuals to select (default to 5)
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
