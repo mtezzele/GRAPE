@@ -52,24 +52,22 @@ def test_nodal_efficiency_after_element_perturbation_isolating():
     F.simulate_element_perturbation(["1"])
 
     nodal_eff_after_element_perturbation = {
-        '2': 0.20847763347763348,
-        '3': 0.1607843137254902,
-        '4': 0.21412231559290384,
-        '5': 0.1568627450980392,
-        '6': 0.2391223155929038,
-        '7': 0.18471055088702149,
-        '8': 0.2638655462184874,
-        '9': 0.17072829131652661,
-        '10': 0.1568627450980392,
-        '11': 0.1568627450980392,
-        '12': 0.16666666666666666,
-        '13': 0.17647058823529413,
-        '14': 0.20588235294117646,
-        '15': 0.17563025210084035,
-        '16': 0.16568627450980392,
-        '17': 0.21960784313725493,
+        '4': 0.2426719576719577,
+        '5': 0.17777777777777776,
+        '6': 0.27100529100529097,
+        '7': 0.20933862433862432,
+        '8': 0.2990476190476191,
+        '9': 0.19349206349206347,
+        '10': 0.17777777777777776, 
+        '11': 0.17777777777777778,
+        '12': 0.1888888888888889,
+        '13': 0.2,
+        '14': 0.23333333333333334,
+        '15': 0.19904761904761903,
+        '16': 0.18777777777777777,
+        '17': 0.2488888888888889,
         '18': 0.0,
-        '19': 0.17647058823529413
+        '19': 0.2
     }
 
     np.testing.assert_array_almost_equal(
@@ -182,24 +180,22 @@ def test_local_efficiency_after_element_perturbation_isolating():
     F.simulate_element_perturbation(["1"])
 
     local_eff_after_element_perturbation = {
-        '2': 0.21412231559290384,
-        '3': 0.1568627450980392,
-        '4': 0.2391223155929038,
-        '5': 0.1568627450980392,
-        '6': 0.22428804855275444,
-        '7': 0.2391223155929038,
-        '8': 0.2049253034547152,
-        '9': 0.16568627450980392,
-        '10': 0.1568627450980392,
-        '11': 0.17647058823529413,
-        '12': 0.17647058823529413,
-        '13': 0.18627450980392157,
-        '14': 0.11764705882352942,
-        '15': 0.17072829131652661,
-        '16': 0.21960784313725493,
-        '17': 0.16127450980392155,
+        '4': 0.27100529100529097,
+        '5': 0.17777777777777778,
+        '6': 0.2541931216931217,
+        '7': 0.27100529100529097,
+        '8': 0.2322486772486772,
+        '9': 0.18777777777777777,
+        '10': 0.17777777777777778,
+        '11': 0.2,
+        '12': 0.2,
+        '13': 0.21111111111111114,
+        '14': 0.13333333333333333,
+        '15': 0.19349206349206347,
+        '16': 0.2488888888888889,
+        '17': 0.18277777777777776,
         '18': 0.0,
-        '19': 0.18627450980392157
+        '19': 0.21111111111111114
     }
 
     np.testing.assert_array_almost_equal(
@@ -288,7 +284,7 @@ def test_global_efficiency_after_element_perturbation_isolating():
     F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
     F.simulate_element_perturbation(["1"])
 
-    np.testing.assert_almost_equal(F.G.global_efficiency, 0.17771187599618973,
+    np.testing.assert_almost_equal(F.G.global_efficiency, 0.2004265873015873,
         err_msg="FINAL GLOBAL EFFICIENCY failure: perturbation of element 1")
 
 def test_global_efficiency_after_single_area_perturbation():
@@ -360,8 +356,6 @@ def test_residual_service_after_element_perturbation_isolating():
     F.simulate_element_perturbation(["1"])
 
     res_service_after_element_perturbation = {
-        '2': 0.0,
-        '3': 0.0,
         '4': 0.0,
         '5': 0.0,
         '6': 0.0,
@@ -496,8 +490,6 @@ class TestStatuses(TestCase):
         F.simulate_element_perturbation(["1"])
 
         mark_status_after_element_perturbation = {
-            '2': 'ACTIVE',
-            '3': 'ACTIVE',
             '4': 'ACTIVE',
             '5': 'ACTIVE',
             '6': 'ACTIVE',
@@ -625,8 +617,6 @@ class TestStatuses(TestCase):
         F.simulate_element_perturbation(["1"])
 
         status_area_after_element_perturbation = {
-            '2': 'DAMAGED',
-            '3': 'DAMAGED',
             '4': 'DAMAGED',
             '5': 'DAMAGED',
             '6': 'AVAILABLE',

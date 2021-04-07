@@ -45,7 +45,7 @@ We acknowledge Aurora Maurizio for her substantial contributions to this package
 
 ## Dependencies and installation
 
-**GRAPE** requires `numpy`, `scipy`, `matplotlib`, `networkx`, `nose` (for local test) and `sphinx` (to generate the documentation). The code is compatible with Python 3.6, and NetworkX 2.5.
+**GRAPE** requires `numpy`, `scipy`, `matplotlib`, `networkx`, `nose`, `pandas`, `deap` (for local test) and `sphinx` (to generate the documentation). The code is compatible with Python 3.6, NetworkX 2.5, and DEAP 1.1.3.
 
 ### Installing from source
 

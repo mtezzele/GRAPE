@@ -124,25 +124,25 @@ class TestInputGraph(TestCase):
         g.load("tests/TOY_graph.csv")
 
         perturbation_resistant_dict = {
-            '1': '0',
-            '2': '1',
-            '3': '1',
-            '4': '1',
-            '5': '1',
-            '6': '0',
-            '7': '0',
-            '8': '0',
-            '9': '0',
-            '10': '0',
-            '11': '0',
-            '12': '0',
-            '13': '0',
-            '14': '0',
-            '15': '0',
-            '16': '0',
-            '17': '0',
-            '18': '0',
-            '19': '0'
+            '1': 0,
+            '2': 1,
+            '3': 1,
+            '4': 1,
+            '5': 1,
+            '6': 0,
+            '7': 0,
+            '8': 0,
+            '9': 0,
+            '10': 0,
+            '11': 0,
+            '12': 0,
+            '13': 0,
+            '14': 0,
+            '15': 0,
+            '16': 0,
+            '17': 0,
+            '18': 0,
+            '19': 0
         }
 
         self.assertDictEqual(
@@ -158,27 +158,7 @@ class TestInputGraph(TestCase):
         g = GeneralGraph()
         g.load("tests/TOY_graph.csv")
 
-        init_status_dict = {
-            '1': '',
-            '2': '1',
-            '3': '1',
-            '4': '',
-            '5': '',
-            '6': '',
-            '7': '',
-            '8': '',
-            '9': '',
-            '10': '',
-            '11': '',
-            '12': '',
-            '13': '',
-            '14': '',
-            '15': '',
-            '16': '',
-            '17': '',
-            '18': '',
-            '19': ''
-        }
+        init_status_dict = {'2': True, '3': True}
 
         self.assertDictEqual(init_status_dict, g.init_status,
             msg="Wrong INIT STATUS in input")
@@ -193,8 +173,8 @@ class TestInputGraph(TestCase):
 
         description_dict = {
             '1': '',
-            '2': 'isolation_A',
-            '3': 'isolation_A',
+            '2': '',
+            '3': '',
             '4': '',
             '5': '',
             '6': '',
@@ -226,8 +206,8 @@ class TestInputGraph(TestCase):
 
         type_dict = {
             '1': 'SOURCE',
-            '2': 'HUB',
-            '3': 'HUB',
+            '2': 'SWITCH',
+            '3': 'SWITCH',
             '4': 'HUB',
             '5': 'HUB',
             '6': 'HUB',

@@ -42,8 +42,7 @@ class GeneralGraph(nx.DiGraph):
         :rtype: pandas.DataFrame, pandas.DataFrame
         """
 
-        conv = {'mark' : str, 'father_mark' : str,
-                'perturbation_resistant':str, 'init_status':str}
+        conv = {'mark' : str, 'father_mark' : str}
         graph_df = pd.read_csv(filename, converters=conv, keep_default_na=False)
 
         for index, row in graph_df.iterrows():
@@ -67,8 +66,7 @@ class GeneralGraph(nx.DiGraph):
         graph_df.drop_duplicates(inplace=True)
         graph_df.set_index('mark', inplace=True)
 
-        nx.set_node_attributes(self, str(), 'intermediate_status')
-        nx.set_node_attributes(self, str(), 'final_status')
+        self._final_status = {}
         nx.set_node_attributes(self, 'AVAILABLE', 'status_area')
         nx.set_node_attributes(self, 'ACTIVE', 'mark_status')
 
@@ -117,31 +115,38 @@ class GeneralGraph(nx.DiGraph):
     def init_status(self):
         """
 
-        :return: init_status attribute for every node.
+        :return: init_status attribute for switches.
         :rtype: dict
         """
 
-        return nx.get_node_attributes(self, 'init_status')
+        init_all = nx.get_node_attributes(self, 'init_status')
+        sw = self.switches
+        init_status_sw = {k:bool(v) for (k, v) in init_all.items() if k in sw}
 
-    @property
-    def intermediate_status(self):
-        """
+        #print("init_all: ", init_all)
+        #print("init_status_sw: ", init_status_sw)
 
-        :return: intermediate_status attribute for every node.
-        :rtype: dict
-        """
-
-        return nx.get_node_attributes(self, 'intermediate_status')
+        return init_status_sw
 
     @property
     def final_status(self):
         """
 
-        :return: final_status attribute for every node.
+        :return: final_status attribute for switches.
         :rtype: dict
         """
 
-        return nx.get_node_attributes(self, 'final_status')
+        return self._final_status
+
+    @final_status.setter
+    def final_status(self, final_status_dict):
+        """
+
+        :param dict final_status_dict: values for final_status attribute
+            for the graph switches.
+        """
+
+        self._final_status = {k:int(v) for (k,v) in final_status_dict.items()}
 
     @property
     def mark_status(self):
@@ -167,7 +172,7 @@ class GeneralGraph(nx.DiGraph):
     def status_area(self, status_area_dict):
         """
 
-        :param dict status_area_dictionary: dictionary keyed by node,
+        :param dict status_area_dict: dictionary keyed by node,
             containing the values for status_area attribute.
         """
 
@@ -222,6 +227,16 @@ class GeneralGraph(nx.DiGraph):
         """
 
         return [idx for idx in self if self.type[idx] == 'USER']
+
+    @property
+    def switches(self):
+        """
+
+        :return: list of graph switches.
+        :rtype: list
+        """
+
+        return [idx for idx in self if self.type[idx] == 'SWITCH']
 
     @property
     def initial_service(self):
