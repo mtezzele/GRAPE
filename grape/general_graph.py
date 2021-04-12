@@ -42,8 +42,11 @@ class GeneralGraph(nx.DiGraph):
         :rtype: pandas.DataFrame, pandas.DataFrame
         """
 
-        conv = {'mark' : str, 'father_mark' : str}
+        conv = {'mark' : str, 'father_mark' : str, }
         graph_df = pd.read_csv(filename, converters=conv, keep_default_na=False)
+        cols_to_int = ['perturbation_resistant', 'init_status']
+        graph_df[cols_to_int] = graph_df[cols_to_int].apply(pd.to_numeric,
+            errors='coerce', axis=1)
 
         for index, row in graph_df.iterrows():
 
@@ -122,9 +125,6 @@ class GeneralGraph(nx.DiGraph):
         init_all = nx.get_node_attributes(self, 'init_status')
         sw = self.switches
         init_status_sw = {k:bool(v) for (k, v) in init_all.items() if k in sw}
-
-        #print("init_all: ", init_all)
-        #print("init_status_sw: ", init_status_sw)
 
         return init_status_sw
 

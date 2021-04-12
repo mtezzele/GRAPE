@@ -108,7 +108,7 @@ class FaultDiagnosis():
 
                 for n in broken_nodes: T.remove_node(n)
 
-        return (n_actions - sum(T.service.values())- len(T),)
+        return (n_actions - sum(T.service.values()) - len(T),)
 
     def optimizer(self, perturbed_nodes, initial_condition, params):
         """
@@ -423,6 +423,26 @@ class FaultDiagnosis():
             component(s) and may be affect nearby areas.
         """
 
+        if self.G.switches:
+            res = np.array(self.optimizer(perturbed_nodes, self.G.init_status,
+                params))
+            best = dict(zip(self.G.init_status.keys(),
+                res[np.argmin(res[:, 1]), 0]))
+
+            initial_condition_sw = list(self.G.init_status.values())
+            final_condition_sw = list(best.values())
+            flips = dict(zip(self.G.init_status.keys(),
+                np.not_equal(initial_condition_sw, final_condition_sw)))
+
+        init_open_edges = {}
+        for sw, closed in self.G.init_status.items():
+            if not closed:
+                logging.debug(f'Opened switch {sw} in initial configuration')
+                for pred in list(self.G.predecessors(sw)):
+                    # if final config is closed for this switch I memorize it
+                    if flips[sw]: init_open_edges[sw] = {pred: self.G[pred][sw]}
+                    self.G.remove_edge(pred, sw)
+
         self.check_paths_and_measures(prefix='original_')
 
         self.G.clear_data(['shortest_path', 'shortest_path_length',
@@ -432,15 +452,20 @@ class FaultDiagnosis():
             'outdegree_centrality', 'degree_centrality'])
 
         if self.G.switches:
-            res = np.array(self.optimizer(perturbed_nodes, self.G.init_status,
-                params))
-            best = dict(zip(self.G.init_status.keys(),
-                res[np.argmin(res[:, 1]), 0]))
+            for sw, closed in best.items():
+                if flips[sw]:
 
-            for switch, opened in best.items():
-                if not opened:
-                    for pred in list(self.G.predecessors(switch)):
-                        self.G.remove_edge(pred, switch)
+                    if not closed:
+                        logging.debug(f'Switch {sw} finally open, first closed')
+                        for pre in list(self.G.predecessors(sw)):
+                            self.G.remove_edge(pre, sw)
+
+                    else:
+                        logging.debug(f'Switch {sw} finally closed, first open')
+                        for pre in flips[sw].values():
+                            self.G.add_edge(pre, sw,
+                            father_condition=flips[sw][pre]['father_condition'],
+                            weight=flips[sw][pre]['weight'])
 
             logging.debug(f'BEST: {best}, with fitness: {np.min(res[:, 1])}')
             self.G.final_status = best
