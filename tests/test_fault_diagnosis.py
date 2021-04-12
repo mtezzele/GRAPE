@@ -7,6 +7,527 @@ from grape.general_graph import GeneralGraph
 from grape.fault_diagnosis import FaultDiagnosis
 
 
+def test_closeness_centrality_after_element_perturbation():
+    """
+    The following test checks the closeness centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_element_perturbation(["1"])
+
+    clo_cen_after_element_perturbation = {
+        '2': 0,
+        '3': 0,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.18823529411764706,
+        '7': 0.11764705882352941,
+        '8': 0.11764705882352941,
+        '9': 0.15126050420168066,
+        '10': 0.12538699690402477,
+        '11': 0.1660899653979239,
+        '12': 0.1859114015976761,
+        '13': 0.16020025031289112,
+        '14': 0.1859114015976761,
+        '15': 0,
+        '16': 0.1711229946524064,
+        '17': 0.12981744421906694,
+        '18': 0.17346938775510204,
+        '19': 0.22145328719723184
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(clo_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.closeness_centrality.values())),
+        err_msg="FINAL CLOSENESS CENTRALITY failure: perturbation of element 1")
+
+def test_closeness_centrality_after_element_perturbation_isolating():
+    """
+    The following test checks the closeness centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    In this case, we have no fault resistant nodes. However, we expect
+    the same behavior due to the presence of isolating nodes '2' and '3'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
+    F.simulate_element_perturbation(["1"])
+
+    clo_cen_after_element_perturbation = {
+        '2': 0,
+        '3': 0,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.18823529411764706,
+        '7': 0.11764705882352941,
+        '8': 0.11764705882352941,
+        '9': 0.15126050420168066,
+        '10': 0.12538699690402477,
+        '11': 0.1660899653979239,
+        '12': 0.1859114015976761,
+        '13': 0.16020025031289112,
+        '14': 0.1859114015976761,
+        '15': 0,
+        '16': 0.1711229946524064,
+        '17': 0.12981744421906694,
+        '18': 0.17346938775510204,
+        '19': 0.22145328719723184
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(clo_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.closeness_centrality.values())),
+        err_msg="FINAL CLOSENESS CENTRALITY failure: perturbation of element 1")
+
+def test_closeness_centrality_after_single_area_perturbation():
+    """
+    The following test checks the closeness centrality after a perturbation.
+    The perturbation here considered is the perturbation of a single area,
+    namely 'area 1'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_area_perturbation(['area1'])
+
+    clo_cen_after_single_area_perturbation = {
+        '2': 0,
+        '3': 0,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.18823529411764706,
+        '7': 0.11764705882352941,
+        '8': 0.11764705882352941,
+        '9': 0.15126050420168066,
+        '10': 0.12538699690402477,
+        '11': 0.1660899653979239,
+        '12': 0.1859114015976761,
+        '13': 0.16020025031289112,
+        '14': 0.1859114015976761,
+        '15': 0,
+        '16': 0.1711229946524064,
+        '17': 0.12981744421906694,
+        '18': 0.17346938775510204,
+        '19': 0.22145328719723184
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(clo_cen_after_single_area_perturbation.values())),
+        np.asarray(sorted(F.G.closeness_centrality.values())),
+        err_msg="FINAL CLOSENESS CENTRALITY failure: perturbation in area 1")
+
+def test_closeness_centrality_after_multi_area_perturbation():
+    """
+   The following test checks the closeness centrality after a perturbation.
+   The perturbation here considered is the perturbation of multiple areas,
+   namely 'area 1', 'area 2', and 'area 3'.
+   """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_area_perturbation(['area1', 'area2', 'area3'])
+
+    clo_cen_after_multi_area_perturbation = {
+        '2': 0,
+        '3': 0,
+        '4': 0.16666666666666666,
+        '5': 0.16666666666666666,
+        '6': 0.5333333333333333,
+        '7': 0.3333333333333333,
+        '8': 0.3333333333333333
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(clo_cen_after_multi_area_perturbation.values())),
+        np.asarray(sorted(F.G.closeness_centrality.values())),
+        err_msg=
+        "FINAL CLOSENESS CENTRALITY failure: perturbation in areas 1, 2, 3")
+
+def test_degree_centrality_after_element_perturbation():
+    """
+    The following test checks the degree centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_element_perturbation(["1"])
+
+    deg_cen_after_element_perturbation = {
+        '2': 0.058823529411764705,
+        '3': 0.058823529411764705,
+        '4': 0.11764705882352941,
+        '5': 0.11764705882352941,
+        '6': 0.29411764705882354,
+        '7': 0.11764705882352941,
+        '8': 0.17647058823529413,
+        '9': 0.17647058823529413,
+        '10': 0.11764705882352941,
+        '11': 0.17647058823529413,
+        '12': 0.23529411764705882,
+        '13': 0.23529411764705882,
+        '14': 0.29411764705882354,
+        '15': 0.058823529411764705,
+        '16': 0.17647058823529413,
+        '17': 0.17647058823529413,
+        '18': 0.058823529411764705,
+        '19': 0.29411764705882354
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(deg_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.degree_centrality.values())),
+        err_msg="FINAL DEGREE CENTRALITY failure: perturbation of element 1")
+
+def test_degree_centrality_after_element_perturbation_isolating():
+    """
+    The following test checks the degree centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    In this case, we have no fault resistant nodes. However, we expect
+    the same behavior due to the presence of isolating nodes '2' and '3'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
+    F.simulate_element_perturbation(["1"])
+
+    deg_cen_after_element_perturbation = {
+        '2': 0.058823529411764705,
+        '3': 0.058823529411764705,
+        '4': 0.11764705882352941,
+        '5': 0.11764705882352941,
+        '6': 0.29411764705882354,
+        '7': 0.11764705882352941,
+        '8': 0.17647058823529413,
+        '9': 0.17647058823529413,
+        '10': 0.11764705882352941,
+        '11': 0.17647058823529413,
+        '12': 0.23529411764705882,
+        '13': 0.23529411764705882,
+        '14': 0.29411764705882354,
+        '15': 0.058823529411764705,
+        '16': 0.17647058823529413,
+        '17': 0.17647058823529413,
+        '18': 0.058823529411764705,
+        '19': 0.29411764705882354
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(deg_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.degree_centrality.values())),
+        err_msg="FINAL DEGREE CENTRALITY failure: perturbation of element 1")
+
+def test_degree_centrality_after_single_area_perturbation():
+    """
+    The following test checks the degree centrality after a perturbation.
+    The perturbation here considered is the perturbation of a single area,
+    namely 'area 1'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_area_perturbation(['area1'])
+
+    deg_cen_after_single_area_perturbation = {
+        '2': 0.058823529411764705,
+        '3': 0.058823529411764705,
+        '4': 0.11764705882352941,
+        '5': 0.11764705882352941,
+        '6': 0.29411764705882354,
+        '7': 0.11764705882352941,
+        '8': 0.17647058823529413,
+        '9': 0.17647058823529413,
+        '10': 0.11764705882352941,
+        '11': 0.17647058823529413,
+        '12': 0.23529411764705882,
+        '13': 0.23529411764705882,
+        '14': 0.29411764705882354,
+        '15': 0.058823529411764705,
+        '16': 0.17647058823529413,
+        '17': 0.17647058823529413,
+        '18': 0.058823529411764705,
+        '19': 0.29411764705882354
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(deg_cen_after_single_area_perturbation.values())),
+        np.asarray(sorted(F.G.degree_centrality.values())),
+        err_msg="FINAL DEGREE CENTRALITY failure: perturbation in area 1")
+
+def test_degree_centrality_after_multi_area_perturbation():
+    """
+   The following test checks the degree centrality after a perturbation.
+   The perturbation here considered is the perturbation of multiple areas,
+   namely 'area 1', 'area 2', and 'area 3'.
+   """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_area_perturbation(['area1', 'area2', 'area3'])
+
+    deg_cen_after_multi_area_perturbation = {
+        '2': 0.16666666666666666,
+        '3': 0.16666666666666666,
+        '4': 0.3333333333333333,
+        '5': 0.16666666666666666,
+        '6': 0.8333333333333334,
+        '7': 0.3333333333333333,
+        '8': 0.3333333333333333
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(deg_cen_after_multi_area_perturbation.values())),
+        np.asarray(sorted(F.G.degree_centrality.values())),
+        err_msg=
+        "FINAL DEGREE CENTRALITY failure: perturbation in areas 1, 2, 3")
+
+def test_indegree_centrality_after_element_perturbation():
+    """
+    The following test checks the indegree centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_element_perturbation(["1"])
+
+    indeg_cen_after_element_perturbation = {
+        '2': 0.0,
+        '3': 0.0,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.17647058823529413,
+        '7': 0.058823529411764705,
+        '8': 0.058823529411764705,
+        '9': 0.11764705882352941,
+        '10': 0.058823529411764705,
+        '11': 0.11764705882352941,
+        '12': 0.11764705882352941,
+        '13': 0.11764705882352941,
+        '14': 0.11764705882352941,
+        '15': 0.0,
+        '16': 0.11764705882352941,
+        '17': 0.058823529411764705,
+        '18': 0.058823529411764705,
+        '19': 0.17647058823529413
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(indeg_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.indegree_centrality.values())),
+        err_msg="FINAL INDEGREE CENTRALITY failure: perturbation of element 1")
+
+def test_indegree_centrality_after_element_perturbation_isolating():
+    """
+    The following test checks the indegree centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    In this case, we have no fault resistant nodes. However, we expect
+    the same behavior due to the presence of isolating nodes '2' and '3'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
+    F.simulate_element_perturbation(["1"])
+
+    indeg_cen_after_element_perturbation = {
+        '2': 0.0,
+        '3': 0.0,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.17647058823529413,
+        '7': 0.058823529411764705,
+        '8': 0.058823529411764705,
+        '9': 0.11764705882352941,
+        '10': 0.058823529411764705,
+        '11': 0.11764705882352941,
+        '12': 0.11764705882352941,
+        '13': 0.11764705882352941,
+        '14': 0.11764705882352941,
+        '15': 0.0,
+        '16': 0.11764705882352941,
+        '17': 0.058823529411764705,
+        '18': 0.058823529411764705,
+        '19': 0.17647058823529413
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(indeg_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.indegree_centrality.values())),
+        err_msg="FINAL INDEGREE CENTRALITY failure: perturbation of element 1")
+
+def test_indegree_centrality_after_single_area_perturbation():
+    """
+    The following test checks the indegree centrality after a perturbation.
+    The perturbation here considered is the perturbation of a single area,
+    namely 'area 1'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_area_perturbation(['area1'])
+
+    indeg_cen_after_single_area_perturbation = {
+        '2': 0.0,
+        '3': 0.0,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.17647058823529413,
+        '7': 0.058823529411764705,
+        '8': 0.058823529411764705,
+        '9': 0.11764705882352941,
+        '10': 0.058823529411764705,
+        '11': 0.11764705882352941,
+        '12': 0.11764705882352941,
+        '13': 0.11764705882352941,
+        '14': 0.11764705882352941,
+        '15': 0.0,
+        '16': 0.11764705882352941,
+        '17': 0.058823529411764705,
+        '18': 0.058823529411764705,
+        '19': 0.17647058823529413
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(indeg_cen_after_single_area_perturbation.values())),
+        np.asarray(sorted(F.G.indegree_centrality.values())),
+        err_msg="FINAL INDEGREE CENTRALITY failure: perturbation in area 1")
+
+def test_indegree_centrality_after_multi_area_perturbation():
+    """
+   The following test checks the indegree centrality after a perturbation.
+   The perturbation here considered is the perturbation of multiple areas,
+   namely 'area 1', 'area 2', and 'area 3'.
+   """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_area_perturbation(['area1', 'area2', 'area3'])
+
+    indeg_cen_after_multi_area_perturbation = {
+        '2': 0.0,
+        '3': 0.0,
+        '4': 0.16666666666666666,
+        '5': 0.16666666666666666,
+        '6': 0.5,
+        '7': 0.16666666666666666,
+        '8': 0.16666666666666666
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(indeg_cen_after_multi_area_perturbation.values())),
+        np.asarray(sorted(F.G.indegree_centrality.values())),
+        err_msg=
+        "FINAL INDEGREE CENTRALITY failure: perturbation in areas 1, 2, 3")
+
+def test_outdegree_centrality_after_element_perturbation():
+    """
+    The following test checks the outdegree centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_element_perturbation(["1"])
+
+
+    outdeg_cen_after_element_perturbation = {
+        '2': 0.058823529411764705,
+        '3': 0.058823529411764705,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.11764705882352941,
+        '7': 0.058823529411764705,
+        '8': 0.11764705882352941,
+        '9': 0.058823529411764705,
+        '10': 0.058823529411764705,
+        '11': 0.058823529411764705,
+        '12': 0.11764705882352941,
+        '13': 0.11764705882352941,
+        '14': 0.17647058823529413,
+        '15': 0.058823529411764705,
+        '16': 0.058823529411764705,
+        '17': 0.11764705882352941,
+        '18': 0.0,
+        '19': 0.11764705882352941
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(outdeg_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.outdegree_centrality.values())),
+        err_msg="FINAL OUTDEGREE CENTRALITY failure: perturbation of element 1")
+
+def test_outdegree_centrality_after_element_perturbation_isolating():
+    """
+    The following test checks the outdegree centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    In this case, we have no fault resistant nodes. However, we expect
+    the same behavior due to the presence of isolating nodes '2' and '3'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
+    F.simulate_element_perturbation(["1"])
+
+    outdeg_cen_after_element_perturbation = {
+        '2': 0.058823529411764705,
+        '3': 0.058823529411764705,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.11764705882352941,
+        '7': 0.058823529411764705,
+        '8': 0.11764705882352941,
+        '9': 0.058823529411764705,
+        '10': 0.058823529411764705,
+        '11': 0.058823529411764705,
+        '12': 0.11764705882352941,
+        '13': 0.11764705882352941,
+        '14': 0.17647058823529413,
+        '15': 0.058823529411764705,
+        '16': 0.058823529411764705,
+        '17': 0.11764705882352941,
+        '18': 0.0,
+        '19': 0.11764705882352941
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(outdeg_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.outdegree_centrality.values())),
+        err_msg="FINAL OUTDEGREE CENTRALITY failure: perturbation of element 1")
+
+def test_outdegree_centrality_after_single_area_perturbation():
+    """
+    The following test checks the outdegree centrality after a perturbation.
+    The perturbation here considered is the perturbation of a single area,
+    namely 'area 1'.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_area_perturbation(['area1'])
+
+    outdeg_cen_after_single_area_perturbation = {
+        '2': 0.058823529411764705,
+        '3': 0.058823529411764705,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.11764705882352941,
+        '7': 0.058823529411764705,
+        '8': 0.11764705882352941,
+        '9': 0.058823529411764705,
+        '10': 0.058823529411764705,
+        '11': 0.058823529411764705,
+        '12': 0.11764705882352941,
+        '13': 0.11764705882352941,
+        '14': 0.17647058823529413,
+        '15': 0.058823529411764705,
+        '16': 0.058823529411764705,
+        '17': 0.11764705882352941,
+        '18': 0.0,
+        '19': 0.11764705882352941
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(outdeg_cen_after_single_area_perturbation.values())),
+        np.asarray(sorted(F.G.outdegree_centrality.values())),
+        err_msg="FINAL OUTDEGREE CENTRALITY failure: perturbation in area 1")
+
+def test_outdegree_centrality_after_multi_area_perturbation():
+    """
+   The following test checks the outdegree centrality after a perturbation.
+   The perturbation here considered is the perturbation of multiple areas,
+   namely 'area 1', 'area 2', and 'area 3'.
+   """
+    F = FaultDiagnosis("tests/TOY_graph.csv")
+    F.simulate_area_perturbation(['area1', 'area2', 'area3'])
+
+    outdeg_cen_after_multi_area_perturbation = {
+        '2': 0.16666666666666666,
+        '3': 0.16666666666666666,
+        '4': 0.16666666666666666,
+        '5': 0.0,
+        '6': 0.3333333333333333,
+        '7': 0.16666666666666666,
+        '8': 0.16666666666666666
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(outdeg_cen_after_multi_area_perturbation.values())),
+        np.asarray(sorted(F.G.outdegree_centrality.values())),
+        err_msg=
+        "FINAL OUTDEGREE CENTRALITY failure: perturbation in areas 1, 2, 3")
+
 def test_nodal_efficiency_after_element_perturbation():
     """
 	The following test checks the nodal efficiency after a perturbation.

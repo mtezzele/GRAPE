@@ -503,9 +503,13 @@ class GeneralGraph(nx.DiGraph):
 
         :param list attributes_to_remove: a list of strings
             with all the attributes to remove.
+
+        :raises: ValueError
         """
 
         for attribute in attributes_to_remove:
+            if not nx.get_node_attributes(self, attribute):
+                raise ValueError(f'No attribute {attribute} in the graph.')
             for node in self:
                 del self.nodes[node][attribute]
 

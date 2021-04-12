@@ -44,6 +44,7 @@ class FaultDiagnosis():
         self.df, self.edges_df = self.G.load(filename)
 
         self.damaged_areas = set()
+        self.paths_df = None
 
     def check_input_with_gephi(self):
         """
@@ -63,61 +64,6 @@ class FaultDiagnosis():
         orphans = self.edges_df['father_mark'].str.contains('NULL')
         self.edges_df = self.edges_df[~orphans]
         self.edges_df.to_csv('check_import_edges.csv', index=False)
-
-    def check_before(self):
-        """
-
-        Describe the topology of the integer graph, before the
-        occurrence of any perturbation in the system.
-        Compute efficiency measures for the whole graph and its nodes.
-        Check the availability of paths between source and target nodes.
-        """
-
-        original_source_user_paths = []
-
-        measure_fields = ['nodal_efficiency', 'local_efficiency', 'service']
-        self.update_output(measure_fields, prefix='original_')
-
-        for source in self.G.sources:
-            for user in self.G.users:
-                if nx.has_path(self.G, source, user):
-
-                    osip = list(nx.all_simple_paths(self.G, source, user))
-                    oshp = self.G.shortest_path[source][user]
-                    oshpl = self.G.shortest_path_length[source][user]
-                    oeff = 1 / oshpl
-                    ids = source + user
-
-                else:
-                    oshpl = 'NO_PATH'
-                    osip = 'NO_PATH'
-                    oshp = 'NO_PATH'
-                    oeff = 'NO_PATH'
-                    ids = source + user
-
-                original_source_user_paths.append({
-                  'from':
-                  source,
-                  'to':
-                  user,
-                  'original_shortest_path_length':
-                  oshpl,
-                  'original_shortest_path':
-                  oshp,
-                  'original_simple_path':
-                  osip,
-                  'original_pair_efficiency':
-                  oeff,
-                  'ids':
-                  ids
-               })
-
-        self.paths_df = pd.DataFrame(original_source_user_paths)
-
-        # In check before we include also centralities
-        centrality_fields = ['closeness_centrality', 'betweenness_centrality',
-            'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
-        self.update_output(centrality_fields)
 
     def fitness_evaluation(self, individual, perturbed_nodes,
         initial_condition):
@@ -259,53 +205,64 @@ class FaultDiagnosis():
 
         return result
 
-    def check_after(self):
+    def check_paths_and_measures(self, prefix=None):
         """
 
-        Describe the topology of the potentially perturbed graph,
-        after the occurrence of a perturbation in the system.
+        Describe the topology of the graph.
         Compute efficiency measures for the whole graph and its nodes.
         Check the availability of paths between source and target nodes.
+
+        :param prefix: prefix to be added to column name,
+            default to None.
+        :type prefix: str, optional
+
         """
 
-        final_source_user_paths = []
+        source_user_paths = []
 
         measure_fields = ['nodal_efficiency', 'local_efficiency', 'service']
-        self.update_output(measure_fields, prefix='final_')
+        self.update_output(measure_fields, prefix=prefix)
+
+        centrality_fields = ['closeness_centrality', 'betweenness_centrality',
+            'indegree_centrality', 'outdegree_centrality', 'degree_centrality']
+        self.update_output(centrality_fields, prefix=prefix)
 
         for source in self.G.sources:
             for user in self.G.users:
                 if nx.has_path(self.G, source, user):
 
-                    sip = list(nx.all_simple_paths(self.G, source, user))
-                    shp = self.G.shortest_path[source][user]
-                    shpl = self.G.shortest_path_length[source][user]
-                    neff = 1 / shpl
+                    all_paths = list(nx.all_simple_paths(self.G, source, user))
+                    shpath = self.G.shortest_path[source][user]
+                    shpath_length = self.G.shortest_path_length[source][user]
+                    neff = 1 / shpath_length
                     ids = source + user
 
                 else:
 
-                    shpl = 'NO_PATH'
-                    sip = 'NO_PATH'
-                    shp = 'NO_PATH'
+                    all_paths = 'NO_PATH'
+                    shpath = 'NO_PATH'
+                    shpath_length = 'NO_PATH'
                     neff = 'NO_PATH'
                     ids = source + user
 
-                final_source_user_paths.append({
+                source_user_paths.append({
                     'from': source,
                     'area': self.G.area[source],
                     'to': user,
-                    'final_shortest_path_length': shpl,
-                    'final_shortest_path': shp,
-                    'final_simple_path': sip,
-                    'final_pair_efficiency': neff,
+                    str(prefix + 'shortest_path_length'): shpath_length,
+                    str(prefix + 'shortest_path'): shpath,
+                    str(prefix + 'simple_path'): all_paths,
+                    str(prefix + 'pair_efficiency'): neff,
                     'ids': ids
                 })
 
-        if final_source_user_paths:
-            final_df = pd.DataFrame(final_source_user_paths)
-            self.paths_df = pd.merge(self.paths_df, final_df,
-                on=['from', 'to', 'ids'], how='outer')
+        if source_user_paths:
+            df = pd.DataFrame(source_user_paths)
+            if self.paths_df is None:
+                self.paths_df = df
+            else:
+                self.paths_df = pd.merge(self.paths_df, df,
+                    on=['from', 'to', 'ids', 'area'], how='outer')
 
     def rm_nodes(self, node, graph, visited=None, broken_nodes=None):
         """
@@ -466,7 +423,7 @@ class FaultDiagnosis():
             component(s) and may be affect nearby areas.
         """
 
-        self.check_before()
+        self.check_paths_and_measures(prefix='original_')
 
         self.G.clear_data(['shortest_path', 'shortest_path_length',
             'efficiency', 'nodal_efficiency', 'local_efficiency',
@@ -491,7 +448,7 @@ class FaultDiagnosis():
         for node in perturbed_nodes:
             if node in self.G.nodes(): self.delete_a_node(node)
 
-        self.check_after()
+        self.check_paths_and_measures(prefix='final_')
         self.paths_df.to_csv('service_paths_' + str(kind)+ '_perturbation.csv',
             index=False)
 
@@ -510,7 +467,7 @@ class FaultDiagnosis():
 
         :param list perturbed_nodes: nodes(s) involved in the
             perturbing event.
-        :param dict params: values for the optimizer evolutionary algorithm.
+        :param params: values for the optimizer evolutionary algorithm.
             Dict of: {str: int, str: int, str: float, str: float, str: int}.
 
             'npop' -- number of individuals for each population (default to 300)
@@ -520,6 +477,11 @@ class FaultDiagnosis():
             'tresh' -- threshold for applying crossover/mutation
                 (default to 0.5)
             'nsel' -- number of individuals to select (default to 5)
+        :type params: dict, optional
+
+        .. note:: A perturbation, depending on the considered system,
+            may spread in all directions starting from the damaged
+            component(s) and may be affect nearby areas.
 
         :raises: SystemExit
         """
@@ -552,6 +514,7 @@ class FaultDiagnosis():
             'tresh' -- threshold for applying crossover/mutation
                 (default to 0.5)
             'nsel' -- number of individuals to select (default to 5)
+        :type params: dict, optional
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
@@ -591,8 +554,10 @@ class FaultDiagnosis():
         fields = [
             'mark', 'description', 'init_status', 'final_status',
             'mark_status', 'perturbation_resistant', 'area', 'status_area',
-            'closeness_centrality', 'betweenness_centrality',
-            'indegree_centrality', 'outdegree_centrality',
+            'original_closeness_centrality', 'final_closeness_centrality',
+            'original_betweenness_centrality', 'final_betweenness_centrality',
+            'original_indegree_centrality', 'final_indegree_centrality',
+            'original_outdegree_centrality', 'final_outdegree_centrality',
             'original_local_efficiency', 'final_local_efficiency',
             'original_nodal_efficiency', 'final_nodal_efficiency',
             'original_service', 'final_service'
