@@ -1229,3 +1229,448 @@ class TestStatuses(TestCase):
             status_area_after_multi_area_perturbation,
             F.G.status_area,
             msg="FINAL STATUS AREA failure: perturbation in areas 1,2,3")
+
+class TestInitiallyClosed(TestCase):
+    """
+    Class TestInitiallyClosed to check possible outputs on measures
+    in case the switches of the toy graph were both initially open.
+    """
+
+    def test_closeness_centrality_after_element_perturbation_initially_closed(self):
+        """
+        The following test checks the closeness centrality after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have all fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_initiallyopen.csv")
+        F.simulate_element_perturbation(["1"])
+
+        clo_cen_2closed = {
+            '1': 0,
+            '2': 0.05555555555555555,
+            '3': 0,
+            '4': 0.07407407407407407,
+            '5': 0.05555555555555555,
+            '6': 0.1736111111111111,
+            '7': 0.11574074074074076,
+            '8': 0.11574074074074076,
+            '9': 0.14327485380116958,
+            '10': 0.12077294685990338,
+            '11': 0.15648148148148147,
+            '12': 0.17451690821256038,
+            '13': 0.15146750524109012,
+            '14': 0.17451690821256038,
+            '15': 0,
+            '16': 0.16071428571428573,
+            '17': 0.125,
+            '18': 0.16363636363636364,
+            '19': 0.20584045584045585
+        }
+
+        clo_cen_3closed = {
+            '1': 0,
+            '2': 0,
+            '3': 0.05555555555555555,
+            '4': 0.05555555555555555,
+            '5': 0.07407407407407407,
+            '6': 0.17777777777777778,
+            '7': 0.1111111111111111,
+            '8': 0.1111111111111111,
+            '9': 0.14285714285714285,
+            '10': 0.11842105263157894,
+            '11': 0.17386831275720163,
+            '12': 0.1866925064599483,
+            '13': 0.16055555555555556,
+            '14': 0.1866925064599483,
+            '15': 0,
+            '16': 0.1616161616161616,
+            '17': 0.12260536398467432,
+            '18': 0.17307692307692307,
+            '19': 0.22299382716049382
+        }
+
+        if F.G.final_status == {'2': 1, '3': 0}:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(clo_cen_2closed.values())),
+            np.asarray(sorted(F.G.closeness_centrality.values())),
+            err_msg="FINAL CLOSENESS CENTRALITY failure: perturbation of element 1")
+        else:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(clo_cen_3closed.values())),
+            np.asarray(sorted(F.G.closeness_centrality.values())),
+            err_msg="FINAL CLOSENESS CENTRALITY failure: perturbation of element 1")
+
+    def test_degree_centrality_after_element_perturbation_initially_closed(self):
+        """
+        The following test checks the degree centrality after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have all fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_initiallyopen.csv")
+        F.simulate_element_perturbation(["1"])
+
+        deg_cen_2closed = {
+            '1': 0.05555555555555555,
+            '2': 0.1111111111111111,
+            '3': 0.05555555555555555,
+            '4': 0.1111111111111111,
+            '5': 0.1111111111111111,
+            '6': 0.2777777777777778,
+            '7': 0.1111111111111111,
+            '8': 0.16666666666666666,
+            '9': 0.16666666666666666,
+            '10': 0.1111111111111111,
+            '11': 0.16666666666666666,
+            '12': 0.2222222222222222,
+            '13': 0.2222222222222222,
+            '14': 0.2777777777777778,
+            '15': 0.05555555555555555,
+            '16': 0.16666666666666666,
+            '17': 0.16666666666666666,
+            '18': 0.05555555555555555,
+            '19': 0.2777777777777778
+        }
+
+        deg_cen_3closed = {
+            '1': 0.05555555555555555,
+            '2': 0.05555555555555555,
+            '3': 0.1111111111111111,
+            '4': 0.1111111111111111,
+            '5': 0.1111111111111111,
+            '6': 0.2777777777777778,
+            '7': 0.1111111111111111,
+            '8': 0.16666666666666666,
+            '9': 0.16666666666666666,
+            '10': 0.1111111111111111,
+            '11': 0.16666666666666666,
+            '12': 0.2222222222222222,
+            '13': 0.2222222222222222,
+            '14': 0.2777777777777778,
+            '15': 0.05555555555555555,
+            '16': 0.16666666666666666,
+            '17': 0.16666666666666666,
+            '18': 0.05555555555555555,
+            '19': 0.2777777777777778
+        }
+
+        if F.G.final_status == {'2': 1, '3': 0}:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(deg_cen_2closed.values())),
+            np.asarray(sorted(F.G.degree_centrality.values())),
+            err_msg="FINAL DEGREE CENTRALITY failure: perturbation of element 1")
+        else:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(deg_cen_3closed.values())),
+            np.asarray(sorted(F.G.degree_centrality.values())),
+            err_msg="FINAL DEGREE CENTRALITY failure: perturbation of element 1")
+
+    def test_indegree_centrality_after_element_perturbation_initially_closed(self):
+        """
+        The following test checks the indegree centrality after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have all fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_initiallyopen.csv")
+        F.simulate_element_perturbation(["1"])
+
+        indeg_cen_2closed = {
+            '1': 0.0,
+            '2': 0.05555555555555555,
+            '3': 0.0,
+            '4': 0.05555555555555555,
+            '5': 0.05555555555555555,
+            '6': 0.16666666666666666,
+            '7': 0.05555555555555555,
+            '8': 0.05555555555555555,
+            '9': 0.1111111111111111,
+            '10': 0.05555555555555555,
+            '11': 0.1111111111111111,
+            '12': 0.1111111111111111,
+            '13': 0.1111111111111111,
+            '14': 0.1111111111111111,
+            '15': 0.0,
+            '16': 0.1111111111111111,
+            '17': 0.05555555555555555,
+            '18': 0.05555555555555555,
+            '19': 0.16666666666666666
+        }
+
+        indeg_cen_3closed = {
+            '1': 0.0,
+            '2': 0.0,
+            '3': 0.05555555555555555,
+            '4': 0.05555555555555555,
+            '5': 0.05555555555555555,
+            '6': 0.16666666666666666,
+            '7': 0.05555555555555555,
+            '8': 0.05555555555555555,
+            '9': 0.1111111111111111,
+            '10': 0.05555555555555555,
+            '11': 0.1111111111111111,
+            '12': 0.1111111111111111,
+            '13': 0.1111111111111111,
+            '14': 0.1111111111111111,
+            '15': 0.0,
+            '16': 0.1111111111111111,
+            '17': 0.05555555555555555,
+            '18': 0.05555555555555555,
+            '19': 0.16666666666666666
+        }
+
+        if F.G.final_status == {'2': 1, '3': 0}:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(indeg_cen_2closed.values())),
+            np.asarray(sorted(F.G.indegree_centrality.values())),
+            err_msg="FINAL INDEGREE CENTRALITY failure: perturbation of element 1")
+        else:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(indeg_cen_3closed.values())),
+            np.asarray(sorted(F.G.indegree_centrality.values())),
+            err_msg="FINAL INDEGREE CENTRALITY failure: perturbation of element 1")
+
+    def test_outdegree_centrality_after_element_perturbation_initially_closed(self):
+        """
+        The following test checks the outdegree centrality after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have all fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_initiallyopen.csv")
+        F.simulate_element_perturbation(["1"])
+
+        outdeg_cen_2closed = {
+            '1': 0.05555555555555555,
+            '2': 0.05555555555555555,
+            '3': 0.05555555555555555,
+            '4': 0.05555555555555555,
+            '5': 0.05555555555555555,
+            '6': 0.1111111111111111,
+            '7': 0.05555555555555555,
+            '8': 0.1111111111111111,
+            '9': 0.05555555555555555,
+            '10': 0.05555555555555555,
+            '11': 0.05555555555555555,
+            '12': 0.1111111111111111,
+            '13': 0.1111111111111111,
+            '14': 0.16666666666666666,
+            '15': 0.05555555555555555,
+            '16': 0.05555555555555555,
+            '17': 0.1111111111111111,
+            '18': 0.0,
+            '19': 0.1111111111111111
+        }
+
+        outdeg_cen_3closed = {
+            '1': 0.05555555555555555,
+            '2': 0.05555555555555555,
+            '3': 0.05555555555555555,
+            '4': 0.05555555555555555,
+            '5': 0.05555555555555555,
+            '6': 0.1111111111111111,
+            '7': 0.05555555555555555,
+            '8': 0.1111111111111111,
+            '9': 0.05555555555555555,
+            '10': 0.05555555555555555,
+            '11': 0.05555555555555555,
+            '12': 0.1111111111111111,
+            '13': 0.1111111111111111,
+            '14': 0.16666666666666666,
+            '15': 0.05555555555555555,
+            '16': 0.05555555555555555,
+            '17': 0.1111111111111111,
+            '18': 0.0,
+            '19': 0.1111111111111111
+        }
+
+        if F.G.final_status == {'2': 1, '3': 0}:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(outdeg_cen_2closed.values())),
+            np.asarray(sorted(F.G.outdegree_centrality.values())),
+            err_msg="FINAL OUTDEGREE CENTRALITY failure: perturbation of element 1")
+        else:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(outdeg_cen_3closed.values())),
+            np.asarray(sorted(F.G.outdegree_centrality.values())),
+            err_msg="FINAL OUTDEGREE CENTRALITY failure: perturbation of element 1")
+
+    def test_nodal_efficiency_after_element_perturbation_initially_closed(self):
+        """
+        The following test checks the nodal efficiency after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have all fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_initiallyopen.csv")
+        F.simulate_element_perturbation(["1"])
+
+        nod_eff_2closed = {
+            '1': 0.19596961680295014,
+            '2': 0.19689554272887605,
+            '3': 0.15185185185185185,
+            '4': 0.20222663139329808,
+            '5': 0.14814814814814814,
+            '6': 0.22583774250440916,
+            '7': 0.1744488536155203,
+            '8': 0.24920634920634926,
+            '9': 0.16124338624338622,
+            '10': 0.14814814814814814,
+            '11': 0.14814814814814817,
+            '12': 0.1574074074074074,
+            '13': 0.16666666666666666,
+            '14': 0.19444444444444445,
+            '15': 0.16587301587301584,
+            '16': 0.15648148148148147,
+            '17': 0.20740740740740743,
+            '18': 0.0,
+            '19': 0.16666666666666666
+        }
+
+        nod_eff_3closed = {
+            '1': 0.15648148148148147,
+            '2': 0.19689554272887605,
+            '3': 0.15185185185185185,
+            '4': 0.20222663139329808,
+            '5': 0.14814814814814814,
+            '6': 0.22583774250440916,
+            '7': 0.1744488536155203,
+            '8': 0.24920634920634926,
+            '9': 0.16124338624338622,
+            '10': 0.14814814814814814,
+            '11': 0.14814814814814817,
+            '12': 0.1574074074074074,
+            '13': 0.16666666666666666,
+            '14': 0.19444444444444445,
+            '15': 0.16587301587301584,
+            '16': 0.15648148148148147,
+            '17': 0.20740740740740743,
+            '18': 0.0,
+            '19': 0.16666666666666666
+        }
+
+        if F.G.final_status == {'2': 1, '3': 0}:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(nod_eff_2closed.values())),
+            np.asarray(sorted(F.G.nodal_efficiency.values())),
+            err_msg="FINAL NODAL EFFICIENCY failure: perturbation of element 1")
+        else:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(nod_eff_3closed.values())),
+            np.asarray(sorted(F.G.nodal_efficiency.values())),
+            err_msg="FINAL NODAL EFFICIENCY failure: perturbation of element 1")
+
+    def test_local_efficiency_after_element_perturbation_initially_closed(self):
+        """
+        The following test checks the local efficiency after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have all fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_initiallyopen.csv")
+        F.simulate_element_perturbation(["1"])
+
+        loc_eff_2closed = {
+            '1': 0.19689554272887605,
+            '2': 0.20222663139329808,
+            '3': 0.14814814814814814,
+            '4': 0.22583774250440916,
+            '5': 0.14814814814814817,
+            '6': 0.21182760141093476,
+            '7': 0.22583774250440916,
+            '8': 0.1935405643738977,
+            '9': 0.15648148148148147,
+            '10': 0.14814814814814817,
+            '11': 0.16666666666666666,
+            '12': 0.16666666666666666,
+            '13': 0.17592592592592593,
+            '14': 0.1111111111111111,
+            '15': 0.16124338624338622,
+            '16': 0.20740740740740743,
+            '17': 0.1523148148148148,
+            '18': 0.0,
+            '19': 0.17592592592592593
+        }
+
+        loc_eff_3closed = {
+            '1': 0.15185185185185185,
+            '2': 0.20222663139329808,
+            '3': 0.14814814814814814,
+            '4': 0.22583774250440916,
+            '5': 0.14814814814814817,
+            '6': 0.21182760141093476,
+            '7': 0.22583774250440916,
+            '8': 0.1935405643738977,
+            '9': 0.15648148148148147,
+            '10': 0.14814814814814817,
+            '11': 0.16666666666666666,
+            '12': 0.16666666666666666,
+            '13': 0.17592592592592593,
+            '14': 0.1111111111111111,
+            '15': 0.16124338624338622,
+            '16': 0.20740740740740743,
+            '17': 0.1523148148148148,
+            '18': 0.0,
+            '19': 0.17592592592592593
+        }
+
+        if F.G.final_status == {'2': 1, '3': 0}:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(loc_eff_2closed.values())),
+            np.asarray(sorted(F.G.local_efficiency.values())),
+            err_msg="FINAL LOCAL EFFICIENCY failure: perturbation of element 1")
+        else:
+            np.testing.assert_array_almost_equal(
+            np.asarray(sorted(loc_eff_3closed.values())),
+            np.asarray(sorted(F.G.local_efficiency.values())),
+            err_msg="FINAL LOCAL EFFICIENCY failure: perturbation of element 1")
+
+    def test_global_efficiency_after_element_perturbation_initially_closed(self):
+        """
+        The following test checks the global efficiency after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have all fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_initiallyopen.csv")
+        F.simulate_element_perturbation(["1"])
+
+        if F.G.final_status == {'2': 1, '3': 0}:
+            np.testing.assert_almost_equal(F.G.global_efficiency,
+            0.16931955309148292,
+            err_msg="FINAL GLOBAL EFFICIENCY failure: perturbation of element 1")
+        else:
+            np.testing.assert_almost_equal(F.G.global_efficiency,
+            0.1672412301798267,
+            err_msg="FINAL GLOBAL EFFICIENCY failure: perturbation of element 1")
+
+    def test_residual_service_after_element_perturbation_initially_closed(self):
+        """
+        The following test checks the residual service after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have all fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_initiallyopen.csv")
+        F.simulate_element_perturbation(["1"])
+
+        res_service = {
+            '1': 0.0,
+            '2': 0.0,
+            '3': 0.0,
+            '4': 0.0,
+            '5': 0.0,
+            '6': 0.0,
+            '7': 0.0,
+            '8': 0.0,
+            '9': 0.0,
+            '10': 0.0,
+            '11': 0.0,
+            '12': 0.0,
+            '13': 0.0,
+            '14': 0.0,
+            '15': 0.0,
+            '16': 0.0,
+            '17': 0.0,
+            '18': 7.0,
+            '19': 0.0
+        }
+
+        np.testing.assert_array_almost_equal(
+            np.asarray(sorted(res_service.values())),
+            np.asarray(sorted(F.G.service.values())),
+            err_msg="FINAL LOCAL EFFICIENCY failure: perturbation of element 1")
+

@@ -462,14 +462,12 @@ class FaultDiagnosis():
 
                     else:
                         logging.debug(f'Switch {sw} finally closed, first open')
-                        for pre in flips[sw].values():
-                            self.G.add_edge(pre, sw,
-                            father_condition=flips[sw][pre]['father_condition'],
-                            weight=flips[sw][pre]['weight'])
+                        for pre, attrs in init_open_edges[sw].items():
+                            self.G.add_edge(pre, sw, **attrs)
 
             logging.debug(f'BEST: {best}, with fitness: {np.min(res[:, 1])}')
             self.G.final_status = best
- 
+
         for node in perturbed_nodes:
             if node in self.G.nodes(): self.delete_a_node(node)
 
@@ -569,7 +567,7 @@ class FaultDiagnosis():
         Write to file graph characterization after the perturbation.
         File is written in CSV format.
 
-        :param str filename: output file name where to print the
+        :param str filename: output file name where to write the
             graph characterization.
         """
 
