@@ -41,6 +41,41 @@ def test_closeness_centrality_after_element_perturbation():
         np.asarray(sorted(F.G.closeness_centrality.values())),
         err_msg="FINAL CLOSENESS CENTRALITY failure: perturbation of element 1")
 
+def test_closeness_centrality_after_element_perturbation_parallel():
+    """
+    The following test checks the closeness centrality after a perturbation.
+    The perturbation here considered is the perturbation of element '1'.
+    This time, in FaultDiagnosis class we set parallel flag as True.
+    """
+    F = FaultDiagnosis("tests/TOY_graph.csv", parallel=True)
+    F.simulate_element_perturbation(["1"])
+
+    clo_cen_after_element_perturbation = {
+        '2': 0,
+        '3': 0,
+        '4': 0.058823529411764705,
+        '5': 0.058823529411764705,
+        '6': 0.18823529411764706,
+        '7': 0.11764705882352941,
+        '8': 0.11764705882352941,
+        '9': 0.15126050420168066,
+        '10': 0.12538699690402477,
+        '11': 0.1660899653979239,
+        '12': 0.1859114015976761,
+        '13': 0.16020025031289112,
+        '14': 0.1859114015976761,
+        '15': 0,
+        '16': 0.1711229946524064,
+        '17': 0.12981744421906694,
+        '18': 0.17346938775510204,
+        '19': 0.22145328719723184
+    }
+
+    np.testing.assert_array_almost_equal(
+        np.asarray(sorted(clo_cen_after_element_perturbation.values())),
+        np.asarray(sorted(F.G.closeness_centrality.values())),
+        err_msg="FINAL CLOSENESS CENTRALITY failure: perturbation of element 1")
+
 def test_closeness_centrality_after_element_perturbation_isolating():
     """
     The following test checks the closeness centrality after a perturbation.
@@ -966,11 +1001,98 @@ def test_residual_service_after_multi_area_perturbation():
         err_msg=
         "FINAL RESIDUAL SERVICE failure: perturbation in areas 1, 2, 3")
 
-class TestStatuses(TestCase):
+class Test_FD(TestCase):
     """
-    Class TestStatuses to check mark_status and status_area
-    of GeneralGraph, after different possible perturbations.
+    Class Test_FD to check other FaultDiagnosis attributes.
     """
+
+    def test_check_input_with_gephi_mark(self):
+        """
+        The following test checks mark attribute of edges_df member
+        of FaultDiagnosis class.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.check_input_with_gephi()
+        edges_dict = F.edges_df.to_dict()
+
+        mark_dict = {
+            1: '2',
+            2: '3',
+            3: '4',
+            4: '5',
+            5: '6',
+            6: '6',
+            7: '7',
+            8: '8',
+            9: '6',
+            10: '9',
+            11: '9',
+            13: '16',
+            14: '16',
+            15: '17',
+            16: '10',
+            17: '11',
+            18: '11',
+            19: '19',
+            20: '19',
+            21: '19',
+            22: '12',
+            23: '12',
+            24: '13',
+            25: '13',
+            26: '14',
+            27: '14',
+            28: '18'
+        }
+
+        self.assertDictEqual(
+            mark_dict,
+            edges_dict['mark'],
+            msg="MARK failure: check_input_with_gephi function")
+
+    def test_check_input_with_gephi_father_mark(self):
+        """
+        The following test checks father_mark attribute of edges_df member
+        of FaultDiagnosis class.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.check_input_with_gephi()
+        edges_dict = F.edges_df.to_dict()
+
+        father_mark_dict = {
+            1: '1',
+            2: '1',
+            3: '2',
+            4: '3',
+            5: '4',
+            6: '7',
+            7: '6',
+            8: '6',
+            9: '8',
+            10: '8',
+            11: '15',
+            13: '9',
+            14: '17',
+            15: '16',
+            16: '17',
+            17: '10',
+            18: '5',
+            19: '11',
+            20: '12',
+            21: '14',
+            22: '19',
+            23: '13',
+            24: '14',
+            25: '12',
+            26: '19',
+            27: '13',
+            28: '14'
+        }
+
+        self.assertDictEqual(
+            father_mark_dict,
+            edges_dict['father_mark'],
+            msg="FATHER MARK failure: check_input_with_gephi function")
 
     def test_mark_status_after_element_perturbation(self):
         """
@@ -1229,12 +1351,6 @@ class TestStatuses(TestCase):
             status_area_after_multi_area_perturbation,
             F.G.status_area,
             msg="FINAL STATUS AREA failure: perturbation in areas 1,2,3")
-
-class TestInitiallyClosed(TestCase):
-    """
-    Class TestInitiallyClosed to check possible outputs on measures
-    in case the switches of the toy graph were both initially open.
-    """
 
     def test_closeness_centrality_after_element_perturbation_initially_closed(self):
         """
@@ -1674,3 +1790,24 @@ class TestInitiallyClosed(TestCase):
             np.asarray(sorted(F.G.service.values())),
             err_msg="FINAL LOCAL EFFICIENCY failure: perturbation of element 1")
 
+    def test_mark_all_OR_predecessors_dead(self):
+        """
+        The following test checks mark attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '9' and '15'.
+        """
+        F = FaultDiagnosis("tests/TOY_graph.csv")
+        F.simulate_element_perturbation(["8", "15"])
+        survived_nodes_mark = nx.get_node_attributes(F.G, 'mark')
+
+        mark_all_OR_predecessors_dead = {
+            '1': '1',
+            '2': '2',
+            '3': '3',
+            '4': '4',
+            '5': '5'
+        }
+
+        self.assertDictEqual(
+            mark_all_OR_predecessors_dead,
+            survived_nodes_mark,
+            msg="MARK failure: all OR predecessors dead")
