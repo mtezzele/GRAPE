@@ -58,6 +58,10 @@ class FaultDiagnosis():
 
         fields = [ 'mark', 'description', 'init_status',
                    'perturbation_resistant', 'area' ]
+        cols_to_str = ['init_status']
+        gephi_nodes_df[cols_to_str] = gephi_nodes_df[cols_to_str].astype(str)
+        conversions = {'nan': '', '1.0': '1', '0.0': '0'}
+        gephi_nodes_df['init_status'].replace(to_replace=conversions, inplace=True)
 
         gephi_nodes_df[fields].to_csv('check_import_nodes.csv', index=False)
 
@@ -610,4 +614,9 @@ class FaultDiagnosis():
             'original_nodal_efficiency', 'final_nodal_efficiency',
             'original_service', 'final_service'
         ]
+        self.df[['init_status', 'final_status']] = self.df[['init_status',
+            'final_status']].astype(str)
+        conversions = {'nan': '', '1.0': '1', '0.0': '0'}
+        self.df[['init_status', 'final_status']] = self.df[['init_status',
+            'final_status']].replace(to_replace=conversions)
         self.df[fields].to_csv(filename, index=False)

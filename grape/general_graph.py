@@ -44,9 +44,11 @@ class GeneralGraph(nx.DiGraph):
 
         conv = {'mark' : str, 'father_mark' : str, }
         graph_df = pd.read_csv(filename, converters=conv, keep_default_na=False)
-        cols_to_int = ['perturbation_resistant', 'init_status']
-        graph_df[cols_to_int] = graph_df[cols_to_int].apply(pd.to_numeric,
+        cols_to_num = ['perturbation_resistant', 'init_status']
+        graph_df[cols_to_num] = graph_df[cols_to_num].apply(pd.to_numeric,
             errors='coerce', axis=1)
+        cols_to_int = ['perturbation_resistant']
+        graph_df[cols_to_int] = graph_df[cols_to_int].astype('int64')
 
         for index, row in graph_df.iterrows():
 
