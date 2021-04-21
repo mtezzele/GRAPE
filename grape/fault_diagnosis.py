@@ -66,7 +66,7 @@ class FaultDiagnosis():
         self.edges_df.to_csv('check_import_edges.csv', index=False)
 
     def fitness_evaluation(self, individual, perturbed_nodes,
-        initial_condition):
+        initial_condition, w):
         """
 
         Evaluation of fitness on individual.
@@ -81,7 +81,7 @@ class FaultDiagnosis():
             switches.
         """
 
-        n_actions = np.sum(np.not_equal(list(initial_condition.values()),
+        acts = np.sum(np.not_equal(list(initial_condition.values()),
             individual))
 
         T = GeneralGraph()
@@ -108,9 +108,10 @@ class FaultDiagnosis():
 
                 for n in broken_nodes: T.remove_node(n)
 
-        return (n_actions - sum(T.service.values()) - len(T),)
+        fit = w['w1']*acts - w['w2']*sum(T.service.values()) - w['w3']*len(T)
+        return (fit,)
 
-    def optimizer(self, perturbed_nodes, initial_condition, params):
+    def optimizer(self, perturbed_nodes, initial_condition, params, weights):
         """
 
         Genetic algorithm to optimize switches conditions, using DEAP.
@@ -154,7 +155,7 @@ class FaultDiagnosis():
         pop = toolbox.population(n=params['npop'])
         # Evaluate the entire population
         fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
-            initial_condition) for ind in pop]
+            initial_condition, weights) for ind in pop]
 
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit
@@ -191,7 +192,7 @@ class FaultDiagnosis():
             # Evaluate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
-                initial_condition) for ind in invalid_ind]
+                initial_condition, weights) for ind in invalid_ind]
     
             for ind, fit in zip(invalid_ind, list(fitnesses)):
                 ind.fitness.values = fit
@@ -395,7 +396,8 @@ class FaultDiagnosis():
             self.damaged_areas.add(self.G.area[n])
             self.G.remove_node(n)
 
-    def apply_perturbation(self, perturbed_nodes, params, kind='element'):
+    def apply_perturbation(self, perturbed_nodes, params, weights,
+        kind='element'):
         """
 
         Perturbation simulator, actually applying the perturbation
@@ -415,6 +417,13 @@ class FaultDiagnosis():
             'tresh' -- threshold for applying crossover/mutation
                 (default to 0.5)
             'nsel' -- number of individuals to select (default to 5)
+        :param weights: values for the optimizer evolutionary algorithm.
+            Dict of: {str: float, str: float, str: float}.
+
+            'w1' -- weight multiplying number of actions (default to 1.0)
+            'w2' -- weight multiplying total final service (default to 1.0)
+            'w3' -- weight multiplying final graph size (default to 1.0)
+        :type weights: dict, optional
         :param str kind: type of simulation, used to label output files,
             default to 'element'
 
@@ -425,7 +434,7 @@ class FaultDiagnosis():
 
         if self.G.switches:
             res = np.array(self.optimizer(perturbed_nodes, self.G.init_status,
-                params))
+                params, weights))
             best = dict(zip(self.G.init_status.keys(),
                 res[np.argmin(res[:, 1]), 0]))
 
@@ -483,7 +492,7 @@ class FaultDiagnosis():
 
     def simulate_element_perturbation(self, perturbed_nodes,
         params={'npop': 300, 'ngen': 100, 'indpb': 0.6, 'tresh': 0.5,
-        'nsel': 5}):
+        'nsel': 5}, weights={'w1': 1.0, 'w2': 1.0, 'w3': 1.0}):
         """
 
         Simulate a perturbation of one or multiple nodes.
@@ -501,6 +510,13 @@ class FaultDiagnosis():
                 (default to 0.5)
             'nsel' -- number of individuals to select (default to 5)
         :type params: dict, optional
+        :param weights: values for the optimizer evolutionary algorithm.
+            Dict of: {str: float, str: float, str: float}.
+
+            'w1' -- weight multiplying number of actions (default to 1.0)
+            'w2' -- weight multiplying total final service (default to 1.0)
+            'w3' -- weight multiplying final graph size (default to 1.0)
+        :type weights: dict, optional
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
@@ -517,10 +533,12 @@ class FaultDiagnosis():
                 logging.debug(f'Valid nodes: {self.G.nodes()}')
                 sys.exit()
 
-        self.apply_perturbation(perturbed_nodes, params, kind='element')
+        self.apply_perturbation(perturbed_nodes, params, weights,
+            kind='element')
 
     def simulate_area_perturbation(self, perturbed_areas, params={'npop': 300,
-        'ngen': 100, 'indpb': 0.6, 'tresh': 0.5, 'nsel': 5}):
+        'ngen': 100, 'indpb': 0.6, 'tresh': 0.5, 'nsel': 5}, weights={'w1': 1.0,
+        'w2': 1.0, 'w3': 1.0}):
         """
 
         Simulate a perturbation in one or multiple areas.
@@ -538,6 +556,13 @@ class FaultDiagnosis():
                 (default to 0.5)
             'nsel' -- number of individuals to select (default to 5)
         :type params: dict, optional
+        :param weights: values for the optimizer evolutionary algorithm.
+            Dict of: {str: float, str: float, str: float}.
+
+            'w1' -- weight multiplying number of actions (default to 1.0)
+            'w2' -- weight multiplying total final service (default to 1.0)
+            'w3' -- weight multiplying final graph size (default to 1.0)
+        :type weights: dict, optional
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
@@ -559,7 +584,7 @@ class FaultDiagnosis():
                 for idx, idx_area in self.G.area.items():
                     if idx_area == area: nodes_in_area.append(idx)
 
-        self.apply_perturbation(nodes_in_area, params, kind='area')
+        self.apply_perturbation(nodes_in_area, params, weights, kind='area')
 
     def graph_characterization_to_file(self, filename):
         """
