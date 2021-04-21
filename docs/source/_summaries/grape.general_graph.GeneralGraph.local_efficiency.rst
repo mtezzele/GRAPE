@@ -3,4 +3,4 @@
 
 .. currentmodule:: grape.general_graph
 
-.. automethod:: GeneralGraph.local_efficiency
+.. autoproperty:: GeneralGraph.local_efficiency

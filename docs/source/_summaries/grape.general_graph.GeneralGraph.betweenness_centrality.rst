@@ -3,4 +3,4 @@
 
 .. currentmodule:: grape.general_graph
 
-.. automethod:: GeneralGraph.betweenness_centrality
+.. autoproperty:: GeneralGraph.betweenness_centrality

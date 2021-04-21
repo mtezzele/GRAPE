@@ -20,59 +20,54 @@
       ~GeneralGraph.add_nodes_from
       ~GeneralGraph.add_weighted_edges_from
       ~GeneralGraph.adjacency
-      ~GeneralGraph.betweenness_centrality
+      ~GeneralGraph.betweenness_centrality_kernel
       ~GeneralGraph.calculate_shortest_path
-      ~GeneralGraph.check_after
-      ~GeneralGraph.check_before
-      ~GeneralGraph.check_input_with_gephi
-      ~GeneralGraph.chunk_it
       ~GeneralGraph.clear
-      ~GeneralGraph.closeness_centrality
-      ~GeneralGraph.compute_efficiency_iteration_parallel
-      ~GeneralGraph.compute_efficiency_kernel
-      ~GeneralGraph.construct_path
-      ~GeneralGraph.construct_path_iteration_parallel
+      ~GeneralGraph.clear_data
+      ~GeneralGraph.clear_edges
+      ~GeneralGraph.closeness_centrality_kernel
+      ~GeneralGraph.compute_betweenness_centrality
+      ~GeneralGraph.compute_closeness_centrality
+      ~GeneralGraph.compute_degree_centrality
+      ~GeneralGraph.compute_efficiency
+      ~GeneralGraph.compute_indegree_centrality
+      ~GeneralGraph.compute_local_efficiency
+      ~GeneralGraph.compute_nodal_efficiency
+      ~GeneralGraph.compute_outdegree_centrality
+      ~GeneralGraph.compute_service
       ~GeneralGraph.construct_path_kernel
       ~GeneralGraph.copy
-      ~GeneralGraph.degree_centrality
-      ~GeneralGraph.delete_a_node
+      ~GeneralGraph.degree_centrality_kernel
+      ~GeneralGraph.dijkstra_single_source_shortest_path
       ~GeneralGraph.edge_subgraph
+      ~GeneralGraph.efficiency_kernel
       ~GeneralGraph.floyd_warshall_initialization
       ~GeneralGraph.floyd_warshall_kernel
-      ~GeneralGraph.floyd_warshall_predecessor_and_distance_parallel
-      ~GeneralGraph.floyd_warshall_predecessor_and_distance_serial
+      ~GeneralGraph.floyd_warshall_predecessor_and_distance
       ~GeneralGraph.get_edge_data
-      ~GeneralGraph.global_efficiency
-      ~GeneralGraph.graph_characterization_to_file
       ~GeneralGraph.has_edge
       ~GeneralGraph.has_node
       ~GeneralGraph.has_predecessor
       ~GeneralGraph.has_successor
-      ~GeneralGraph.indegree_centrality
+      ~GeneralGraph.indegree_centrality_kernel
       ~GeneralGraph.is_directed
       ~GeneralGraph.is_multigraph
       ~GeneralGraph.load
-      ~GeneralGraph.local_efficiency
-      ~GeneralGraph.merge_lists
+      ~GeneralGraph.local_efficiency_kernel
       ~GeneralGraph.nbunch_iter
       ~GeneralGraph.neighbors
-      ~GeneralGraph.nodal_efficiency
+      ~GeneralGraph.nodal_efficiency_kernel
       ~GeneralGraph.number_of_edges
       ~GeneralGraph.number_of_nodes
       ~GeneralGraph.order
-      ~GeneralGraph.outdegree_centrality
-      ~GeneralGraph.parallel_wrapper_proc
+      ~GeneralGraph.outdegree_centrality_kernel
       ~GeneralGraph.predecessors
       ~GeneralGraph.remove_edge
       ~GeneralGraph.remove_edges_from
       ~GeneralGraph.remove_node
       ~GeneralGraph.remove_nodes_from
       ~GeneralGraph.reverse
-      ~GeneralGraph.rm_nodes
-      ~GeneralGraph.service_paths_to_file
-      ~GeneralGraph.simulate_multi_area_perturbation
-      ~GeneralGraph.single_source_shortest_path_parallel
-      ~GeneralGraph.single_source_shortest_path_serial
+      ~GeneralGraph.shortest_path_list_kernel
       ~GeneralGraph.size
       ~GeneralGraph.subgraph
       ~GeneralGraph.successors
@@ -81,8 +76,6 @@
       ~GeneralGraph.to_undirected
       ~GeneralGraph.to_undirected_class
       ~GeneralGraph.update
-      ~GeneralGraph.update_areas
-      ~GeneralGraph.update_status
    
    
 
@@ -93,15 +86,42 @@
    .. autosummary::
    
       ~GeneralGraph.adj
+      ~GeneralGraph.area
+      ~GeneralGraph.betweenness_centrality
+      ~GeneralGraph.closeness_centrality
       ~GeneralGraph.degree
+      ~GeneralGraph.degree_centrality
+      ~GeneralGraph.description
       ~GeneralGraph.edges
+      ~GeneralGraph.efficiency
+      ~GeneralGraph.father_condition
+      ~GeneralGraph.final_status
+      ~GeneralGraph.global_efficiency
       ~GeneralGraph.in_degree
       ~GeneralGraph.in_edges
+      ~GeneralGraph.indegree_centrality
+      ~GeneralGraph.init_status
+      ~GeneralGraph.initial_service
+      ~GeneralGraph.local_efficiency
+      ~GeneralGraph.mark
+      ~GeneralGraph.mark_status
       ~GeneralGraph.name
+      ~GeneralGraph.nodal_efficiency
       ~GeneralGraph.nodes
       ~GeneralGraph.out_degree
       ~GeneralGraph.out_edges
+      ~GeneralGraph.outdegree_centrality
+      ~GeneralGraph.perturbation_resistant
       ~GeneralGraph.pred
+      ~GeneralGraph.service
+      ~GeneralGraph.shortest_path
+      ~GeneralGraph.shortest_path_length
+      ~GeneralGraph.sources
+      ~GeneralGraph.status_area
       ~GeneralGraph.succ
+      ~GeneralGraph.switches
+      ~GeneralGraph.type
+      ~GeneralGraph.users
+      ~GeneralGraph.weight
    
    

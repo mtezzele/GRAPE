@@ -3,4 +3,4 @@
 
 .. currentmodule:: grape.general_graph
 
-.. automethod:: GeneralGraph.indegree_centrality
+.. autoproperty:: GeneralGraph.indegree_centrality

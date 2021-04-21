@@ -120,20 +120,18 @@ class FaultDiagnosis():
 
         Genetic algorithm to optimize switches conditions, using DEAP.
 
-        :param list perturbed_nodes: nodes(s) involved in the
-            perturbing event.
+        :param list perturbed_nodes: nodes(s) involved in the perturbing event.
         :param dict initial_condition: initial status (boolean) for the graph
             switches.
         :param dict params: values for the optimizer evolutionary algorithm.
             Dict of: {str: int, str: int, str: float, str: float, str: int}.
-
-            'npop' -- number of individuals for each population (default to 300)
-            'ngen' -- total number of generations (default to 100)
-            'indpb' -- independent probability for attributes to be changed
-                (default to 0.6)
-            'tresh' -- threshold for applying crossover/mutation
-                (default to 0.5)
-            'nsel' -- number of individuals to select (default to 5)
+            - 'npop': number of individuals for each population (default to 300)
+            - 'ngen': total number of generations (default to 100)
+            - 'indpb': independent probability for attributes to be changed
+            (default to 0.6)
+            - 'tresh': threshold for applying crossover/mutation
+            (default to 0.5)
+            - 'nsel': number of individuals to select (default to 5)
         """
 
         logging.getLogger().setLevel(logging.INFO)
@@ -412,21 +410,19 @@ class FaultDiagnosis():
         :param list perturbed_nodes: nodes(s) involved in the
             perturbing event.
         :param dict params: values for the optimizer evolutionary algorithm.
-            Dict of: {str: int, str: int, str: float, str: float, str: int}.
-
-            'npop' -- number of individuals for each population (default to 300)
-            'ngen' -- total number of generations (default to 100)
-            'indpb' -- independent probability for attributes to be changed
-                (default to 0.6)
-            'tresh' -- threshold for applying crossover/mutation
-                (default to 0.5)
-            'nsel' -- number of individuals to select (default to 5)
+            Dict of: {str: int, str: int, str: float, str: float, str: int}:
+            - 'npop': number of individuals for each population (default to 300)
+            - 'ngen': total number of generations (default to 100)
+            - 'indpb': independent probability for attributes to be changed
+            (default to 0.6)
+            - 'tresh': threshold for applying crossover/mutation
+            (default to 0.5)
+            - 'nsel': number of individuals to select (default to 5)
         :param weights: values for the optimizer evolutionary algorithm.
-            Dict of: {str: float, str: float, str: float}.
-
-            'w1' -- weight multiplying number of actions (default to 1.0)
-            'w2' -- weight multiplying total final service (default to 1.0)
-            'w3' -- weight multiplying final graph size (default to 1.0)
+            Dict of: {str: float, str: float, str: float}:
+            - 'w1': weight multiplying number of actions (default to 1.0)
+            - 'w2': weight multiplying total final service (default to 1.0)
+            - 'w3': weight multiplying final graph size (default to 1.0)
         :type weights: dict, optional
         :param str kind: type of simulation, used to label output files,
             default to 'element'
@@ -501,25 +497,22 @@ class FaultDiagnosis():
 
         Simulate a perturbation of one or multiple nodes.
 
-        :param list perturbed_nodes: nodes(s) involved in the
-            perturbing event.
+        :param list perturbed_nodes: nodes(s) involved in the perturbing event.
         :param params: values for the optimizer evolutionary algorithm.
-            Dict of: {str: int, str: int, str: float, str: float, str: int}.
-
-            'npop' -- number of individuals for each population (default to 300)
-            'ngen' -- total number of generations (default to 100)
-            'indpb' -- independent probability for attributes to be changed
-                (default to 0.6)
-            'tresh' -- threshold for applying crossover/mutation
-                (default to 0.5)
-            'nsel' -- number of individuals to select (default to 5)
+            Dict of: {str: int, str: int, str: float, str: float, str: int}:
+            - 'npop': number of individuals for each population (default to 300)
+            - 'ngen': total number of generations (default to 100)
+            - 'indpb': independent probability for attributes to be changed
+            (default to 0.6)
+            - 'tresh': threshold for applying crossover/mutation
+            (default to 0.5)
+            - 'nsel': number of individuals to select (default to 5)
         :type params: dict, optional
         :param weights: values for the optimizer evolutionary algorithm.
-            Dict of: {str: float, str: float, str: float}.
-
-            'w1' -- weight multiplying number of actions (default to 1.0)
-            'w2' -- weight multiplying total final service (default to 1.0)
-            'w3' -- weight multiplying final graph size (default to 1.0)
+            Dict of: {str: float, str: float, str: float}:
+            - 'w1': weight multiplying number of actions (default to 1.0)
+            - 'w2': weight multiplying total final service (default to 1.0)
+            - 'w3': weight multiplying final graph size (default to 1.0)
         :type weights: dict, optional
 
         .. note:: A perturbation, depending on the considered system,
@@ -547,25 +540,22 @@ class FaultDiagnosis():
 
         Simulate a perturbation in one or multiple areas.
 
-        :param list perturbed_areas: area(s) involved in the
-            perturbing event.
+        :param list perturbed_areas: area(s) involved in the perturbing event.
         :param dict params: values for the optimizer evolutionary algorithm.
-            Dict of: {str: int, str: int, str: float, str: float, str: int}.
-
-            'npop' -- number of individuals for each population (default to 300)
-            'ngen' -- total number of generations (default to 100)
-            'indpb' -- independent probability for attributes to be changed
-                (default to 0.6) 
-            'tresh' -- threshold for applying crossover/mutation
-                (default to 0.5)
-            'nsel' -- number of individuals to select (default to 5)
+            Dict of: {str: int, str: int, str: float, str: float, str: int}:
+            - 'npop': number of individuals for each population (default to 300)
+            - 'ngen': total number of generations (default to 100)
+            - 'indpb': independent probability for attributes to be changed
+            (default to 0.6) 
+            - 'tresh' threshold for applying crossover/mutation
+            (default to 0.5)
+            - 'nsel': number of individuals to select (default to 5)
         :type params: dict, optional
         :param weights: values for the optimizer evolutionary algorithm.
-            Dict of: {str: float, str: float, str: float}.
-
-            'w1' -- weight multiplying number of actions (default to 1.0)
-            'w2' -- weight multiplying total final service (default to 1.0)
-            'w3' -- weight multiplying final graph size (default to 1.0)
+            Dict of: {str: float, str: float, str: float}:
+            - 'w1': weight multiplying number of actions (default to 1.0)
+            - 'w2': weight multiplying total final service (default to 1.0)
+            - 'w3': weight multiplying final graph size (default to 1.0)
         :type weights: dict, optional
 
         .. note:: A perturbation, depending on the considered system,

@@ -11,20 +11,25 @@ GeneralGraph
 
     GeneralGraph
     GeneralGraph.load
-    GeneralGraph.check_input_with_gephi
-    GeneralGraph.construct_path
-    GeneralGraph.construct_path_kernel
-    GeneralGraph.construct_path_iteration_parallel
-    GeneralGraph.compute_efficiency_kernel
-    GeneralGraph.compute_efficiency_iteration_parallel
-    GeneralGraph.floyd_warshall_initialization
-    GeneralGraph.floyd_warshall_kernel
-    GeneralGraph.floyd_warshall_predecessor_and_distance_parallel
-    GeneralGraph.floyd_warshall_predecessor_and_distance_serial
-    GeneralGraph.single_source_shortest_path_serial
-    GeneralGraph.single_source_shortest_path_parallel
-    GeneralGraph.chunk_it
-    GeneralGraph.parallel_wrapper_proc
+    GeneralGraph.mark
+    GeneralGraph.area
+    GeneralGraph.perturbation_resistant
+    GeneralGraph.description
+    GeneralGraph.init_status
+    GeneralGraph.final_status
+    GeneralGraph.mark_status
+    GeneralGraph.status_area
+    GeneralGraph.father_condition
+    GeneralGraph.weight
+    GeneralGraph.type
+    GeneralGraph.sources
+    GeneralGraph.users
+    GeneralGraph.switches
+    GeneralGraph.initial_service
+    GeneralGraph.service
+    GeneralGraph.shortest_path
+    GeneralGraph.shortest_path_length
+    GeneralGraph.efficiency
     GeneralGraph.nodal_efficiency
     GeneralGraph.local_efficiency
     GeneralGraph.global_efficiency
@@ -33,17 +38,31 @@ GeneralGraph
     GeneralGraph.degree_centrality
     GeneralGraph.indegree_centrality
     GeneralGraph.outdegree_centrality
+    GeneralGraph.clear_data
+    GeneralGraph.construct_path_kernel
+    GeneralGraph.floyd_warshall_initialization
+    GeneralGraph.floyd_warshall_kernel
+    GeneralGraph.floyd_warshall_predecessor_and_distance
+    GeneralGraph.dijkstra_single_source_shortest_path
     GeneralGraph.calculate_shortest_path
-    GeneralGraph.check_before
-    GeneralGraph.check_after
-    GeneralGraph.rm_nodes
-    GeneralGraph.merge_lists
-    GeneralGraph.update_areas
-    GeneralGraph.delete_a_node
-    GeneralGraph.simulate_multi_area_perturbation
-    GeneralGraph.update_status
-    GeneralGraph.service_paths_to_file
-    GeneralGraph.graph_characterization_to_file
+    GeneralGraph.efficiency_kernel
+    GeneralGraph.compute_efficiency
+    GeneralGraph.nodal_efficiency_kernel
+    GeneralGraph.compute_nodal_efficiency
+    GeneralGraph.local_efficiency_kernel
+    GeneralGraph.compute_local_efficiency
+    GeneralGraph.shortest_path_list_kernel
+    GeneralGraph.betweenness_centrality_kernel
+    GeneralGraph.compute_betweenness_centrality
+    GeneralGraph.closeness_centrality_kernel
+    GeneralGraph.compute_closeness_centrality
+    GeneralGraph.degree_centrality_kernel
+    GeneralGraph.compute_degree_centrality
+    GeneralGraph.indegree_centrality_kernel
+    GeneralGraph.compute_indegree_centrality
+    GeneralGraph.outdegree_centrality_kernel
+    GeneralGraph.compute_outdegree_centrality
+    GeneralGraph.compute_service
 
 .. autoclass:: GeneralGraph
     :members:

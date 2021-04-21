@@ -3,4 +3,4 @@
 
 .. currentmodule:: grape.general_graph
 
-.. automethod:: GeneralGraph.closeness_centrality
+.. autoproperty:: GeneralGraph.closeness_centrality
