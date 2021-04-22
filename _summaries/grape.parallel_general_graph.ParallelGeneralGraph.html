@@ -1,0 +1,659 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>grape.parallel_general_graph.ParallelGeneralGraph &mdash; GRAPE 1.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration" href="grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration.html" />
+    <link rel="prev" title="ParallelGeneralGraph" href="../parallel_general_graph.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> GRAPE
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../code.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../general_graph.html">GeneralGraph</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../parallel_general_graph.html">ParallelGeneralGraph</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">grape.parallel_general_graph.ParallelGeneralGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration.html">grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.measure_processes.html">grape.parallel_general_graph.ParallelGeneralGraph.measure_processes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.floyd_warshall_predecessor_and_distance.html">grape.parallel_general_graph.ParallelGeneralGraph.floyd_warshall_predecessor_and_distance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_iteration_parallel.html">grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_iteration_parallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_single_source_shortest_path.html">grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_single_source_shortest_path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.calculate_shortest_path.html">grape.parallel_general_graph.ParallelGeneralGraph.calculate_shortest_path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_efficiency.html">grape.parallel_general_graph.ParallelGeneralGraph.compute_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_nodal_efficiency.html">grape.parallel_general_graph.ParallelGeneralGraph.compute_nodal_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_local_efficiency.html">grape.parallel_general_graph.ParallelGeneralGraph.compute_local_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.shortest_path_list_iteration.html">grape.parallel_general_graph.ParallelGeneralGraph.shortest_path_list_iteration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_betweenness_centrality.html">grape.parallel_general_graph.ParallelGeneralGraph.compute_betweenness_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_closeness_centrality.html">grape.parallel_general_graph.ParallelGeneralGraph.compute_closeness_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_degree_centrality.html">grape.parallel_general_graph.ParallelGeneralGraph.compute_degree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_indegree_centrality.html">grape.parallel_general_graph.ParallelGeneralGraph.compute_indegree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_outdegree_centrality.html">grape.parallel_general_graph.ParallelGeneralGraph.compute_outdegree_centrality</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../fault_diagnosis.html">FaultDiagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils.html">utils</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../LICENSE.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GRAPE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../code.html">Code Documentation</a> &raquo;</li>
+        
+          <li><a href="../parallel_general_graph.html">ParallelGeneralGraph</a> &raquo;</li>
+        
+      <li>grape.parallel_general_graph.ParallelGeneralGraph</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/_summaries/grape.parallel_general_graph.ParallelGeneralGraph.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="grape-parallel-general-graph-parallelgeneralgraph">
+<h1>grape.parallel_general_graph.ParallelGeneralGraph<a class="headerlink" href="#grape-parallel-general-graph-parallelgeneralgraph" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="grape.parallel_general_graph.ParallelGeneralGraph">
+<em class="property">class </em><code class="sig-name descname">ParallelGeneralGraph</code><a class="reference internal" href="../_modules/grape/parallel_general_graph.html#ParallelGeneralGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.parallel_general_graph.ParallelGeneralGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class ParallelGeneralGraph for parallel implementation of
+directed graphs (DiGraph).</p>
+<p>Constructs a new graph given an input file.
+A DiGraph stores nodes and edges with optional data or attributes.
+DiGraphs hold directed edges.
+Nodes can be arbitrary python objects with optional key/value attributes.
+Edges are represented  as links between nodes with optional key/value
+attributes.</p>
+<p>Initialize a graph with edges, name, or graph attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>incoming_graph_data</strong> (<em>input graph</em><em> (</em><em>optional</em><em>, </em><em>default: None</em><em>)</em>) – Data to initialize graph.  If None (default) an empty
+graph is created.  The data can be an edge list, or any
+NetworkX graph object.  If the corresponding optional Python
+packages are installed the data can also be a NumPy matrix
+or 2d ndarray, a SciPy sparse matrix, or a PyGraphviz graph.</p></li>
+<li><p><strong>attr</strong> (<em>keyword arguments</em><em>, </em><em>optional</em><em> (</em><em>default= no attributes</em><em>)</em>) – Attributes to add to graph as key=value pairs.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">convert</span></code></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>  <span class="c1"># or DiGraph, MultiGraph, MultiDiGraph, etc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my graph&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]</span>  <span class="c1"># list of edges</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Arbitrary graph attribute pairs (key=value) may be assigned</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="s2">&quot;Friday&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">.</span><span class="n">graph</span>
+<span class="go">{&#39;day&#39;: &#39;Friday&#39;}</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="grape.parallel_general_graph.ParallelGeneralGraph.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grape/parallel_general_graph.html#ParallelGeneralGraph.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.parallel_general_graph.ParallelGeneralGraph.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a graph with edges, name, or graph attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>incoming_graph_data</strong> (<em>input graph</em><em> (</em><em>optional</em><em>, </em><em>default: None</em><em>)</em>) – Data to initialize graph.  If None (default) an empty
+graph is created.  The data can be an edge list, or any
+NetworkX graph object.  If the corresponding optional Python
+packages are installed the data can also be a NumPy matrix
+or 2d ndarray, a SciPy sparse matrix, or a PyGraphviz graph.</p></li>
+<li><p><strong>attr</strong> (<em>keyword arguments</em><em>, </em><em>optional</em><em> (</em><em>default= no attributes</em><em>)</em>) – Attributes to add to graph as key=value pairs.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">convert()</span></code></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>  <span class="c1"># or DiGraph, MultiGraph, MultiDiGraph, etc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my graph&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]</span>  <span class="c1"># list of edges</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Arbitrary graph attribute pairs (key=value) may be assigned</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="s2">&quot;Friday&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">.</span><span class="n">graph</span>
+<span class="go">{&#39;day&#39;: &#39;Friday&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grape.parallel_general_graph.ParallelGeneralGraph.__init__" title="grape.parallel_general_graph.ParallelGeneralGraph.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<td><p>Initialize a graph with edges, name, or graph attributes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_edge</span></code>(u_of_edge, v_of_edge, **attr)</p></td>
+<td><p>Add an edge between u and v.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_edges_from</span></code>(ebunch_to_add, **attr)</p></td>
+<td><p>Add all the edges in ebunch_to_add.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_node</span></code>(node_for_adding, **attr)</p></td>
+<td><p>Add a single node <cite>node_for_adding</cite> and update node attributes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_nodes_from</span></code>(nodes_for_adding, **attr)</p></td>
+<td><p>Add multiple nodes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_weighted_edges_from</span></code>(ebunch_to_add[, weight])</p></td>
+<td><p>Add weighted edges in <cite>ebunch_to_add</cite> with specified weight attr</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjacency</span></code>()</p></td>
+<td><p>Returns an iterator over (node, adjacency dict) tuples for all nodes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">betweenness_centrality_kernel</span></code>(nodes, …)</p></td>
+<td><p>Compute betweenness centrality, from shortest path list.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.calculate_shortest_path.html#grape.parallel_general_graph.ParallelGeneralGraph.calculate_shortest_path" title="grape.parallel_general_graph.ParallelGeneralGraph.calculate_shortest_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_shortest_path</span></code></a>()</p></td>
+<td><p>Choose the most appropriate way to compute the all-pairs shortest path depending on graph size and density.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>()</p></td>
+<td><p>Remove all nodes and edges from the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_data</span></code>(attributes_to_remove)</p></td>
+<td><p>Delete attributes for all nodes in the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_edges</span></code>()</p></td>
+<td><p>Remove all edges from the graph without altering nodes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">closeness_centrality_kernel</span></code>(nodes, …)</p></td>
+<td><p>Compute betweenness centrality, from shortest path list.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_betweenness_centrality.html#grape.parallel_general_graph.ParallelGeneralGraph.compute_betweenness_centrality" title="grape.parallel_general_graph.ParallelGeneralGraph.compute_betweenness_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_betweenness_centrality</span></code></a>()</p></td>
+<td><p>Betweenness_centrality calculation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_closeness_centrality.html#grape.parallel_general_graph.ParallelGeneralGraph.compute_closeness_centrality" title="grape.parallel_general_graph.ParallelGeneralGraph.compute_closeness_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_closeness_centrality</span></code></a>()</p></td>
+<td><p>Closeness_centrality calculation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_degree_centrality.html#grape.parallel_general_graph.ParallelGeneralGraph.compute_degree_centrality" title="grape.parallel_general_graph.ParallelGeneralGraph.compute_degree_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_degree_centrality</span></code></a>()</p></td>
+<td><p>Degree centrality calculation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_efficiency.html#grape.parallel_general_graph.ParallelGeneralGraph.compute_efficiency" title="grape.parallel_general_graph.ParallelGeneralGraph.compute_efficiency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_efficiency</span></code></a>()</p></td>
+<td><p>Efficiency calculation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_indegree_centrality.html#grape.parallel_general_graph.ParallelGeneralGraph.compute_indegree_centrality" title="grape.parallel_general_graph.ParallelGeneralGraph.compute_indegree_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_indegree_centrality</span></code></a>()</p></td>
+<td><p>In-degree centrality calculation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_local_efficiency.html#grape.parallel_general_graph.ParallelGeneralGraph.compute_local_efficiency" title="grape.parallel_general_graph.ParallelGeneralGraph.compute_local_efficiency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_local_efficiency</span></code></a>()</p></td>
+<td><p>Local efficiency calculation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_nodal_efficiency.html#grape.parallel_general_graph.ParallelGeneralGraph.compute_nodal_efficiency" title="grape.parallel_general_graph.ParallelGeneralGraph.compute_nodal_efficiency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_nodal_efficiency</span></code></a>()</p></td>
+<td><p>Nodal efficiency calculation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.compute_outdegree_centrality.html#grape.parallel_general_graph.ParallelGeneralGraph.compute_outdegree_centrality" title="grape.parallel_general_graph.ParallelGeneralGraph.compute_outdegree_centrality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_outdegree_centrality</span></code></a>()</p></td>
+<td><p>Out-degree centrality calculation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_service</span></code>()</p></td>
+<td><p>Compute service for every node, together with edge splitting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">construct_path_kernel</span></code>(nodes, predecessor)</p></td>
+<td><p>Reconstruct source-target paths starting from predecessors matrix, and populate the dictionary of shortest paths.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>([as_view])</p></td>
+<td><p>Returns a copy of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">degree_centrality_kernel</span></code>(nodes, graph_size)</p></td>
+<td><p>Compute degree centrality.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_iteration_parallel.html#grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_iteration_parallel" title="grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_iteration_parallel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dijkstra_iteration_parallel</span></code></a>(out_queue, nodes)</p></td>
+<td><p>Parallel SSSP algorithm based on Dijkstra’s method.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_single_source_shortest_path.html#grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_single_source_shortest_path" title="grape.parallel_general_graph.ParallelGeneralGraph.dijkstra_single_source_shortest_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dijkstra_single_source_shortest_path</span></code></a>()</p></td>
+<td><p>Wrapper for parallel SSSP algorithm based on Dijkstra’s method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_subgraph</span></code>(edges)</p></td>
+<td><p>Returns the subgraph induced by the specified edges.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">efficiency_kernel</span></code>(nodes, shortest_path_length)</p></td>
+<td><p>Compute efficiency, starting from path length attribute.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">floyd_warshall_initialization</span></code>()</p></td>
+<td><p>Initialization of Floyd Warshall APSP algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">floyd_warshall_kernel</span></code>(distance, predecessor, …)</p></td>
+<td><p>Floyd Warshall’s APSP inner iteration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.floyd_warshall_predecessor_and_distance.html#grape.parallel_general_graph.ParallelGeneralGraph.floyd_warshall_predecessor_and_distance" title="grape.parallel_general_graph.ParallelGeneralGraph.floyd_warshall_predecessor_and_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">floyd_warshall_predecessor_and_distance</span></code></a>()</p></td>
+<td><p>Parallel Floyd Warshall’s APSP algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_edge_data</span></code>(u, v[, default])</p></td>
+<td><p>Returns the attribute dictionary associated with edge (u, v).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_edge</span></code>(u, v)</p></td>
+<td><p>Returns True if the edge (u, v) is in the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_node</span></code>(n)</p></td>
+<td><p>Returns True if the graph contains the node n.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_predecessor</span></code>(u, v)</p></td>
+<td><p>Returns True if node u has predecessor v.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_successor</span></code>(u, v)</p></td>
+<td><p>Returns True if node u has successor v.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">indegree_centrality_kernel</span></code>(nodes, graph_size)</p></td>
+<td><p>Compute in-degree centrality.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_directed</span></code>()</p></td>
+<td><p>Returns True if graph is directed, False otherwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_multigraph</span></code>()</p></td>
+<td><p>Returns True if graph is a multigraph, False otherwise.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>(filename)</p></td>
+<td><p>Load input file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_efficiency_kernel</span></code>(nodes, nodal_efficiency)</p></td>
+<td><p>Compute local efficiency, starting from nodal efficiency attribute.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration.html#grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration" title="grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">measure_iteration</span></code></a>(nodes, record, kernel, …)</p></td>
+<td><p>Inner iteration for parallel measures, to update shared dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.measure_processes.html#grape.parallel_general_graph.ParallelGeneralGraph.measure_processes" title="grape.parallel_general_graph.ParallelGeneralGraph.measure_processes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">measure_processes</span></code></a>(record, kernel, *measure_args)</p></td>
+<td><p>Division of total number of nodes in chuncks and parallel distribution of tasks into processes, for different kernel measure functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nbunch_iter</span></code>([nbunch])</p></td>
+<td><p>Returns an iterator over nodes contained in nbunch that are also in the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">neighbors</span></code>(n)</p></td>
+<td><p>Returns an iterator over successor nodes of n.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nodal_efficiency_kernel</span></code>(nodes, efficiency, …)</p></td>
+<td><p>Compute nodal efficiency, starting from efficiency attribute.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_edges</span></code>([u, v])</p></td>
+<td><p>Returns the number of edges between two nodes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">number_of_nodes</span></code>()</p></td>
+<td><p>Returns the number of nodes in the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">order</span></code>()</p></td>
+<td><p>Returns the number of nodes in the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">outdegree_centrality_kernel</span></code>(nodes, graph_size)</p></td>
+<td><p>Compute out-degree centrality.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predecessors</span></code>(n)</p></td>
+<td><p>Returns an iterator over predecessor nodes of n.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_edge</span></code>(u, v)</p></td>
+<td><p>Remove the edge between u and v.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_edges_from</span></code>(ebunch)</p></td>
+<td><p>Remove all edges specified in ebunch.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_node</span></code>(n)</p></td>
+<td><p>Remove node n.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_nodes_from</span></code>(nodes)</p></td>
+<td><p>Remove multiple nodes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reverse</span></code>([copy])</p></td>
+<td><p>Returns the reverse of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.parallel_general_graph.ParallelGeneralGraph.shortest_path_list_iteration.html#grape.parallel_general_graph.ParallelGeneralGraph.shortest_path_list_iteration" title="grape.parallel_general_graph.ParallelGeneralGraph.shortest_path_list_iteration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shortest_path_list_iteration</span></code></a>(nodes, …)</p></td>
+<td><p>Inner iteration for parallel shortest path list calculation, to update shared list.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shortest_path_list_kernel</span></code>(nodes, shortest_path)</p></td>
+<td><p>Collect the shortest paths that contain at least two nodes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code>([weight])</p></td>
+<td><p>Returns the number of edges or total of all edge weights.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subgraph</span></code>(nodes)</p></td>
+<td><p>Returns a SubGraph view of the subgraph induced on <cite>nodes</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">successors</span></code>(n)</p></td>
+<td><p>Returns an iterator over successor nodes of n.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_directed</span></code>([as_view])</p></td>
+<td><p>Returns a directed representation of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_directed_class</span></code>()</p></td>
+<td><p>Returns the class to use for empty directed copies.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_undirected</span></code>([reciprocal, as_view])</p></td>
+<td><p>Returns an undirected representation of the digraph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_undirected_class</span></code>()</p></td>
+<td><p>Returns the class to use for empty undirected copies.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code>([edges, nodes])</p></td>
+<td><p>Update the graph using nodes/edges/graphs as input.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adj</span></code></p></td>
+<td><p>Graph adjacency object holding the neighbors of each node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">area</span></code></p></td>
+<td><p>area attribute for every node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">betweenness_centrality</span></code></p></td>
+<td><p>Betweenness centrality of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">closeness_centrality</span></code></p></td>
+<td><p>Closeness centrality of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">degree</span></code></p></td>
+<td><p>A DegreeView for the Graph as G.degree or G.degree().</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">degree_centrality</span></code></p></td>
+<td><p>Degree centrality of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<td><p>description attribute for every node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">edges</span></code></p></td>
+<td><p>An OutEdgeView of the DiGraph as G.edges or G.edges().</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">efficiency</span></code></p></td>
+<td><p>Efficiency of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">father_condition</span></code></p></td>
+<td><p>father_condition attribute for every edge.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">final_status</span></code></p></td>
+<td><p>final_status attribute for switches.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">global_efficiency</span></code></p></td>
+<td><p>Average global efficiency of the whole graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_degree</span></code></p></td>
+<td><p>An InDegreeView for (node, in_degree) or in_degree for single node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_edges</span></code></p></td>
+<td><p>An InEdgeView of the Graph as G.in_edges or G.in_edges().</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">indegree_centrality</span></code></p></td>
+<td><p>In-degree centrality of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_status</span></code></p></td>
+<td><p>init_status attribute for switches.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initial_service</span></code></p></td>
+<td><p>initial_service attribute for every node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_efficiency</span></code></p></td>
+<td><p>Local efficiency of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark</span></code></p></td>
+<td><p>mark attribute for every node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark_status</span></code></p></td>
+<td><p>mark_status attribute for every node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>String identifier of the graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nodal_efficiency</span></code></p></td>
+<td><p>Nodal efficiency of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nodes</span></code></p></td>
+<td><p>A NodeView of the Graph as G.nodes or G.nodes().</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">out_degree</span></code></p></td>
+<td><p>An OutDegreeView for (node, out_degree)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">out_edges</span></code></p></td>
+<td><p>An OutEdgeView of the DiGraph as G.edges or G.edges().</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">outdegree_centrality</span></code></p></td>
+<td><p>Out-degree centrality of the graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">perturbation_resistant</span></code></p></td>
+<td><p>perturbation_resistant attribute for every node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pred</span></code></p></td>
+<td><p>Graph adjacency object holding the predecessors of each node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">service</span></code></p></td>
+<td><p>Computed service.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shortest_path</span></code></p></td>
+<td><p>Shortest existing paths between all node pairs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shortest_path_length</span></code></p></td>
+<td><p>Shortest path length.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sources</span></code></p></td>
+<td><p>list of graph sources.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">status_area</span></code></p></td>
+<td><p>status_area attribute for every node.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">succ</span></code></p></td>
+<td><p>Graph adjacency object holding the successors of each node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">switches</span></code></p></td>
+<td><p>list of graph switches.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p>type attribute for every node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">users</span></code></p></td>
+<td><p>list of graph users.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">weight</span></code></p></td>
+<td><p>weight attribute for every edge.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration.html" class="btn btn-neutral float-right" title="grape.parallel_general_graph.ParallelGeneralGraph.measure_iteration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../parallel_general_graph.html" class="btn btn-neutral float-left" title="ParallelGeneralGraph" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2019, GRAPE contributors.
+      <span class="lastupdated">
+        Last updated on Apr 22, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

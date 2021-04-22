@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>grape.general_graph &mdash; GRAPE 1.0.0 documentation</title>
+  <title>grape.general_graph &mdash; GRAPE 1.0.1 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.0.0
+                1.0.1
               </div>
             
           
@@ -203,9 +203,13 @@
 <span class="sd">        :rtype: pandas.DataFrame, pandas.DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">conv</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mark&#39;</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;father_mark&#39;</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                <span class="s1">&#39;perturbation_resistant&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;init_status&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">}</span>
+        <span class="n">conv</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mark&#39;</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;father_mark&#39;</span> <span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="p">}</span>
         <span class="n">graph_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">converters</span><span class="o">=</span><span class="n">conv</span><span class="p">,</span> <span class="n">keep_default_na</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">cols_to_num</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;perturbation_resistant&#39;</span><span class="p">,</span> <span class="s1">&#39;init_status&#39;</span><span class="p">]</span>
+        <span class="n">graph_df</span><span class="p">[</span><span class="n">cols_to_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_df</span><span class="p">[</span><span class="n">cols_to_num</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">,</span>
+            <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">cols_to_int</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;perturbation_resistant&#39;</span><span class="p">]</span>
+        <span class="n">graph_df</span><span class="p">[</span><span class="n">cols_to_int</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_df</span><span class="p">[</span><span class="n">cols_to_int</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">graph_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
 
@@ -228,18 +232,9 @@
         <span class="n">graph_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">graph_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;mark&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s1">&#39;intermediate_status&#39;</span><span class="p">)</span>
-        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s1">&#39;final_status&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_status</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;AVAILABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;status_area&#39;</span><span class="p">)</span>
-        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ACTIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;Mark_Status&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">node_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">node_type</span> <span class="o">==</span> <span class="s1">&#39;SOURCE&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">node_type</span> <span class="o">==</span> <span class="s1">&#39;USER&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ACTIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;mark_status&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">graph_df</span><span class="p">,</span> <span class="n">graph_edges_df</span></div>
 
@@ -286,31 +281,35 @@
     <span class="k">def</span> <span class="nf">init_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        :return: init_status attribute for every node.</span>
+<span class="sd">        :return: init_status attribute for switches.</span>
 <span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;init_status&#39;</span><span class="p">)</span>
+        <span class="n">init_all</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;init_status&#39;</span><span class="p">)</span>
+        <span class="n">sw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span>
+        <span class="n">init_status_sw</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="nb">bool</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">init_all</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sw</span><span class="p">}</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">intermediate_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :return: intermediate_status attribute for every node.</span>
-<span class="sd">        :rtype: dict</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;intermediate_status&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">init_status_sw</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">final_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        :return: final_status attribute for every node.</span>
+<span class="sd">        :return: final_status attribute for switches.</span>
 <span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;final_status&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_final_status</span>
+
+    <span class="nd">@final_status</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">final_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">final_status_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param dict final_status_dict: values for final_status attribute</span>
+<span class="sd">            for the graph switches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_final_status</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">final_status_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mark_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -331,6 +330,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;status_area&#39;</span><span class="p">)</span>
+
+    <span class="nd">@status_area</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">status_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status_area_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param dict status_area_dict: dictionary keyed by node,</span>
+<span class="sd">            containing the values for status_area attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status_area_dict</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;status_area&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">father_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -361,6 +370,36 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: list of graph sources.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SOURCE&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">users</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: list of graph users.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;USER&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">switches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: list of graph switches.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SWITCH&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">initial_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -627,9 +666,13 @@
 
 <span class="sd">        :param list attributes_to_remove: a list of strings</span>
 <span class="sd">            with all the attributes to remove.</span>
+
+<span class="sd">        :raises: ValueError</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes_to_remove</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nx</span><span class="o">.</span><span class="n">get_node_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No attribute </span><span class="si">{attribute}</span><span class="s1"> in the graph.&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">attribute</span><span class="p">]</span></div>
 
@@ -736,20 +779,20 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">n</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>  <span class="c1"># k</span>
             <span class="n">distance_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:])</span>
             <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="n">w</span><span class="p">],</span> <span class="n">distance</span><span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="p">:]),</span>
-                    <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">init</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span>
-                <span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:],</span>
+                    <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">init</span><span class="p">,</span> <span class="n">n</span><span class="p">)),</span> <span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:],</span>
                 <span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:])</span>
             <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">distance</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:],</span> <span class="n">distance_copy</span><span class="p">)</span>
             <span class="n">predecessor</span><span class="p">[</span><span class="n">init</span><span class="p">:</span><span class="n">stop</span><span class="p">,</span> <span class="p">:][</span><span class="o">~</span><span class="n">diff</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">predecessor</span><span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="p">:],</span>
                 <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">init</span><span class="p">,</span> <span class="mi">1</span><span class="p">))[</span><span class="o">~</span><span class="n">diff</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">barrier</span><span class="p">:</span>
-            <span class="n">barrier</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
+            <span class="k">if</span> <span class="n">barrier</span><span class="p">:</span>
+                <span class="n">barrier</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="GeneralGraph.floyd_warshall_predecessor_and_distance"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.floyd_warshall_predecessor_and_distance">[docs]</a>    <span class="k">def</span> <span class="nf">floyd_warshall_predecessor_and_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1309,21 +1352,21 @@
         <span class="n">shortest_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path</span>
 
         <span class="n">usr_per_source</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">s</span><span class="p">:</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="k">if</span> <span class="n">nx</span><span class="o">.</span><span class="n">has_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">u</span><span class="p">)]</span>
-            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span>
+            <span class="n">s</span><span class="p">:</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="k">if</span> <span class="n">nx</span><span class="o">.</span><span class="n">has_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">u</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span>
         <span class="p">}</span>
 
-        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">usr_per_source</span><span class="p">[</span><span class="n">s</span><span class="p">]:</span>
                 <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortest_path</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">u</span><span class="p">]:</span>
                     <span class="n">usr_per_node</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">1.</span>
 
-        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">usr_per_source</span><span class="p">[</span><span class="n">s</span><span class="p">]:</span>
                 <span class="n">computed_service</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">+=</span> <span class="n">initial_service</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">usr_per_source</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
 
         <span class="c1">#Cycle just on the edges contained in source-user shortest paths</span>
-        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">usr_per_source</span><span class="p">[</span><span class="n">s</span><span class="p">]:</span>
                 <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shortest_path</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">u</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
 
@@ -1346,7 +1389,7 @@
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on Mar 23, 2021.
+        Last updated on Apr 22, 2021.
       </span>
 
     </p>

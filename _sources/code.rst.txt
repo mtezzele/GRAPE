@@ -7,3 +7,6 @@ Code Documentation
 
 
    general_graph
+   parallel_general_graph
+   fault_diagnosis
+   utils

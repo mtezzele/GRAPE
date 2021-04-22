@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>grape.general_graph.GeneralGraph.area &mdash; GRAPE 1.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grape.general_graph.GeneralGraph.perturbation_resistant" href="grape.general_graph.GeneralGraph.perturbation_resistant.html" />
+    <link rel="prev" title="grape.general_graph.GeneralGraph.mark" href="grape.general_graph.GeneralGraph.mark.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> GRAPE
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../code.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../general_graph.html">GeneralGraph</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.html">grape.general_graph.GeneralGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.load.html">grape.general_graph.GeneralGraph.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.mark.html">grape.general_graph.GeneralGraph.mark</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">grape.general_graph.GeneralGraph.area</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.perturbation_resistant.html">grape.general_graph.GeneralGraph.perturbation_resistant</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.description.html">grape.general_graph.GeneralGraph.description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.init_status.html">grape.general_graph.GeneralGraph.init_status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.final_status.html">grape.general_graph.GeneralGraph.final_status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.mark_status.html">grape.general_graph.GeneralGraph.mark_status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.status_area.html">grape.general_graph.GeneralGraph.status_area</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.father_condition.html">grape.general_graph.GeneralGraph.father_condition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.weight.html">grape.general_graph.GeneralGraph.weight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.type.html">grape.general_graph.GeneralGraph.type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.sources.html">grape.general_graph.GeneralGraph.sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.users.html">grape.general_graph.GeneralGraph.users</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.switches.html">grape.general_graph.GeneralGraph.switches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.initial_service.html">grape.general_graph.GeneralGraph.initial_service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.service.html">grape.general_graph.GeneralGraph.service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.shortest_path.html">grape.general_graph.GeneralGraph.shortest_path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.shortest_path_length.html">grape.general_graph.GeneralGraph.shortest_path_length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.efficiency.html">grape.general_graph.GeneralGraph.efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.nodal_efficiency.html">grape.general_graph.GeneralGraph.nodal_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.local_efficiency.html">grape.general_graph.GeneralGraph.local_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.global_efficiency.html">grape.general_graph.GeneralGraph.global_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.betweenness_centrality.html">grape.general_graph.GeneralGraph.betweenness_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.closeness_centrality.html">grape.general_graph.GeneralGraph.closeness_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.degree_centrality.html">grape.general_graph.GeneralGraph.degree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.indegree_centrality.html">grape.general_graph.GeneralGraph.indegree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.outdegree_centrality.html">grape.general_graph.GeneralGraph.outdegree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.clear_data.html">grape.general_graph.GeneralGraph.clear_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.construct_path_kernel.html">grape.general_graph.GeneralGraph.construct_path_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.floyd_warshall_initialization.html">grape.general_graph.GeneralGraph.floyd_warshall_initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.floyd_warshall_kernel.html">grape.general_graph.GeneralGraph.floyd_warshall_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.floyd_warshall_predecessor_and_distance.html">grape.general_graph.GeneralGraph.floyd_warshall_predecessor_and_distance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.dijkstra_single_source_shortest_path.html">grape.general_graph.GeneralGraph.dijkstra_single_source_shortest_path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.calculate_shortest_path.html">grape.general_graph.GeneralGraph.calculate_shortest_path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.efficiency_kernel.html">grape.general_graph.GeneralGraph.efficiency_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_efficiency.html">grape.general_graph.GeneralGraph.compute_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.nodal_efficiency_kernel.html">grape.general_graph.GeneralGraph.nodal_efficiency_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_nodal_efficiency.html">grape.general_graph.GeneralGraph.compute_nodal_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.local_efficiency_kernel.html">grape.general_graph.GeneralGraph.local_efficiency_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_local_efficiency.html">grape.general_graph.GeneralGraph.compute_local_efficiency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.shortest_path_list_kernel.html">grape.general_graph.GeneralGraph.shortest_path_list_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.betweenness_centrality_kernel.html">grape.general_graph.GeneralGraph.betweenness_centrality_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_betweenness_centrality.html">grape.general_graph.GeneralGraph.compute_betweenness_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.closeness_centrality_kernel.html">grape.general_graph.GeneralGraph.closeness_centrality_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_closeness_centrality.html">grape.general_graph.GeneralGraph.compute_closeness_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.degree_centrality_kernel.html">grape.general_graph.GeneralGraph.degree_centrality_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_degree_centrality.html">grape.general_graph.GeneralGraph.compute_degree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.indegree_centrality_kernel.html">grape.general_graph.GeneralGraph.indegree_centrality_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_indegree_centrality.html">grape.general_graph.GeneralGraph.compute_indegree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.outdegree_centrality_kernel.html">grape.general_graph.GeneralGraph.outdegree_centrality_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_outdegree_centrality.html">grape.general_graph.GeneralGraph.compute_outdegree_centrality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.general_graph.GeneralGraph.compute_service.html">grape.general_graph.GeneralGraph.compute_service</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../parallel_general_graph.html">ParallelGeneralGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fault_diagnosis.html">FaultDiagnosis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils.html">utils</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../LICENSE.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GRAPE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../code.html">Code Documentation</a> &raquo;</li>
+        
+          <li><a href="../general_graph.html">GeneralGraph</a> &raquo;</li>
+        
+      <li>grape.general_graph.GeneralGraph.area</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/_summaries/grape.general_graph.GeneralGraph.area.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="grape-general-graph-generalgraph-area">
+<h1>grape.general_graph.GeneralGraph.area<a class="headerlink" href="#grape-general-graph-generalgraph-area" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="grape.general_graph.GeneralGraph.area">
+<em class="property">property </em><code class="sig-prename descclassname">GeneralGraph.</code><code class="sig-name descname">area</code><a class="headerlink" href="#grape.general_graph.GeneralGraph.area" title="Permalink to this definition">¶</a></dt>
+<dd><p>area attribute for every node.
+:rtype: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="grape.general_graph.GeneralGraph.perturbation_resistant.html" class="btn btn-neutral float-right" title="grape.general_graph.GeneralGraph.perturbation_resistant" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grape.general_graph.GeneralGraph.mark.html" class="btn btn-neutral float-left" title="grape.general_graph.GeneralGraph.mark" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2019, GRAPE contributors.
+      <span class="lastupdated">
+        Last updated on Apr 22, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

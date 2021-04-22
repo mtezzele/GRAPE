@@ -3,4 +3,4 @@
 
 .. currentmodule:: grape.general_graph
 
-.. automethod:: GeneralGraph.nodal_efficiency
+.. autoproperty:: GeneralGraph.nodal_efficiency

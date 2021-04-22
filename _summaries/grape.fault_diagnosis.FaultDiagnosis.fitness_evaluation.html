@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation &mdash; GRAPE 1.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grape.fault_diagnosis.FaultDiagnosis.optimizer" href="grape.fault_diagnosis.FaultDiagnosis.optimizer.html" />
+    <link rel="prev" title="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi" href="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> GRAPE
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../code.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../general_graph.html">GeneralGraph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../parallel_general_graph.html">ParallelGeneralGraph</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../fault_diagnosis.html">FaultDiagnosis</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.html">grape.fault_diagnosis.FaultDiagnosis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi.html">grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.optimizer.html">grape.fault_diagnosis.FaultDiagnosis.optimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures.html">grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.rm_nodes.html">grape.fault_diagnosis.FaultDiagnosis.rm_nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.update_output.html">grape.fault_diagnosis.FaultDiagnosis.update_output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.update_status_areas.html">grape.fault_diagnosis.FaultDiagnosis.update_status_areas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.delete_a_node.html">grape.fault_diagnosis.FaultDiagnosis.delete_a_node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.apply_perturbation.html">grape.fault_diagnosis.FaultDiagnosis.apply_perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.simulate_element_perturbation.html">grape.fault_diagnosis.FaultDiagnosis.simulate_element_perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation.html">grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.graph_characterization_to_file.html">grape.fault_diagnosis.FaultDiagnosis.graph_characterization_to_file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../utils.html">utils</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../LICENSE.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GRAPE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../code.html">Code Documentation</a> &raquo;</li>
+        
+          <li><a href="../fault_diagnosis.html">FaultDiagnosis</a> &raquo;</li>
+        
+      <li>grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/_summaries/grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="grape-fault-diagnosis-faultdiagnosis-fitness-evaluation">
+<h1>grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation<a class="headerlink" href="#grape-fault-diagnosis-faultdiagnosis-fitness-evaluation" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation">
+<code class="sig-prename descclassname">FaultDiagnosis.</code><code class="sig-name descname">fitness_evaluation</code><span class="sig-paren">(</span><em class="sig-param">individual</em>, <em class="sig-param">perturbed_nodes</em>, <em class="sig-param">initial_condition</em>, <em class="sig-param">w</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grape/fault_diagnosis.html#FaultDiagnosis.fitness_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluation of fitness on individual.
+The individual is a list of conditions for the graph switches
+(True or False).
+Edges connecting its predecessors are removed if the switch state
+is set to ‘False’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>perturbed_nodes</strong> (<em>list</em>) – nodes(s) involved in the
+perturbing event.</p></li>
+<li><p><strong>initial_condition</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – initial status (boolean) for the graph
+switches.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="grape.fault_diagnosis.FaultDiagnosis.optimizer.html" class="btn btn-neutral float-right" title="grape.fault_diagnosis.FaultDiagnosis.optimizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi.html" class="btn btn-neutral float-left" title="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2019, GRAPE contributors.
+      <span class="lastupdated">
+        Last updated on Apr 22, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,822 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>grape.fault_diagnosis &mdash; GRAPE 1.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GRAPE
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../code.html">Code Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../LICENSE.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GRAPE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>grape.fault_diagnosis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for grape.fault_diagnosis</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;FaultDiagnosis module&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">deap</span> <span class="kn">import</span> <span class="n">base</span><span class="p">,</span> <span class="n">creator</span><span class="p">,</span> <span class="n">tools</span>
+
+<span class="kn">from</span> <span class="nn">.general_graph</span> <span class="kn">import</span> <span class="n">GeneralGraph</span>
+<span class="kn">from</span> <span class="nn">.parallel_general_graph</span> <span class="kn">import</span> <span class="n">ParallelGeneralGraph</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FaultDiagnosis"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis">[docs]</a><span class="k">class</span> <span class="nc">FaultDiagnosis</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Class FaultDiagnosis.</span>
+
+<span class="sd">    Perturbation of a GeneralGraph object.</span>
+<span class="sd">    Perturbation can be simulated on a list of elements, or areas.</span>
+<span class="sd">    From one element, the perturbation propagates in all directions,</span>
+<span class="sd">    unless an isolating element is present.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FaultDiagnosis.__init__"><a class="viewcode-back" href="../../_summaries/grape.fault_diagnosis.FaultDiagnosis.html#grape.fault_diagnosis.FaultDiagnosis.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Create an input graph, with the structure contained in the input file.</span>
+
+<span class="sd">        :param str filename: input file in CSV format.</span>
+<span class="sd">        :param parallel: flag for parallel graph creation,</span>
+<span class="sd">            default to False.</span>
+<span class="sd">        :type parallel: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">parallel</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">ParallelGeneralGraph</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">GeneralGraph</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">damaged_areas</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paths_df</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.check_input_with_gephi"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi">[docs]</a>    <span class="k">def</span> <span class="nf">check_input_with_gephi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Write list of nodes and list of edges CSV format files,</span>
+<span class="sd">        to visualize the input with Gephi.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">gephi_nodes_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">gephi_nodes_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;mark&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;mark&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;init_status&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;perturbation_resistant&#39;</span><span class="p">,</span> <span class="s1">&#39;area&#39;</span> <span class="p">]</span>
+        <span class="n">cols_to_str</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;init_status&#39;</span><span class="p">]</span>
+        <span class="n">gephi_nodes_df</span><span class="p">[</span><span class="n">cols_to_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">gephi_nodes_df</span><span class="p">[</span><span class="n">cols_to_str</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">conversions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nan&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;1.0&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">}</span>
+        <span class="n">gephi_nodes_df</span><span class="p">[</span><span class="s1">&#39;init_status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_replace</span><span class="o">=</span><span class="n">conversions</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">gephi_nodes_df</span><span class="p">[</span><span class="n">fields</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;check_import_nodes.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">orphans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges_df</span><span class="p">[</span><span class="s1">&#39;father_mark&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;NULL&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges_df</span><span class="p">[</span><span class="o">~</span><span class="n">orphans</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;check_import_edges.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.fitness_evaluation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation">[docs]</a>    <span class="k">def</span> <span class="nf">fitness_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">individual</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
+        <span class="n">initial_condition</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Evaluation of fitness on individual.</span>
+<span class="sd">        The individual is a list of conditions for the graph switches</span>
+<span class="sd">        (True or False).</span>
+<span class="sd">        Edges connecting its predecessors are removed if the switch state</span>
+<span class="sd">        is set to &#39;False&#39;.</span>
+
+<span class="sd">        :param list perturbed_nodes: nodes(s) involved in the</span>
+<span class="sd">            perturbing event.</span>
+<span class="sd">        :param dict initial_condition: initial status (boolean) for the graph</span>
+<span class="sd">            switches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">acts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">not_equal</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">initial_condition</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+            <span class="n">individual</span><span class="p">))</span>
+
+        <span class="n">T</span> <span class="o">=</span> <span class="n">GeneralGraph</span><span class="p">()</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span> 
+        <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">father_condition</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;father_condition&#39;</span><span class="p">],</span>
+                <span class="n">weight</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">])</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">initial_service</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;initial_service&#39;</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">perturbation_resistant</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;perturbation_resistant&#39;</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">switch</span><span class="p">,</span> <span class="n">opened</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">initial_condition</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">individual</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">opened</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">switch</span><span class="p">)):</span>
+                    <span class="n">T</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">switch</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">perturbed_nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">T</span><span class="o">.</span><span class="n">nodes</span><span class="p">():</span>
+
+                <span class="n">_</span><span class="p">,</span> <span class="n">broken_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rm_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+                <span class="n">broken_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">broken_nodes</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">broken_nodes</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">fit</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;w1&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">acts</span> <span class="o">-</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;w2&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">sum</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">-</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;w3&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">fit</span><span class="p">,)</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.optimizer"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.optimizer">[docs]</a>    <span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">initial_condition</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Genetic algorithm to optimize switches conditions, using DEAP.</span>
+
+<span class="sd">        :param list perturbed_nodes: nodes(s) involved in the perturbing event.</span>
+<span class="sd">        :param dict initial_condition: initial status (boolean) for the graph</span>
+<span class="sd">            switches.</span>
+<span class="sd">        :param dict params: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">            Dict of: {str: int, str: int, str: float, str: float, str: int}.</span>
+<span class="sd">            - &#39;npop&#39;: number of individuals for each population (default to 300)</span>
+<span class="sd">            - &#39;ngen&#39;: total number of generations (default to 100)</span>
+<span class="sd">            - &#39;indpb&#39;: independent probability for attributes to be changed</span>
+<span class="sd">            (default to 0.6)</span>
+<span class="sd">            - &#39;tresh&#39;: threshold for applying crossover/mutation</span>
+<span class="sd">            (default to 0.5)</span>
+<span class="sd">            - &#39;nsel&#39;: number of individuals to select (default to 5)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+        <span class="n">creator</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;FitnessMin&quot;</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Fitness</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,))</span>
+        <span class="n">creator</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;Individual&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">fitness</span><span class="o">=</span><span class="n">creator</span><span class="o">.</span><span class="n">FitnessMin</span><span class="p">)</span>
+    
+        <span class="n">toolbox</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">Toolbox</span><span class="p">()</span>
+        <span class="c1"># Attribute generator</span>
+        <span class="n">toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;attribute_bool&quot;</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">,</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
+        <span class="c1"># Structure initializers</span>
+        <span class="n">toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;individual&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">initRepeat</span><span class="p">,</span> <span class="n">creator</span><span class="o">.</span><span class="n">Individual</span><span class="p">,</span>
+            <span class="n">toolbox</span><span class="o">.</span><span class="n">attribute_bool</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">switches</span><span class="p">))</span>
+        <span class="n">toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;population&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">initRepeat</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span>
+            <span class="n">toolbox</span><span class="o">.</span><span class="n">individual</span><span class="p">)</span>
+    
+        <span class="n">toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;evaluate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness_evaluation</span><span class="p">)</span>
+        <span class="n">toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mate&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">cxUniform</span><span class="p">,</span> <span class="n">indpb</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;indpb&#39;</span><span class="p">])</span>
+        <span class="n">toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mutate&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">mutShuffleIndexes</span><span class="p">,</span>
+            <span class="n">indpb</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;indpb&#39;</span><span class="p">])</span>
+        <span class="n">toolbox</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="n">tools</span><span class="o">.</span><span class="n">selBest</span><span class="p">)</span>
+
+        <span class="n">pop</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">population</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;npop&#39;</span><span class="p">])</span>
+        <span class="c1"># Evaluate the entire population</span>
+        <span class="n">fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">toolbox</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
+            <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">pop</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">fit</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">fitnesses</span><span class="p">):</span>
+            <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">fit</span>
+        <span class="n">fits</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">pop</span><span class="p">]</span>
+
+        <span class="c1"># Variable keeping track of the number of generations</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="mi">0</span>
+    
+        <span class="n">fitnesses</span> <span class="o">=</span> <span class="n">fits</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Begin the evolution</span>
+
+        <span class="k">while</span> <span class="n">g</span> <span class="o">&lt;</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;ngen&#39;</span><span class="p">]:</span>
+            <span class="c1"># A new generation</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">g</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="c1"># Select the next generation individuals</span>
+            <span class="n">offspring</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;nsel&#39;</span><span class="p">])</span>
+            <span class="c1"># Clone the selected individuals</span>
+            <span class="n">offspring</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">toolbox</span><span class="o">.</span><span class="n">clone</span><span class="p">,</span> <span class="n">offspring</span><span class="p">))</span>
+
+            <span class="c1"># Apply crossover and mutation on the offspring</span>
+            <span class="k">for</span> <span class="n">child1</span><span class="p">,</span> <span class="n">child2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">offspring</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">offspring</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;tresh&#39;</span><span class="p">]:</span>
+                    <span class="n">toolbox</span><span class="o">.</span><span class="n">mate</span><span class="p">(</span><span class="n">child1</span><span class="p">,</span> <span class="n">child2</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">child1</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span>
+                    <span class="k">del</span> <span class="n">child2</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span>
+    
+            <span class="k">for</span> <span class="n">mutant</span> <span class="ow">in</span> <span class="n">offspring</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;tresh&#39;</span><span class="p">]:</span>
+                    <span class="n">toolbox</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">mutant</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">mutant</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span>
+    
+            <span class="c1"># Evaluate the individuals with an invalid fitness</span>
+            <span class="n">invalid_ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">offspring</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">valid</span><span class="p">]</span>
+            <span class="n">fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">toolbox</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
+                <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">invalid_ind</span><span class="p">]</span>
+    
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">fit</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">invalid_ind</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">fitnesses</span><span class="p">)):</span>
+                <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">fit</span>
+
+            <span class="n">pop</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">offspring</span><span class="p">[:]</span> <span class="o">+</span> <span class="n">invalid_ind</span><span class="p">[:]</span>
+
+            <span class="n">best</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.check_paths_and_measures"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures">[docs]</a>    <span class="k">def</span> <span class="nf">check_paths_and_measures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Describe the topology of the graph.</span>
+<span class="sd">        Compute efficiency measures for the whole graph and its nodes.</span>
+<span class="sd">        Check the availability of paths between source and target nodes.</span>
+
+<span class="sd">        :param prefix: prefix to be added to column name,</span>
+<span class="sd">            default to None.</span>
+<span class="sd">        :type prefix: str, optional</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">source_user_paths</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">measure_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;nodal_efficiency&#39;</span><span class="p">,</span> <span class="s1">&#39;local_efficiency&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_output</span><span class="p">(</span><span class="n">measure_fields</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+
+        <span class="n">centrality_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;closeness_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;betweenness_centrality&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;indegree_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;outdegree_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;degree_centrality&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_output</span><span class="p">(</span><span class="n">centrality_fields</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">users</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nx</span><span class="o">.</span><span class="n">has_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+
+                    <span class="n">all_paths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">all_simple_paths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">user</span><span class="p">))</span>
+                    <span class="n">shpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">shortest_path</span><span class="p">[</span><span class="n">source</span><span class="p">][</span><span class="n">user</span><span class="p">]</span>
+                    <span class="n">shpath_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">shortest_path_length</span><span class="p">[</span><span class="n">source</span><span class="p">][</span><span class="n">user</span><span class="p">]</span>
+                    <span class="n">neff</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">shpath_length</span>
+                    <span class="n">ids</span> <span class="o">=</span> <span class="n">source</span> <span class="o">+</span> <span class="n">user</span>
+
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="n">all_paths</span> <span class="o">=</span> <span class="s1">&#39;NO_PATH&#39;</span>
+                    <span class="n">shpath</span> <span class="o">=</span> <span class="s1">&#39;NO_PATH&#39;</span>
+                    <span class="n">shpath_length</span> <span class="o">=</span> <span class="s1">&#39;NO_PATH&#39;</span>
+                    <span class="n">neff</span> <span class="o">=</span> <span class="s1">&#39;NO_PATH&#39;</span>
+                    <span class="n">ids</span> <span class="o">=</span> <span class="n">source</span> <span class="o">+</span> <span class="n">user</span>
+
+                <span class="n">source_user_paths</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s1">&#39;from&#39;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+                    <span class="s1">&#39;area&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">source</span><span class="p">],</span>
+                    <span class="s1">&#39;to&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;shortest_path_length&#39;</span><span class="p">):</span> <span class="n">shpath_length</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;shortest_path&#39;</span><span class="p">):</span> <span class="n">shpath</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;simple_path&#39;</span><span class="p">):</span> <span class="n">all_paths</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;pair_efficiency&#39;</span><span class="p">):</span> <span class="n">neff</span><span class="p">,</span>
+                    <span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="n">ids</span>
+                <span class="p">})</span>
+
+        <span class="k">if</span> <span class="n">source_user_paths</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">source_user_paths</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths_df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">paths_df</span> <span class="o">=</span> <span class="n">df</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">paths_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths_df</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>
+                    <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;from&#39;</span><span class="p">,</span> <span class="s1">&#39;to&#39;</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">,</span> <span class="s1">&#39;area&#39;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.rm_nodes"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.rm_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">rm_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">visited</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">broken_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Remove nodes from the graph in a depth first search way to</span>
+<span class="sd">        propagate the perturbation.</span>
+<span class="sd">        Nodes are not deleted if perturbation resistant.</span>
+<span class="sd">        Moreover, valves are not deleted if encountered</span>
+<span class="sd">        during the propagation of a the perturbation.</span>
+<span class="sd">        They are deleted, instead, if object of node deletion themselves.</span>
+
+<span class="sd">        :param str node: the id of the node to remove.</span>
+<span class="sd">        :param nx.DiGraph graph: graph on which to apply the node deletion</span>
+<span class="sd">        :param visited: nodes already visited, default to None.</span>
+<span class="sd">        :type visited: set, optional</span>
+<span class="sd">        :param broken_nodes: nodes that got broken along the perturbation,</span>
+<span class="sd">            default to None.</span>
+<span class="sd">        :type visited: list, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">visited</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">visited</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">broken_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Visited: </span><span class="si">{visited}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Node: </span><span class="si">{node}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">perturbation_resistant</span><span class="p">[</span><span class="n">node</span><span class="p">]):</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Node </span><span class="si">{node}</span><span class="s1"> visited, fault resistant node&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">visited</span><span class="p">,</span> <span class="n">broken_nodes</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fathers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;AND&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span> <span class="s1">&#39;OR&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span> <span class="s1">&#39;SINGLE&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">()</span> <span class="p">}</span>
+            <span class="n">predecessors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Predecessors: </span><span class="si">{predecessors}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">visited</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">broken_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Broken: </span><span class="si">{broken_nodes}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">predecessors</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">predecessors</span><span class="p">:</span>
+                    <span class="n">fathers</span><span class="p">[</span><span class="n">graph</span><span class="o">.</span><span class="n">father_condition</span><span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="n">node</span><span class="p">)]]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">fathers</span><span class="p">[</span><span class="s1">&#39;AND&#39;</span><span class="p">]</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">broken_nodes</span><span class="p">):</span>
+                    <span class="n">broken_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Broken </span><span class="si">{node}</span><span class="s1">, AND predecessor broken.&#39;</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Nodes broken so far: </span><span class="si">{broken_nodes}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="c1">#&#39;SINGLE&#39; treated as &#39;AND&#39;</span>
+                <span class="k">elif</span> <span class="n">fathers</span><span class="p">[</span><span class="s1">&#39;SINGLE&#39;</span><span class="p">]</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">broken_nodes</span><span class="p">):</span>
+                    <span class="n">broken_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Broken </span><span class="si">{node}</span><span class="s1">, SINGLE predecessor broken.&#39;</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Nodes broken so far: </span><span class="si">{broken_nodes}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">fathers</span><span class="p">[</span><span class="s1">&#39;OR&#39;</span><span class="p">]</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">broken_nodes</span><span class="p">))</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">predecessors</span><span class="p">):</span>
+                        <span class="c1">#all my &#39;OR&#39; predecessors are dead</span>
+                        <span class="n">broken_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Broken </span><span class="si">{node}</span><span class="s1">, no more fathers&#39;</span><span class="p">)</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Nodes broken so far: </span><span class="si">{broken_nodes}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Surviving fathers: </span><span class="si">{fathers}</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Nodes broken so far: </span><span class="si">{broken_nodes}</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">broken_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Node: </span><span class="si">{node}</span><span class="s1"> has no more predecessors&#39;</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Nodes broken so far: </span><span class="si">{broken_nodes}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">next_node</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="n">node</span><span class="p">])</span> <span class="o">-</span> <span class="n">visited</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rm_nodes</span><span class="p">(</span><span class="n">next_node</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="n">broken_nodes</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">visited</span><span class="p">,</span> <span class="n">broken_nodes</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.update_output"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.update_output">[docs]</a>    <span class="k">def</span> <span class="nf">update_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_list</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="nb">str</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Update columns output DataFrame with attributes</span>
+<span class="sd">        in attribute_list.</span>
+
+<span class="sd">        :param list attribute_list: list of attributes to be updated</span>
+<span class="sd">            to the output DataFrame.</span>
+<span class="sd">        :param prefix: prefix to be added to column name,</span>
+<span class="sd">            default to empty string.</span>
+<span class="sd">        :type prefix: str, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">attribute_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">col</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.update_status_areas"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.update_status_areas">[docs]</a>    <span class="k">def</span> <span class="nf">update_status_areas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">damaged_areas</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Update the status of the elements in the damaged areas</span>
+<span class="sd">        after the propagation of the perturbation.</span>
+
+<span class="sd">        :param list damaged_areas: area(s) in which to update the status.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;mark_status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;NOT_ACTIVE&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">old_status_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">status_area</span>
+        <span class="n">new_status_area</span> <span class="o">=</span> <span class="n">old_status_area</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">old_status_area</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="ow">in</span> <span class="n">damaged_areas</span><span class="p">:</span>
+                <span class="n">new_status_area</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DAMAGED&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">status_area</span> <span class="o">=</span> <span class="n">new_status_area</span>
+
+        <span class="k">for</span> <span class="n">area</span> <span class="ow">in</span> <span class="n">damaged_areas</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">area</span> <span class="o">==</span> <span class="n">area</span><span class="p">,</span> <span class="s1">&#39;status_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DAMAGED&#39;</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.delete_a_node"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.delete_a_node">[docs]</a>    <span class="k">def</span> <span class="nf">delete_a_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Delete a node in the graph.</span>
+
+<span class="sd">        :param str node: the id of the node to remove.</span>
+
+<span class="sd">        .. warning:: the node id must be contained in the graph.</span>
+<span class="sd">            No check is done within this function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">_</span> <span class="p">,</span> <span class="n">broken_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rm_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
+        <span class="n">broken_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">broken_nodes</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">broken_nodes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">damaged_areas</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.apply_perturbation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.apply_perturbation">[docs]</a>    <span class="k">def</span> <span class="nf">apply_perturbation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;element&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Perturbation simulator, actually applying the perturbation</span>
+<span class="sd">        to all the nodes affected by the perturbation.</span>
+<span class="sd">        The optimizer is run if any switch is present, and edges connecting</span>
+<span class="sd">        its predecessors are removed if the switch state is set to &#39;False&#39;.</span>
+
+<span class="sd">        :param list perturbed_nodes: nodes(s) involved in the</span>
+<span class="sd">            perturbing event.</span>
+<span class="sd">        :param dict params: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">            Dict of: {str: int, str: int, str: float, str: float, str: int}:</span>
+<span class="sd">            - &#39;npop&#39;: number of individuals for each population (default to 300)</span>
+<span class="sd">            - &#39;ngen&#39;: total number of generations (default to 100)</span>
+<span class="sd">            - &#39;indpb&#39;: independent probability for attributes to be changed</span>
+<span class="sd">            (default to 0.6)</span>
+<span class="sd">            - &#39;tresh&#39;: threshold for applying crossover/mutation</span>
+<span class="sd">            (default to 0.5)</span>
+<span class="sd">            - &#39;nsel&#39;: number of individuals to select (default to 5)</span>
+<span class="sd">        :param weights: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
+<span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
+<span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
+<span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
+<span class="sd">        :type weights: dict, optional</span>
+<span class="sd">        :param str kind: type of simulation, used to label output files,</span>
+<span class="sd">            default to &#39;element&#39;</span>
+
+<span class="sd">        .. note:: A perturbation, depending on the considered system,</span>
+<span class="sd">            may spread in all directions starting from the damaged</span>
+<span class="sd">            component(s) and may be affect nearby areas.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">perturbed_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">init_status</span><span class="p">,</span>
+                <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">))</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">init_status</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+                <span class="n">res</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">res</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="mi">0</span><span class="p">]))</span>
+
+            <span class="n">initial_condition_sw</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">init_status</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">final_condition_sw</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">best</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">flips</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">init_status</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">not_equal</span><span class="p">(</span><span class="n">initial_condition_sw</span><span class="p">,</span> <span class="n">final_condition_sw</span><span class="p">)))</span>
+
+        <span class="n">init_open_edges</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">sw</span><span class="p">,</span> <span class="n">closed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">init_status</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">closed</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Opened switch </span><span class="si">{sw}</span><span class="s1"> in initial configuration&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">sw</span><span class="p">)):</span>
+                    <span class="c1"># if final config is closed for this switch I memorize it</span>
+                    <span class="k">if</span> <span class="n">flips</span><span class="p">[</span><span class="n">sw</span><span class="p">]:</span> <span class="n">init_open_edges</span><span class="p">[</span><span class="n">sw</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">pred</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">[</span><span class="n">pred</span><span class="p">][</span><span class="n">sw</span><span class="p">]}</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">sw</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_paths_and_measures</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;original_&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">clear_data</span><span class="p">([</span><span class="s1">&#39;shortest_path&#39;</span><span class="p">,</span> <span class="s1">&#39;shortest_path_length&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;efficiency&#39;</span><span class="p">,</span> <span class="s1">&#39;nodal_efficiency&#39;</span><span class="p">,</span> <span class="s1">&#39;local_efficiency&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;computed_service&#39;</span><span class="p">,</span> <span class="s1">&#39;closeness_centrality&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;betweenness_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;indegree_centrality&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;outdegree_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;degree_centrality&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sw</span><span class="p">,</span> <span class="n">closed</span> <span class="ow">in</span> <span class="n">best</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">flips</span><span class="p">[</span><span class="n">sw</span><span class="p">]:</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">closed</span><span class="p">:</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Switch </span><span class="si">{sw}</span><span class="s1"> finally open, first closed&#39;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">pre</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">sw</span><span class="p">)):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">sw</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Switch </span><span class="si">{sw}</span><span class="s1"> finally closed, first open&#39;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">pre</span><span class="p">,</span> <span class="n">attrs</span> <span class="ow">in</span> <span class="n">init_open_edges</span><span class="p">[</span><span class="n">sw</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">sw</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;BEST: </span><span class="si">{best}</span><span class="s1">, with fitness: {np.min(res[:, 1])}&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">final_status</span> <span class="o">=</span> <span class="n">best</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">perturbed_nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">():</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_a_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_paths_and_measures</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;final_&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paths_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;service_paths_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span><span class="o">+</span> <span class="s1">&#39;_perturbation.csv&#39;</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">status_area_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;final_status&#39;</span><span class="p">,</span> <span class="s1">&#39;mark_status&#39;</span><span class="p">,</span> <span class="s1">&#39;status_area&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_output</span><span class="p">(</span><span class="n">status_area_fields</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_status_areas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">damaged_areas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph_characterization_to_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_perturbation.csv&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.simulate_element_perturbation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.simulate_element_perturbation">[docs]</a>    <span class="k">def</span> <span class="nf">simulate_element_perturbation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;npop&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">&#39;ngen&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;indpb&#39;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;tresh&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s1">&#39;nsel&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;w1&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Simulate a perturbation of one or multiple nodes.</span>
+
+<span class="sd">        :param list perturbed_nodes: nodes(s) involved in the perturbing event.</span>
+<span class="sd">        :param params: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">            Dict of: {str: int, str: int, str: float, str: float, str: int}:</span>
+<span class="sd">            - &#39;npop&#39;: number of individuals for each population (default to 300)</span>
+<span class="sd">            - &#39;ngen&#39;: total number of generations (default to 100)</span>
+<span class="sd">            - &#39;indpb&#39;: independent probability for attributes to be changed</span>
+<span class="sd">            (default to 0.6)</span>
+<span class="sd">            - &#39;tresh&#39;: threshold for applying crossover/mutation</span>
+<span class="sd">            (default to 0.5)</span>
+<span class="sd">            - &#39;nsel&#39;: number of individuals to select (default to 5)</span>
+<span class="sd">        :type params: dict, optional</span>
+<span class="sd">        :param weights: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
+<span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
+<span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
+<span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
+<span class="sd">        :type weights: dict, optional</span>
+
+<span class="sd">        .. note:: A perturbation, depending on the considered system,</span>
+<span class="sd">            may spread in all directions starting from the damaged</span>
+<span class="sd">            component(s) and may be affect nearby areas.</span>
+
+<span class="sd">        :raises: SystemExit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">perturbed_nodes</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">():</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The node </span><span class="si">{node}</span><span class="s1"> is not in the graph&#39;</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Insert a valid node&#39;</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Valid nodes: {self.G.nodes()}&#39;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_perturbation</span><span class="p">(</span><span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;element&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.simulate_area_perturbation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation">[docs]</a>    <span class="k">def</span> <span class="nf">simulate_area_perturbation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_areas</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;npop&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="s1">&#39;ngen&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;indpb&#39;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;tresh&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;nsel&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;w1&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s1">&#39;w2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Simulate a perturbation in one or multiple areas.</span>
+
+<span class="sd">        :param list perturbed_areas: area(s) involved in the perturbing event.</span>
+<span class="sd">        :param dict params: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">            Dict of: {str: int, str: int, str: float, str: float, str: int}:</span>
+<span class="sd">            - &#39;npop&#39;: number of individuals for each population (default to 300)</span>
+<span class="sd">            - &#39;ngen&#39;: total number of generations (default to 100)</span>
+<span class="sd">            - &#39;indpb&#39;: independent probability for attributes to be changed</span>
+<span class="sd">            (default to 0.6) </span>
+<span class="sd">            - &#39;tresh&#39; threshold for applying crossover/mutation</span>
+<span class="sd">            (default to 0.5)</span>
+<span class="sd">            - &#39;nsel&#39;: number of individuals to select (default to 5)</span>
+<span class="sd">        :type params: dict, optional</span>
+<span class="sd">        :param weights: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
+<span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
+<span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
+<span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
+<span class="sd">        :type weights: dict, optional</span>
+
+<span class="sd">        .. note:: A perturbation, depending on the considered system,</span>
+<span class="sd">            may spread in all directions starting from the damaged</span>
+<span class="sd">            component(s) and may be affect nearby areas.</span>
+
+<span class="sd">        :raises: SystemExit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">nodes_in_area</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">area</span> <span class="ow">in</span> <span class="n">perturbed_areas</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">area</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The area </span><span class="si">{area}</span><span class="s1"> is not in the graph&#39;</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Insert a valid area&#39;</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Valid areas: {set(self.G.area.values())}&#39;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">idx_area</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">idx_area</span> <span class="o">==</span> <span class="n">area</span><span class="p">:</span> <span class="n">nodes_in_area</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_perturbation</span><span class="p">(</span><span class="n">nodes_in_area</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;area&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.graph_characterization_to_file"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.graph_characterization_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">graph_characterization_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Write to file graph characterization after the perturbation.</span>
+<span class="sd">        File is written in CSV format.</span>
+
+<span class="sd">        :param str filename: output file name where to write the</span>
+<span class="sd">            graph characterization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;mark&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;mark&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;init_status&#39;</span><span class="p">,</span> <span class="s1">&#39;final_status&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;mark_status&#39;</span><span class="p">,</span> <span class="s1">&#39;perturbation_resistant&#39;</span><span class="p">,</span> <span class="s1">&#39;area&#39;</span><span class="p">,</span> <span class="s1">&#39;status_area&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;original_closeness_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;final_closeness_centrality&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;original_betweenness_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;final_betweenness_centrality&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;original_indegree_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;final_indegree_centrality&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;original_outdegree_centrality&#39;</span><span class="p">,</span> <span class="s1">&#39;final_outdegree_centrality&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;original_local_efficiency&#39;</span><span class="p">,</span> <span class="s1">&#39;final_local_efficiency&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;original_nodal_efficiency&#39;</span><span class="p">,</span> <span class="s1">&#39;final_nodal_efficiency&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;original_service&#39;</span><span class="p">,</span> <span class="s1">&#39;final_service&#39;</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;init_status&#39;</span><span class="p">,</span> <span class="s1">&#39;final_status&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;init_status&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;final_status&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">conversions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nan&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;1.0&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;init_status&#39;</span><span class="p">,</span> <span class="s1">&#39;final_status&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;init_status&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;final_status&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_replace</span><span class="o">=</span><span class="n">conversions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">fields</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2019, GRAPE contributors.
+      <span class="lastupdated">
+        Last updated on Apr 22, 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
