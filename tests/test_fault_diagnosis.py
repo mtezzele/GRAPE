@@ -1811,3 +1811,79 @@ class Test_FD(TestCase):
             mark_all_OR_predecessors_dead,
             survived_nodes_mark,
             msg="MARK failure: all OR predecessors dead")
+
+    def test_final_status_after_element_perturbation_isolating_serial(self):
+        """
+        The following test checks final_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have no fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
+        F.simulate_element_perturbation(["1"])
+
+        final_status_after_element_perturbation = {
+            '2': 0,
+            '3': 0
+        }
+
+        self.assertDictEqual(
+            final_status_after_element_perturbation,
+            F.G.final_status,
+            msg="FINAL STATUS failure: perturbation of element 1")
+
+    def test_final_status_after_element_perturbation_isolating_class_parallel(self):
+        """
+        The following test checks final_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have no fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv", parallel=True)
+        F.simulate_element_perturbation(["1"])
+
+        final_status_after_element_perturbation = {
+            '2': 0,
+            '3': 0
+        }
+
+        self.assertDictEqual(
+            final_status_after_element_perturbation,
+            F.G.final_status,
+            msg="FINAL STATUS failure: perturbation of element 1")
+
+    def test_final_status_after_element_perturbation_isolating_fault_parallel(self):
+        """
+        The following test checks final_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have no fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv")
+        F.simulate_element_perturbation(["1"], parallel=True)
+
+        final_status_after_element_perturbation = {
+            '2': 0,
+            '3': 0
+        }
+
+        self.assertDictEqual(
+            final_status_after_element_perturbation,
+            F.G.final_status,
+            msg="FINAL STATUS failure: perturbation of element 1")
+
+    def test_final_status_after_element_perturbation_isolating_both_parallel(self):
+        """
+        The following test checks final_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have no fault resistant nodes.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv", parallel=True)
+        F.simulate_element_perturbation(["1"], parallel=True)
+
+        final_status_after_element_perturbation = {
+            '2': 0,
+            '3': 0
+        }
+
+        self.assertDictEqual(
+            final_status_after_element_perturbation,
+            F.G.final_status,
+            msg="FINAL STATUS failure: perturbation of element 1")

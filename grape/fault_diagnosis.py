@@ -3,12 +3,14 @@
 import logging
 import sys
 import warnings
+import multiprocessing as mp
 import networkx as nx
 import numpy as np
 import pandas as pd
 import random
 from deap import base, creator, tools
 
+from .utils import chunk_it
 from .general_graph import GeneralGraph
 from .parallel_general_graph import ParallelGeneralGraph
 
@@ -69,8 +71,88 @@ class FaultDiagnosis():
         self.edges_df = self.edges_df[~orphans]
         self.edges_df.to_csv('check_import_edges.csv', index=False)
 
-    def fitness_evaluation(self, individual, perturbed_nodes,
-        initial_condition, w):
+    def fitness_iteration_parallel(self, out_queue, ichunk, chunk_length,
+        individuals, perturbed_nodes, initial_condition, weights):
+        """
+
+        Parallel iteration for fitness evaluation. We append to the
+        multiprocessing queue a tuple constituted by constituted by the
+        index of the individual, the individual itself, and its fitness.
+
+        :param multiprocessing.queues.Queue out_queue: multiprocessing queue
+        :param int ichunk: index of the chunk under consideration
+        :param int chunk_length: lengths of the chunks (the last chunk may
+            be shorter due to non-even division of the number of generations by
+            the number of processors)
+        :param list individuals: list of individuals on which to perform
+            fitness evaluation.
+        :param list perturbed_nodes: nodes(s) involved in the perturbing event.
+        :param dict initial_condition: initial status (boolean) for the graph
+            switches.
+        :param dict weights: weights for fitness evaluation on individuals.
+            Dict of: {str: float, str: float, str: float}:
+            - 'w1': weight multiplying number of actions (default to 1.0)
+            - 'w2': weight multiplying total final service (default to 1.0)
+            - 'w3': weight multiplying final graph size (default to 1.0)
+
+        """
+
+        for iter_ind in range(len(individuals)):
+            ind_fit = (ichunk*chunk_length + iter_ind, individuals[iter_ind],
+                self.fitness_evaluation(individuals[iter_ind], perturbed_nodes,
+                initial_condition, weights))
+            out_queue.put(ind_fit)
+
+    def fitness_evaluation_parallel(self, pop, perturbed_nodes,
+        initial_condition, weights):
+        """
+
+        Wrapper for fitness evaluation. This methods spawns the processes for
+        fitness evaluation and collects the results.
+
+        :param list pop: list of individuals
+        :param list perturbed_nodes: nodes(s) involved in the perturbing event.
+        :param dict initial_condition: initial status (boolean) for the graph
+            switches.
+        :param dict weights: weights for fitness evaluation on individuals.
+            Dict of: {str: float, str: float, str: float}:
+            - 'w1': weight multiplying number of actions (default to 1.0)
+            - 'w2': weight multiplying total final service (default to 1.0)
+            - 'w3': weight multiplying final graph size (default to 1.0)
+
+        :return: list of tuples constituted by the index of the individual,
+            the individual itself, and its fitness
+        :rtype: list
+        """
+
+        n_procs = mp.cpu_count()
+
+        fitnesses_tuples = []
+        out_queue = mp.Queue()
+        ind_chunks = chunk_it(pop, n_procs)
+
+        processes = [
+            mp.Process( target=self.fitness_iteration_parallel,
+            args=( out_queue, p, len(ind_chunks[0]), ind_chunks[p],
+                perturbed_nodes, initial_condition, weights ))
+                for p in range(n_procs) ]
+
+        for proc in processes:
+            proc.start()
+
+        while 1:
+            running = any(p.is_alive() for p in processes)
+            while not out_queue.empty():
+
+                fitnesses_tuples.append(out_queue.get())
+
+            if not running:
+                break
+
+        return fitnesses_tuples
+
+    def fitness_evaluation(self, individual, perturbed_nodes, initial_condition,
+        w):
         """
 
         Evaluation of fitness on individual.
@@ -79,10 +161,16 @@ class FaultDiagnosis():
         Edges connecting its predecessors are removed if the switch state
         is set to 'False'.
 
+        :param list individual: element on which to compute the fitness.
         :param list perturbed_nodes: nodes(s) involved in the
             perturbing event.
         :param dict initial_condition: initial status (boolean) for the graph
             switches.
+        :param dict w: weights for fitness evaluation on individuals.
+            Dict of: {str: float, str: float, str: float}:
+            - 'w1': weight multiplying number of actions (default to 1.0)
+            - 'w2': weight multiplying total final service (default to 1.0)
+            - 'w3': weight multiplying final graph size (default to 1.0)
         """
 
         acts = np.sum(np.not_equal(list(initial_condition.values()),
@@ -115,7 +203,8 @@ class FaultDiagnosis():
         fit = w['w1']*acts - w['w2']*sum(T.service.values()) - w['w3']*len(T)
         return (fit,)
 
-    def optimizer(self, perturbed_nodes, initial_condition, params, weights):
+    def optimizer(self, perturbed_nodes, initial_condition, params, weights,
+        parallel):
         """
 
         Genetic algorithm to optimize switches conditions, using DEAP.
@@ -132,6 +221,13 @@ class FaultDiagnosis():
             - 'tresh': threshold for applying crossover/mutation
             (default to 0.5)
             - 'nsel': number of individuals to select (default to 5)
+        :param dict weights: weights for fitness evaluation on individuals.
+            Dict of: {str: float, str: float, str: float}:
+            - 'w1': weight multiplying number of actions (default to 1.0)
+            - 'w2': weight multiplying total final service (default to 1.0)
+            - 'w3': weight multiplying final graph size (default to 1.0)
+        :param bool parallel: flag for parallel fitness evaluation of
+            initial population
         """
 
         logging.getLogger().setLevel(logging.INFO)
@@ -156,8 +252,14 @@ class FaultDiagnosis():
 
         pop = toolbox.population(n=params['npop'])
         # Evaluate the entire population
-        fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
-            initial_condition, weights) for ind in pop]
+        if not parallel:
+            fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
+                initial_condition, weights) for ind in pop]
+        else:
+            res_par = self.fitness_evaluation_parallel(pop, perturbed_nodes,
+                initial_condition, weights)
+            res_par.sort(key=lambda x:x[0])
+            fitnesses = [x[2] for x in res_par]
 
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit
@@ -195,7 +297,7 @@ class FaultDiagnosis():
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
                 initial_condition, weights) for ind in invalid_ind]
-    
+
             for ind, fit in zip(invalid_ind, list(fitnesses)):
                 ind.fitness.values = fit
 
@@ -398,7 +500,7 @@ class FaultDiagnosis():
             self.damaged_areas.add(self.G.area[n])
             self.G.remove_node(n)
 
-    def apply_perturbation(self, perturbed_nodes, params, weights,
+    def apply_perturbation(self, perturbed_nodes, params, weights, parallel,
         kind='element'):
         """
 
@@ -418,12 +520,13 @@ class FaultDiagnosis():
             - 'tresh': threshold for applying crossover/mutation
             (default to 0.5)
             - 'nsel': number of individuals to select (default to 5)
-        :param weights: values for the optimizer evolutionary algorithm.
+        :param dict weights: weights for fitness evaluation on individuals.
             Dict of: {str: float, str: float, str: float}:
             - 'w1': weight multiplying number of actions (default to 1.0)
             - 'w2': weight multiplying total final service (default to 1.0)
             - 'w3': weight multiplying final graph size (default to 1.0)
-        :type weights: dict, optional
+        :param bool parallel: flag for parallel fitness evaluation of
+            initial population
         :param str kind: type of simulation, used to label output files,
             default to 'element'
 
@@ -434,7 +537,7 @@ class FaultDiagnosis():
 
         if self.G.switches:
             res = np.array(self.optimizer(perturbed_nodes, self.G.init_status,
-                params, weights))
+                params, weights, parallel))
             best = dict(zip(self.G.init_status.keys(),
                 res[np.argmin(res[:, 1]), 0]))
 
@@ -492,7 +595,7 @@ class FaultDiagnosis():
 
     def simulate_element_perturbation(self, perturbed_nodes,
         params={'npop': 300, 'ngen': 100, 'indpb': 0.6, 'tresh': 0.5,
-        'nsel': 5}, weights={'w1': 1.0, 'w2': 1.0, 'w3': 1.0}):
+        'nsel': 5}, weights={'w1': 1.0, 'w2': 1.0, 'w3': 1.0}, parallel=False):
         """
 
         Simulate a perturbation of one or multiple nodes.
@@ -508,12 +611,15 @@ class FaultDiagnosis():
             (default to 0.5)
             - 'nsel': number of individuals to select (default to 5)
         :type params: dict, optional
-        :param weights: values for the optimizer evolutionary algorithm.
+        :param weights: weights for fitness evaluation on individuals.
             Dict of: {str: float, str: float, str: float}:
             - 'w1': weight multiplying number of actions (default to 1.0)
             - 'w2': weight multiplying total final service (default to 1.0)
             - 'w3': weight multiplying final graph size (default to 1.0)
         :type weights: dict, optional
+        :param parallel: flag for parallel fitness evaluation of
+            initial population, default to False
+        :type parallel: bool, optional
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
@@ -530,12 +636,12 @@ class FaultDiagnosis():
                 logging.debug(f'Valid nodes: {self.G.nodes()}')
                 sys.exit()
 
-        self.apply_perturbation(perturbed_nodes, params, weights,
+        self.apply_perturbation(perturbed_nodes, params, weights, parallel,
             kind='element')
 
     def simulate_area_perturbation(self, perturbed_areas, params={'npop': 300,
         'ngen': 100, 'indpb': 0.6, 'tresh': 0.5, 'nsel': 5}, weights={'w1': 1.0,
-        'w2': 1.0, 'w3': 1.0}):
+        'w2': 1.0, 'w3': 1.0}, parallel=False):
         """
 
         Simulate a perturbation in one or multiple areas.
@@ -551,12 +657,15 @@ class FaultDiagnosis():
             (default to 0.5)
             - 'nsel': number of individuals to select (default to 5)
         :type params: dict, optional
-        :param weights: values for the optimizer evolutionary algorithm.
+        :param weights: weights for fitness evaluation on individuals.
             Dict of: {str: float, str: float, str: float}:
             - 'w1': weight multiplying number of actions (default to 1.0)
             - 'w2': weight multiplying total final service (default to 1.0)
             - 'w3': weight multiplying final graph size (default to 1.0)
         :type weights: dict, optional
+        :param parallel: flag for parallel fitness evaluation of
+            initial population, default to False
+        :type parallel: bool, optional
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
@@ -578,7 +687,8 @@ class FaultDiagnosis():
                 for idx, idx_area in self.G.area.items():
                     if idx_area == area: nodes_in_area.append(idx)
 
-        self.apply_perturbation(nodes_in_area, params, weights, kind='area')
+        self.apply_perturbation(nodes_in_area, params, weights, parallel,
+            kind='area')
 
     def graph_characterization_to_file(self, filename):
         """

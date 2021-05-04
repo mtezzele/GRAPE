@@ -1,23 +1,23 @@
 """Utility functions module"""
 
 
-def chunk_it(nodes, n):
+def chunk_it(elements, n_procs):
     """
 
-    Divide nodes in chunks according to number of processes.
+    Divide elements in chunks according to number of processes.
 
-    :param list nodes: list of nodes
-    :param int n: number of available processes
+    :param list elements: list of elements to be divided in chunks
+    :param int n_procs: number of available processes
     
-    :return: list of graph nodes to be assigned to every process
+    :return: list of elements to be assigned to every process
     :rtype: list
     """
 
-    avg = len(nodes) / n
+    avg = len(elements) / n_procs
     out = []
     last = 0.0
 
-    while last < len(nodes):
-        out.append(nodes[int(last):int(last + avg)])
+    while last < len(elements):
+        out.append(elements[int(last):int(last + avg)])
         last += avg
     return out
