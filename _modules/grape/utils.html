@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>grape.utils &mdash; GRAPE 1.0.1 documentation</title>
+  <title>grape.utils &mdash; GRAPE 1.1.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -162,24 +162,24 @@
 <span></span><span class="sd">&quot;&quot;&quot;Utility functions module&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="chunk_it"><a class="viewcode-back" href="../../_summaries/grape.utils.chunk_it.html#grape.utils.chunk_it">[docs]</a><span class="k">def</span> <span class="nf">chunk_it</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<div class="viewcode-block" id="chunk_it"><a class="viewcode-back" href="../../_summaries/grape.utils.chunk_it.html#grape.utils.chunk_it">[docs]</a><span class="k">def</span> <span class="nf">chunk_it</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">n_procs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">    Divide nodes in chunks according to number of processes.</span>
+<span class="sd">    Divide elements in chunks according to number of processes.</span>
 
-<span class="sd">    :param list nodes: list of nodes</span>
-<span class="sd">    :param int n: number of available processes</span>
+<span class="sd">    :param list elements: list of elements to be divided in chunks</span>
+<span class="sd">    :param int n_procs: number of available processes</span>
 <span class="sd">    </span>
-<span class="sd">    :return: list of graph nodes to be assigned to every process</span>
+<span class="sd">    :return: list of elements to be assigned to every process</span>
 <span class="sd">    :rtype: list</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">avg</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
+    <span class="n">avg</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_procs</span>
     <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">last</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-    <span class="k">while</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">last</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="n">last</span> <span class="o">+</span> <span class="n">avg</span><span class="p">)])</span>
+    <span class="k">while</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">last</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="n">last</span> <span class="o">+</span> <span class="n">avg</span><span class="p">)])</span>
         <span class="n">last</span> <span class="o">+=</span> <span class="n">avg</span>
     <span class="k">return</span> <span class="n">out</span></div>
 </pre></div>
@@ -195,7 +195,7 @@
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on Apr 22, 2021.
+        Last updated on May 04, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>grape.fault_diagnosis.FaultDiagnosis &mdash; GRAPE 1.0.1 documentation</title>
+  <title>grape.fault_diagnosis.FaultDiagnosis &mdash; GRAPE 1.1.0 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -97,6 +97,8 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../fault_diagnosis.html">FaultDiagnosis</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">grape.fault_diagnosis.FaultDiagnosis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi.html">grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel.html">grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel.html">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation.html">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.optimizer.html">grape.fault_diagnosis.FaultDiagnosis.optimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures.html">grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures</a></li>
@@ -247,6 +249,12 @@ default to False.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation.html#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation" title="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitness_evaluation</span></code></a>(individual, …)</p></td>
 <td><p>Evaluation of fitness on individual.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel.html#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel" title="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitness_evaluation_parallel</span></code></a>(pop, …)</p></td>
+<td><p>Wrapper for fitness evaluation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel.html#grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel" title="grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitness_iteration_parallel</span></code></a>(out_queue, …)</p></td>
+<td><p>Parallel iteration for fitness evaluation.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.graph_characterization_to_file.html#grape.fault_diagnosis.FaultDiagnosis.graph_characterization_to_file" title="grape.fault_diagnosis.FaultDiagnosis.graph_characterization_to_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graph_characterization_to_file</span></code></a>(filename)</p></td>
 <td><p>Write to file graph characterization after the perturbation.</p></td>
 </tr>
@@ -290,7 +298,7 @@ default to False.</p></li>
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on Apr 22, 2021.
+        Last updated on May 04, 2021.
       </span>
 
     </p>

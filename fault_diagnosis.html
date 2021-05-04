@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FaultDiagnosis &mdash; GRAPE 1.0.1 documentation</title>
+  <title>FaultDiagnosis &mdash; GRAPE 1.1.0 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -97,6 +97,8 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">FaultDiagnosis</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.html">grape.fault_diagnosis.FaultDiagnosis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi.html">grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel.html">grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel.html">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation.html">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.optimizer.html">grape.fault_diagnosis.FaultDiagnosis.optimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures.html">grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures</a></li>
@@ -200,6 +202,12 @@
 <tr class="row-even"><td><p><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi.html#grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi" title="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FaultDiagnosis.check_input_with_gephi</span></code></a></p></td>
 <td><p>Write list of nodes and list of edges CSV format files, to visualize the input with Gephi.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel.html#grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel" title="grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FaultDiagnosis.fitness_iteration_parallel</span></code></a></p></td>
+<td><p>Parallel iteration for fitness evaluation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel.html#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel" title="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FaultDiagnosis.fitness_evaluation_parallel</span></code></a></p></td>
+<td><p>Wrapper for fitness evaluation.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_summaries/grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation.html#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation" title="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FaultDiagnosis.fitness_evaluation</span></code></a></p></td>
 <td><p>Evaluation of fitness on individual.</p></td>
 </tr>
@@ -256,7 +264,7 @@ default to False.</p></li>
 </dl>
 <dl class="method">
 <dt>
-<code class="sig-name descname">apply_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_nodes</em>, <em class="sig-param">params</em>, <em class="sig-param">weights</em>, <em class="sig-param">kind='element'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.apply_perturbation"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">apply_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_nodes</em>, <em class="sig-param">params</em>, <em class="sig-param">weights</em>, <em class="sig-param">parallel</em>, <em class="sig-param">kind='element'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.apply_perturbation"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Perturbation simulator, actually applying the perturbation
 to all the nodes affected by the perturbation.
 The optimizer is run if any switch is present, and edges connecting
@@ -275,11 +283,13 @@ Dict of: {str: int, str: int, str: float, str: float, str: int}:
 - ‘tresh’: threshold for applying crossover/mutation
 (default to 0.5)
 - ‘nsel’: number of individuals to select (default to 5)</p></li>
-<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em>) – values for the optimizer evolutionary algorithm.
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – weights for fitness evaluation on individuals.
 Dict of: {str: float, str: float, str: float}:
 - ‘w1’: weight multiplying number of actions (default to 1.0)
 - ‘w2’: weight multiplying total final service (default to 1.0)
 - ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
+<li><p><strong>parallel</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – flag for parallel fitness evaluation of
+initial population</p></li>
 <li><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – type of simulation, used to label output files,
 default to ‘element’</p></li>
 </ul>
@@ -341,10 +351,74 @@ is set to ‘False’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>individual</strong> (<em>list</em>) – element on which to compute the fitness.</p></li>
 <li><p><strong>perturbed_nodes</strong> (<em>list</em>) – nodes(s) involved in the
 perturbing event.</p></li>
 <li><p><strong>initial_condition</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – initial status (boolean) for the graph
 switches.</p></li>
+<li><p><strong>w</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – weights for fitness evaluation on individuals.
+Dict of: {str: float, str: float, str: float}:
+- ‘w1’: weight multiplying number of actions (default to 1.0)
+- ‘w2’: weight multiplying total final service (default to 1.0)
+- ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">fitness_evaluation_parallel</code><span class="sig-paren">(</span><em class="sig-param">pop</em>, <em class="sig-param">perturbed_nodes</em>, <em class="sig-param">initial_condition</em>, <em class="sig-param">weights</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.fitness_evaluation_parallel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Wrapper for fitness evaluation. This methods spawns the processes for
+fitness evaluation and collects the results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pop</strong> (<em>list</em>) – list of individuals</p></li>
+<li><p><strong>perturbed_nodes</strong> (<em>list</em>) – nodes(s) involved in the perturbing event.</p></li>
+<li><p><strong>initial_condition</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – initial status (boolean) for the graph
+switches.</p></li>
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – weights for fitness evaluation on individuals.
+Dict of: {str: float, str: float, str: float}:
+- ‘w1’: weight multiplying number of actions (default to 1.0)
+- ‘w2’: weight multiplying total final service (default to 1.0)
+- ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of tuples constituted by the index of the individual,
+the individual itself, and its fitness</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">fitness_iteration_parallel</code><span class="sig-paren">(</span><em class="sig-param">out_queue</em>, <em class="sig-param">ichunk</em>, <em class="sig-param">chunk_length</em>, <em class="sig-param">individuals</em>, <em class="sig-param">perturbed_nodes</em>, <em class="sig-param">initial_condition</em>, <em class="sig-param">weights</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.fitness_iteration_parallel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Parallel iteration for fitness evaluation. We append to the
+multiprocessing queue a tuple constituted by constituted by the
+index of the individual, the individual itself, and its fitness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_queue</strong> (<em>multiprocessing.queues.Queue</em>) – multiprocessing queue</p></li>
+<li><p><strong>ichunk</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – index of the chunk under consideration</p></li>
+<li><p><strong>chunk_length</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – lengths of the chunks (the last chunk may
+be shorter due to non-even division of the number of generations by
+the number of processors)</p></li>
+<li><p><strong>individuals</strong> (<em>list</em>) – list of individuals on which to perform
+fitness evaluation.</p></li>
+<li><p><strong>perturbed_nodes</strong> (<em>list</em>) – nodes(s) involved in the perturbing event.</p></li>
+<li><p><strong>initial_condition</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – initial status (boolean) for the graph
+switches.</p></li>
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – weights for fitness evaluation on individuals.
+Dict of: {str: float, str: float, str: float}:
+- ‘w1’: weight multiplying number of actions (default to 1.0)
+- ‘w2’: weight multiplying total final service (default to 1.0)
+- ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
 </ul>
 </dd>
 </dl>
@@ -365,7 +439,7 @@ graph characterization.</p>
 
 <dl class="method">
 <dt>
-<code class="sig-name descname">optimizer</code><span class="sig-paren">(</span><em class="sig-param">perturbed_nodes</em>, <em class="sig-param">initial_condition</em>, <em class="sig-param">params</em>, <em class="sig-param">weights</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.optimizer"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">optimizer</code><span class="sig-paren">(</span><em class="sig-param">perturbed_nodes</em>, <em class="sig-param">initial_condition</em>, <em class="sig-param">params</em>, <em class="sig-param">weights</em>, <em class="sig-param">parallel</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.optimizer"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Genetic algorithm to optimize switches conditions, using DEAP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -382,6 +456,13 @@ Dict of: {str: int, str: int, str: float, str: float, str: int}.
 - ‘tresh’: threshold for applying crossover/mutation
 (default to 0.5)
 - ‘nsel’: number of individuals to select (default to 5)</p></li>
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – weights for fitness evaluation on individuals.
+Dict of: {str: float, str: float, str: float}:
+- ‘w1’: weight multiplying number of actions (default to 1.0)
+- ‘w2’: weight multiplying total final service (default to 1.0)
+- ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
+<li><p><strong>parallel</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – flag for parallel fitness evaluation of
+initial population</p></li>
 </ul>
 </dd>
 </dl>
@@ -411,7 +492,7 @@ default to None.</p></li>
 
 <dl class="method">
 <dt>
-<code class="sig-name descname">simulate_area_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_areas</em>, <em class="sig-param">params={'indpb': 0.6</em>, <em class="sig-param">'ngen': 100</em>, <em class="sig-param">'npop': 300</em>, <em class="sig-param">'nsel': 5</em>, <em class="sig-param">'tresh': 0.5}</em>, <em class="sig-param">weights={'w1': 1.0</em>, <em class="sig-param">'w2': 1.0</em>, <em class="sig-param">'w3': 1.0}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.simulate_area_perturbation"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">simulate_area_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_areas</em>, <em class="sig-param">params={'indpb': 0.6</em>, <em class="sig-param">'ngen': 100</em>, <em class="sig-param">'npop': 300</em>, <em class="sig-param">'nsel': 5</em>, <em class="sig-param">'tresh': 0.5}</em>, <em class="sig-param">weights={'w1': 1.0</em>, <em class="sig-param">'w2': 1.0</em>, <em class="sig-param">'w3': 1.0}</em>, <em class="sig-param">parallel=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.simulate_area_perturbation"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Simulate a perturbation in one or multiple areas.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -426,11 +507,13 @@ Dict of: {str: int, str: int, str: float, str: float, str: int}:
 - ‘tresh’ threshold for applying crossover/mutation
 (default to 0.5)
 - ‘nsel’: number of individuals to select (default to 5)</p></li>
-<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em>) – values for the optimizer evolutionary algorithm.
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em>) – weights for fitness evaluation on individuals.
 Dict of: {str: float, str: float, str: float}:
 - ‘w1’: weight multiplying number of actions (default to 1.0)
 - ‘w2’: weight multiplying total final service (default to 1.0)
 - ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
+<li><p><strong>parallel</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) – flag for parallel fitness evaluation of
+initial population, default to False</p></li>
 </ul>
 </dd>
 </dl>
@@ -449,7 +532,7 @@ component(s) and may be affect nearby areas.</p>
 
 <dl class="method">
 <dt>
-<code class="sig-name descname">simulate_element_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_nodes</em>, <em class="sig-param">params={'indpb': 0.6</em>, <em class="sig-param">'ngen': 100</em>, <em class="sig-param">'npop': 300</em>, <em class="sig-param">'nsel': 5</em>, <em class="sig-param">'tresh': 0.5}</em>, <em class="sig-param">weights={'w1': 1.0</em>, <em class="sig-param">'w2': 1.0</em>, <em class="sig-param">'w3': 1.0}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.simulate_element_perturbation"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">simulate_element_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_nodes</em>, <em class="sig-param">params={'indpb': 0.6</em>, <em class="sig-param">'ngen': 100</em>, <em class="sig-param">'npop': 300</em>, <em class="sig-param">'nsel': 5</em>, <em class="sig-param">'tresh': 0.5}</em>, <em class="sig-param">weights={'w1': 1.0</em>, <em class="sig-param">'w2': 1.0</em>, <em class="sig-param">'w3': 1.0}</em>, <em class="sig-param">parallel=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/fault_diagnosis.html#FaultDiagnosis.simulate_element_perturbation"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Simulate a perturbation of one or multiple nodes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -464,11 +547,13 @@ Dict of: {str: int, str: int, str: float, str: float, str: int}:
 - ‘tresh’: threshold for applying crossover/mutation
 (default to 0.5)
 - ‘nsel’: number of individuals to select (default to 5)</p></li>
-<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em>) – values for the optimizer evolutionary algorithm.
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em>) – weights for fitness evaluation on individuals.
 Dict of: {str: float, str: float, str: float}:
 - ‘w1’: weight multiplying number of actions (default to 1.0)
 - ‘w2’: weight multiplying total final service (default to 1.0)
 - ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
+<li><p><strong>parallel</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) – flag for parallel fitness evaluation of
+initial population, default to False</p></li>
 </ul>
 </dd>
 </dl>
@@ -534,7 +619,7 @@ after the propagation of the perturbation.</p>
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on Apr 22, 2021.
+        Last updated on May 04, 2021.
       </span>
 
     </p>

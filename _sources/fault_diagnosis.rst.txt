@@ -11,6 +11,8 @@ FaultDiagnosis
 
     FaultDiagnosis
     FaultDiagnosis.check_input_with_gephi
+    FaultDiagnosis.fitness_iteration_parallel
+    FaultDiagnosis.fitness_evaluation_parallel
     FaultDiagnosis.fitness_evaluation
     FaultDiagnosis.optimizer
     FaultDiagnosis.check_paths_and_measures

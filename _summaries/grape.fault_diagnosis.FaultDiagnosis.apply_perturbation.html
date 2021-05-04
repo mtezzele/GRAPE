@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>grape.fault_diagnosis.FaultDiagnosis.apply_perturbation &mdash; GRAPE 1.0.1 documentation</title>
+  <title>grape.fault_diagnosis.FaultDiagnosis.apply_perturbation &mdash; GRAPE 1.1.0 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -97,6 +97,8 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../fault_diagnosis.html">FaultDiagnosis</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.html">grape.fault_diagnosis.FaultDiagnosis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi.html">grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel.html">grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel.html">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation.html">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.optimizer.html">grape.fault_diagnosis.FaultDiagnosis.optimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures.html">grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures</a></li>
@@ -191,7 +193,7 @@
 <h1>grape.fault_diagnosis.FaultDiagnosis.apply_perturbation<a class="headerlink" href="#grape-fault-diagnosis-faultdiagnosis-apply-perturbation" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="grape.fault_diagnosis.FaultDiagnosis.apply_perturbation">
-<code class="sig-prename descclassname">FaultDiagnosis.</code><code class="sig-name descname">apply_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_nodes</em>, <em class="sig-param">params</em>, <em class="sig-param">weights</em>, <em class="sig-param">kind='element'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grape/fault_diagnosis.html#FaultDiagnosis.apply_perturbation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.fault_diagnosis.FaultDiagnosis.apply_perturbation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">FaultDiagnosis.</code><code class="sig-name descname">apply_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_nodes</em>, <em class="sig-param">params</em>, <em class="sig-param">weights</em>, <em class="sig-param">parallel</em>, <em class="sig-param">kind='element'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grape/fault_diagnosis.html#FaultDiagnosis.apply_perturbation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.fault_diagnosis.FaultDiagnosis.apply_perturbation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perturbation simulator, actually applying the perturbation
 to all the nodes affected by the perturbation.
 The optimizer is run if any switch is present, and edges connecting
@@ -210,11 +212,13 @@ Dict of: {str: int, str: int, str: float, str: float, str: int}:
 - ‘tresh’: threshold for applying crossover/mutation
 (default to 0.5)
 - ‘nsel’: number of individuals to select (default to 5)</p></li>
-<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em>) – values for the optimizer evolutionary algorithm.
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) – weights for fitness evaluation on individuals.
 Dict of: {str: float, str: float, str: float}:
 - ‘w1’: weight multiplying number of actions (default to 1.0)
 - ‘w2’: weight multiplying total final service (default to 1.0)
 - ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
+<li><p><strong>parallel</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – flag for parallel fitness evaluation of
+initial population</p></li>
 <li><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – type of simulation, used to label output files,
 default to ‘element’</p></li>
 </ul>
@@ -246,7 +250,7 @@ component(s) and may be affect nearby areas.</p>
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on Apr 22, 2021.
+        Last updated on May 04, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>grape.utils.chunk_it &mdash; GRAPE 1.0.1 documentation</title>
+  <title>grape.utils.chunk_it &mdash; GRAPE 1.1.0 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -179,17 +179,17 @@
 <h1>grape.utils.chunk_it<a class="headerlink" href="#grape-utils-chunk-it" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="grape.utils.chunk_it">
-<code class="sig-name descname">chunk_it</code><span class="sig-paren">(</span><em class="sig-param">nodes</em>, <em class="sig-param">n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grape/utils.html#chunk_it"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.utils.chunk_it" title="Permalink to this definition">¶</a></dt>
-<dd><p>Divide nodes in chunks according to number of processes.</p>
+<code class="sig-name descname">chunk_it</code><span class="sig-paren">(</span><em class="sig-param">elements</em>, <em class="sig-param">n_procs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grape/utils.html#chunk_it"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.utils.chunk_it" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divide elements in chunks according to number of processes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nodes</strong> (<em>list</em>) – list of nodes</p></li>
-<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – number of available processes</p></li>
+<li><p><strong>elements</strong> (<em>list</em>) – list of elements to be divided in chunks</p></li>
+<li><p><strong>n_procs</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – number of available processes</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>list of graph nodes to be assigned to every process</p>
+<dd class="field-even"><p>list of elements to be assigned to every process</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
@@ -215,7 +215,7 @@
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on Apr 22, 2021.
+        Last updated on May 04, 2021.
       </span>
 
     </p>

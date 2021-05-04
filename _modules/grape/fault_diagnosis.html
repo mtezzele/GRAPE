@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>grape.fault_diagnosis &mdash; GRAPE 1.0.1 documentation</title>
+  <title>grape.fault_diagnosis &mdash; GRAPE 1.1.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -164,12 +164,14 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">from</span> <span class="nn">deap</span> <span class="kn">import</span> <span class="n">base</span><span class="p">,</span> <span class="n">creator</span><span class="p">,</span> <span class="n">tools</span>
 
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">chunk_it</span>
 <span class="kn">from</span> <span class="nn">.general_graph</span> <span class="kn">import</span> <span class="n">GeneralGraph</span>
 <span class="kn">from</span> <span class="nn">.parallel_general_graph</span> <span class="kn">import</span> <span class="n">ParallelGeneralGraph</span>
 
@@ -230,8 +232,88 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">edges_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges_df</span><span class="p">[</span><span class="o">~</span><span class="n">orphans</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">edges_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;check_import_edges.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FaultDiagnosis.fitness_evaluation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation">[docs]</a>    <span class="k">def</span> <span class="nf">fitness_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">individual</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
-        <span class="n">initial_condition</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+<div class="viewcode-block" id="FaultDiagnosis.fitness_iteration_parallel"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel">[docs]</a>    <span class="k">def</span> <span class="nf">fitness_iteration_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_queue</span><span class="p">,</span> <span class="n">ichunk</span><span class="p">,</span> <span class="n">chunk_length</span><span class="p">,</span>
+        <span class="n">individuals</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parallel iteration for fitness evaluation. We append to the</span>
+<span class="sd">        multiprocessing queue a tuple constituted by constituted by the</span>
+<span class="sd">        index of the individual, the individual itself, and its fitness.</span>
+
+<span class="sd">        :param multiprocessing.queues.Queue out_queue: multiprocessing queue</span>
+<span class="sd">        :param int ichunk: index of the chunk under consideration</span>
+<span class="sd">        :param int chunk_length: lengths of the chunks (the last chunk may</span>
+<span class="sd">            be shorter due to non-even division of the number of generations by</span>
+<span class="sd">            the number of processors)</span>
+<span class="sd">        :param list individuals: list of individuals on which to perform</span>
+<span class="sd">            fitness evaluation.</span>
+<span class="sd">        :param list perturbed_nodes: nodes(s) involved in the perturbing event.</span>
+<span class="sd">        :param dict initial_condition: initial status (boolean) for the graph</span>
+<span class="sd">            switches.</span>
+<span class="sd">        :param dict weights: weights for fitness evaluation on individuals.</span>
+<span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
+<span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
+<span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
+<span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">iter_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">individuals</span><span class="p">)):</span>
+            <span class="n">ind_fit</span> <span class="o">=</span> <span class="p">(</span><span class="n">ichunk</span><span class="o">*</span><span class="n">chunk_length</span> <span class="o">+</span> <span class="n">iter_ind</span><span class="p">,</span> <span class="n">individuals</span><span class="p">[</span><span class="n">iter_ind</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitness_evaluation</span><span class="p">(</span><span class="n">individuals</span><span class="p">[</span><span class="n">iter_ind</span><span class="p">],</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
+                <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">))</span>
+            <span class="n">out_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">ind_fit</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.fitness_evaluation_parallel"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel">[docs]</a>    <span class="k">def</span> <span class="nf">fitness_evaluation_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pop</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
+        <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Wrapper for fitness evaluation. This methods spawns the processes for</span>
+<span class="sd">        fitness evaluation and collects the results.</span>
+
+<span class="sd">        :param list pop: list of individuals</span>
+<span class="sd">        :param list perturbed_nodes: nodes(s) involved in the perturbing event.</span>
+<span class="sd">        :param dict initial_condition: initial status (boolean) for the graph</span>
+<span class="sd">            switches.</span>
+<span class="sd">        :param dict weights: weights for fitness evaluation on individuals.</span>
+<span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
+<span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
+<span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
+<span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
+
+<span class="sd">        :return: list of tuples constituted by the index of the individual,</span>
+<span class="sd">            the individual itself, and its fitness</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n_procs</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+        <span class="n">fitnesses_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">out_queue</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="n">ind_chunks</span> <span class="o">=</span> <span class="n">chunk_it</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">n_procs</span><span class="p">)</span>
+
+        <span class="n">processes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span> <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness_iteration_parallel</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span> <span class="n">out_queue</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind_chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ind_chunks</span><span class="p">[</span><span class="n">p</span><span class="p">],</span>
+                <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span> <span class="p">))</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_procs</span><span class="p">)</span> <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
+            <span class="n">proc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">running</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">)</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">out_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+
+                <span class="n">fitnesses_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_queue</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">running</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">fitnesses_tuples</span></div>
+
+<div class="viewcode-block" id="FaultDiagnosis.fitness_evaluation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation">[docs]</a>    <span class="k">def</span> <span class="nf">fitness_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">individual</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">initial_condition</span><span class="p">,</span>
+        <span class="n">w</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Evaluation of fitness on individual.</span>
@@ -240,10 +322,16 @@
 <span class="sd">        Edges connecting its predecessors are removed if the switch state</span>
 <span class="sd">        is set to &#39;False&#39;.</span>
 
+<span class="sd">        :param list individual: element on which to compute the fitness.</span>
 <span class="sd">        :param list perturbed_nodes: nodes(s) involved in the</span>
 <span class="sd">            perturbing event.</span>
 <span class="sd">        :param dict initial_condition: initial status (boolean) for the graph</span>
 <span class="sd">            switches.</span>
+<span class="sd">        :param dict w: weights for fitness evaluation on individuals.</span>
+<span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
+<span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
+<span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
+<span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">acts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">not_equal</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">initial_condition</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
@@ -276,7 +364,8 @@
         <span class="n">fit</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;w1&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">acts</span> <span class="o">-</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;w2&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">sum</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">-</span> <span class="n">w</span><span class="p">[</span><span class="s1">&#39;w3&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">fit</span><span class="p">,)</span></div>
 
-<div class="viewcode-block" id="FaultDiagnosis.optimizer"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.optimizer">[docs]</a>    <span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">initial_condition</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<div class="viewcode-block" id="FaultDiagnosis.optimizer"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.optimizer">[docs]</a>    <span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">initial_condition</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span>
+        <span class="n">parallel</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Genetic algorithm to optimize switches conditions, using DEAP.</span>
@@ -293,6 +382,13 @@
 <span class="sd">            - &#39;tresh&#39;: threshold for applying crossover/mutation</span>
 <span class="sd">            (default to 0.5)</span>
 <span class="sd">            - &#39;nsel&#39;: number of individuals to select (default to 5)</span>
+<span class="sd">        :param dict weights: weights for fitness evaluation on individuals.</span>
+<span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
+<span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
+<span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
+<span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
+<span class="sd">        :param bool parallel: flag for parallel fitness evaluation of</span>
+<span class="sd">            initial population</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
@@ -317,8 +413,14 @@
 
         <span class="n">pop</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">population</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;npop&#39;</span><span class="p">])</span>
         <span class="c1"># Evaluate the entire population</span>
-        <span class="n">fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">toolbox</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
-            <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">pop</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parallel</span><span class="p">:</span>
+            <span class="n">fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">toolbox</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
+                <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">pop</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res_par</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness_evaluation_parallel</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
+                <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+            <span class="n">res_par</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">res_par</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">fit</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pop</span><span class="p">,</span> <span class="n">fitnesses</span><span class="p">):</span>
             <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">fit</span>
@@ -356,7 +458,7 @@
             <span class="n">invalid_ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">offspring</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">valid</span><span class="p">]</span>
             <span class="n">fitnesses</span> <span class="o">=</span> <span class="p">[</span><span class="n">toolbox</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
                 <span class="n">initial_condition</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">invalid_ind</span><span class="p">]</span>
-    
+
             <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">fit</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">invalid_ind</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">fitnesses</span><span class="p">)):</span>
                 <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">fit</span>
 
@@ -559,7 +661,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">damaged_areas</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FaultDiagnosis.apply_perturbation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.apply_perturbation">[docs]</a>    <span class="k">def</span> <span class="nf">apply_perturbation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span>
+<div class="viewcode-block" id="FaultDiagnosis.apply_perturbation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.apply_perturbation">[docs]</a>    <span class="k">def</span> <span class="nf">apply_perturbation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">parallel</span><span class="p">,</span>
         <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;element&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
@@ -579,12 +681,13 @@
 <span class="sd">            - &#39;tresh&#39;: threshold for applying crossover/mutation</span>
 <span class="sd">            (default to 0.5)</span>
 <span class="sd">            - &#39;nsel&#39;: number of individuals to select (default to 5)</span>
-<span class="sd">        :param weights: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">        :param dict weights: weights for fitness evaluation on individuals.</span>
 <span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
 <span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
 <span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
 <span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
-<span class="sd">        :type weights: dict, optional</span>
+<span class="sd">        :param bool parallel: flag for parallel fitness evaluation of</span>
+<span class="sd">            initial population</span>
 <span class="sd">        :param str kind: type of simulation, used to label output files,</span>
 <span class="sd">            default to &#39;element&#39;</span>
 
@@ -595,7 +698,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">(</span><span class="n">perturbed_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">init_status</span><span class="p">,</span>
-                <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">))</span>
+                <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">parallel</span><span class="p">))</span>
             <span class="n">best</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">init_status</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
                 <span class="n">res</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">res</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="mi">0</span><span class="p">]))</span>
 
@@ -653,7 +756,7 @@
 
 <div class="viewcode-block" id="FaultDiagnosis.simulate_element_perturbation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.simulate_element_perturbation">[docs]</a>    <span class="k">def</span> <span class="nf">simulate_element_perturbation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_nodes</span><span class="p">,</span>
         <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;npop&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">&#39;ngen&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;indpb&#39;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;tresh&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
-        <span class="s1">&#39;nsel&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;w1&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}):</span>
+        <span class="s1">&#39;nsel&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;w1&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Simulate a perturbation of one or multiple nodes.</span>
@@ -669,12 +772,15 @@
 <span class="sd">            (default to 0.5)</span>
 <span class="sd">            - &#39;nsel&#39;: number of individuals to select (default to 5)</span>
 <span class="sd">        :type params: dict, optional</span>
-<span class="sd">        :param weights: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">        :param weights: weights for fitness evaluation on individuals.</span>
 <span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
 <span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
 <span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
 <span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
 <span class="sd">        :type weights: dict, optional</span>
+<span class="sd">        :param parallel: flag for parallel fitness evaluation of</span>
+<span class="sd">            initial population, default to False</span>
+<span class="sd">        :type parallel: bool, optional</span>
 
 <span class="sd">        .. note:: A perturbation, depending on the considered system,</span>
 <span class="sd">            may spread in all directions starting from the damaged</span>
@@ -691,12 +797,12 @@
                 <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Valid nodes: {self.G.nodes()}&#39;</span><span class="p">)</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">apply_perturbation</span><span class="p">(</span><span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_perturbation</span><span class="p">(</span><span class="n">perturbed_nodes</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">parallel</span><span class="p">,</span>
             <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;element&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FaultDiagnosis.simulate_area_perturbation"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation">[docs]</a>    <span class="k">def</span> <span class="nf">simulate_area_perturbation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perturbed_areas</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;npop&#39;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
         <span class="s1">&#39;ngen&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;indpb&#39;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s1">&#39;tresh&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;nsel&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="n">weights</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;w1&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="s1">&#39;w2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}):</span>
+        <span class="s1">&#39;w2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;w3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Simulate a perturbation in one or multiple areas.</span>
@@ -712,12 +818,15 @@
 <span class="sd">            (default to 0.5)</span>
 <span class="sd">            - &#39;nsel&#39;: number of individuals to select (default to 5)</span>
 <span class="sd">        :type params: dict, optional</span>
-<span class="sd">        :param weights: values for the optimizer evolutionary algorithm.</span>
+<span class="sd">        :param weights: weights for fitness evaluation on individuals.</span>
 <span class="sd">            Dict of: {str: float, str: float, str: float}:</span>
 <span class="sd">            - &#39;w1&#39;: weight multiplying number of actions (default to 1.0)</span>
 <span class="sd">            - &#39;w2&#39;: weight multiplying total final service (default to 1.0)</span>
 <span class="sd">            - &#39;w3&#39;: weight multiplying final graph size (default to 1.0)</span>
 <span class="sd">        :type weights: dict, optional</span>
+<span class="sd">        :param parallel: flag for parallel fitness evaluation of</span>
+<span class="sd">            initial population, default to False</span>
+<span class="sd">        :type parallel: bool, optional</span>
 
 <span class="sd">        .. note:: A perturbation, depending on the considered system,</span>
 <span class="sd">            may spread in all directions starting from the damaged</span>
@@ -739,7 +848,8 @@
                 <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">idx_area</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">idx_area</span> <span class="o">==</span> <span class="n">area</span><span class="p">:</span> <span class="n">nodes_in_area</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">apply_perturbation</span><span class="p">(</span><span class="n">nodes_in_area</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;area&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_perturbation</span><span class="p">(</span><span class="n">nodes_in_area</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">parallel</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;area&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FaultDiagnosis.graph_characterization_to_file"><a class="viewcode-back" href="../../fault_diagnosis.html#grape.fault_diagnosis.FaultDiagnosis.graph_characterization_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">graph_characterization_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -784,7 +894,7 @@
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on Apr 22, 2021.
+        Last updated on May 04, 2021.
       </span>
 
     </p>

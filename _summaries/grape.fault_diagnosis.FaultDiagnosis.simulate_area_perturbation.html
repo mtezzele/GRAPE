@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation &mdash; GRAPE 1.0.1 documentation</title>
+  <title>grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation &mdash; GRAPE 1.1.0 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.0.1
+                1.1.0
               </div>
             
           
@@ -97,6 +97,8 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../fault_diagnosis.html">FaultDiagnosis</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.html">grape.fault_diagnosis.FaultDiagnosis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi.html">grape.fault_diagnosis.FaultDiagnosis.check_input_with_gephi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel.html">grape.fault_diagnosis.FaultDiagnosis.fitness_iteration_parallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel.html">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation_parallel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation.html">grape.fault_diagnosis.FaultDiagnosis.fitness_evaluation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.optimizer.html">grape.fault_diagnosis.FaultDiagnosis.optimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures.html">grape.fault_diagnosis.FaultDiagnosis.check_paths_and_measures</a></li>
@@ -191,7 +193,7 @@
 <h1>grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation<a class="headerlink" href="#grape-fault-diagnosis-faultdiagnosis-simulate-area-perturbation" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation">
-<code class="sig-prename descclassname">FaultDiagnosis.</code><code class="sig-name descname">simulate_area_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_areas</em>, <em class="sig-param">params={'indpb': 0.6</em>, <em class="sig-param">'ngen': 100</em>, <em class="sig-param">'npop': 300</em>, <em class="sig-param">'nsel': 5</em>, <em class="sig-param">'tresh': 0.5}</em>, <em class="sig-param">weights={'w1': 1.0</em>, <em class="sig-param">'w2': 1.0</em>, <em class="sig-param">'w3': 1.0}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grape/fault_diagnosis.html#FaultDiagnosis.simulate_area_perturbation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">FaultDiagnosis.</code><code class="sig-name descname">simulate_area_perturbation</code><span class="sig-paren">(</span><em class="sig-param">perturbed_areas</em>, <em class="sig-param">params={'indpb': 0.6</em>, <em class="sig-param">'ngen': 100</em>, <em class="sig-param">'npop': 300</em>, <em class="sig-param">'nsel': 5</em>, <em class="sig-param">'tresh': 0.5}</em>, <em class="sig-param">weights={'w1': 1.0</em>, <em class="sig-param">'w2': 1.0</em>, <em class="sig-param">'w3': 1.0}</em>, <em class="sig-param">parallel=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/grape/fault_diagnosis.html#FaultDiagnosis.simulate_area_perturbation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grape.fault_diagnosis.FaultDiagnosis.simulate_area_perturbation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulate a perturbation in one or multiple areas.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -206,11 +208,13 @@ Dict of: {str: int, str: int, str: float, str: float, str: int}:
 - ‘tresh’ threshold for applying crossover/mutation
 (default to 0.5)
 - ‘nsel’: number of individuals to select (default to 5)</p></li>
-<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em>) – values for the optimizer evolutionary algorithm.
+<li><p><strong>weights</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em>) – weights for fitness evaluation on individuals.
 Dict of: {str: float, str: float, str: float}:
 - ‘w1’: weight multiplying number of actions (default to 1.0)
 - ‘w2’: weight multiplying total final service (default to 1.0)
 - ‘w3’: weight multiplying final graph size (default to 1.0)</p></li>
+<li><p><strong>parallel</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) – flag for parallel fitness evaluation of
+initial population, default to False</p></li>
 </ul>
 </dd>
 </dl>
@@ -245,7 +249,7 @@ component(s) and may be affect nearby areas.</p>
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on Apr 22, 2021.
+        Last updated on May 04, 2021.
       </span>
 
     </p>

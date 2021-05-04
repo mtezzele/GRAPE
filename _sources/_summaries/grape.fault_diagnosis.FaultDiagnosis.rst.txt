@@ -19,6 +19,8 @@
       ~FaultDiagnosis.check_paths_and_measures
       ~FaultDiagnosis.delete_a_node
       ~FaultDiagnosis.fitness_evaluation
+      ~FaultDiagnosis.fitness_evaluation_parallel
+      ~FaultDiagnosis.fitness_iteration_parallel
       ~FaultDiagnosis.graph_characterization_to_file
       ~FaultDiagnosis.optimizer
       ~FaultDiagnosis.rm_nodes
