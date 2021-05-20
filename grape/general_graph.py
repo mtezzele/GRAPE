@@ -7,6 +7,9 @@ import copy
 import numpy as np
 import networkx as nx
 import pandas as pd
+from matplotlib import cm
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -219,6 +222,16 @@ class GeneralGraph(nx.DiGraph):
         """
 
         return [idx for idx in self if self.type[idx] == 'SOURCE']
+
+    @property
+    def hubs(self):
+        """
+
+        :return: list of graph hubs.
+        :rtype: list
+        """
+
+        return [idx for idx in self if self.type[idx] == 'HUB']
 
     @property
     def users(self):
@@ -1215,3 +1228,117 @@ class GeneralGraph(nx.DiGraph):
                     splitting[(head, tail)] += 1./usr_per_node[head]
 
         return computed_service, splitting
+
+    def print_graph(self, radius=None, initial_pos=None, fixed_nodes=None,
+        n_iter=500, thresh=0.0001, size=800, border='black', fsize=12,
+        fcolor='k', family='sans-serif', title='Graph', input_cmap=None,
+        save_to_file=None):
+        """
+
+        Print the graph.
+        Positions of the nodes are generated from a spring layout simulation,
+        if not asked to be fixed during it.
+        Initial positions can be specified for the nodes.
+        Both initial positions and fixed positions can be specified just for
+        a subset of the nodes.
+        The shapes of the nodes characterize their type
+        (SOURCE/HUB/USER/SWITCH).
+        Nodes color is set as white with black borders by default. If an input
+        colormap is specified, different areas get colored differently (the
+        colormap is evenly spaced in color depending on the total number of
+        areas).
+        Edges are colored depending on the logic relation specified: black for
+        SINGLE edges, magenta for AND edges, brown dashed for OR edges.
+        The font size, family and color for labels can be also specified,
+        together with the title for the window figure.
+
+        :param radius: optimal distance between nodes.
+        :type radius: float, optional, default to 1/sqrt(n) where n is the
+            number of nodes in the graph
+        :param initial_pos: initial positions for nodes as a dictionary with
+            node as jeys and values as a coordinate list or tuple. If None,
+            then use random initial positions.
+        :type initial_pos: dict, optional, default to None
+        :param fixed_nodes: nodes to keep fixed at initial position. ValueError
+            raised if `fixed_nodes` specified and `initial_pos` not.
+        :type fixed_nodes: list, optional, default to None
+        :param n_iter: maximum number of iterations taken in spring layout
+            simulation.
+        :type iter: int, optional, default to 500
+        :param thresh: threshold for relative error in node position changes.
+            The iteration stops if the error is below this threshold.
+        :type thresh: float, optional, default to 0.0001
+        :param size: size of nodes.
+        :type size: int, optional, default to 800
+        :param border: color of node borders.
+        :type border: color, optional, default to 'black'
+        :param fsize: font size for text labels.
+        :type fsize: int, optional, default to 12
+        :param fcolor: font color string for labels.
+        :type fcolor: string, optional, default to 'k' (black)
+        :param ffamily: font family for labels.
+        :type ffamily: string, optional, default to 'sans-serif'
+        :param title: title for figure window.
+        :type title: string, optional, defaut to 'Graph'
+        :param cmap: colormap for coloring the different areas with different
+            colors. If None, all nodes are colored as white.
+        :type cmap: Matplotlib colormap, optional, default to None
+        :param save_to_file: name of the file where to save the graph drawing.
+            The extension is guesses from the filename.
+            Interactive window is rendered in any case.
+        :type save_to_file: string, optional, default to None
+
+
+        :raises: ValueError
+        """
+
+        if (fixed_nodes is not None) and (initial_pos is None):
+            raise ValueError('Fixed requested without given initial positions')
+        logging.getLogger().setLevel(logging.INFO)
+
+        pos = nx.spring_layout(self, k=radius, pos=initial_pos,
+            fixed=fixed_nodes, iterations=n_iter, threshold=thresh,
+            seed=3113794652)
+
+        shapes = {'SOURCE': 'v', 'USER': '^', 'HUB': 'o', 'SWITCH': 'X'}
+
+        all_areas = list(set(self.area.values()))
+        if input_cmap is None:
+            mymap = ListedColormap(["white"])
+        else:
+            mymap = cm.get_cmap(input_cmap, len(all_areas))
+        area_indices = {}
+        for idx in range(len(all_areas)):
+            area_indices[all_areas[idx]] = idx*(1./len(all_areas))
+
+        for node in self:
+            col = mymap(area_indices[self.area[node]])
+            col = np.array([col])
+            nx.draw_networkx_nodes(self, pos, nodelist=[node], node_color=col,
+                node_shape=shapes[self.type[node]], node_size=size,
+                edgecolors=border)
+
+        or_edges = [(u, v) for (u, v, d) in self.edges(data=True)
+            if d['father_condition'] == 'OR']
+        and_edges = [(u, v) for (u, v, d) in self.edges(data=True)
+            if d['father_condition'] == 'AND']
+        single_edges = [(u, v) for (u, v, d) in self.edges(data=True)
+            if d['father_condition'] == 'SINGLE']
+
+        nx.draw_networkx_edges(self, pos, edgelist=or_edges, width=3, alpha=0.9,
+            edge_color='brown', style='dashed', node_size=size)
+        nx.draw_networkx_edges(self, pos, edgelist=and_edges, width=3,
+            alpha=0.9, edge_color='violet', node_size=size)
+        nx.draw_networkx_edges(self, pos, edgelist=single_edges, width=3,
+            alpha=0.9, edge_color='black', node_size=size)
+
+        nx.draw_networkx_labels(self, pos, labels=self.mark, font_size=fsize,
+            font_color=fcolor)
+
+        plt.get_current_fig_manager().canvas.set_window_title(title)
+        plt.tight_layout()
+        plt.axis('off')
+        if save_to_file:
+            plt.savefig(save_to_file, orientation='landscape', transparent=True)
+        else:
+            plt.show()

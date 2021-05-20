@@ -1,9 +1,13 @@
 """TestOutputGraph to check output of GeneralGraph"""
 
 from unittest import TestCase
+from unittest import mock
+import math
 import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
 from grape.general_graph import GeneralGraph
+import grape.general_graph as my_module
 
 
 def test_nodal_efficiency():
@@ -288,3 +292,29 @@ def test_service():
         np.asarray(sorted(original_service.values())),
         np.asarray(sorted(g.service.values())),
         err_msg="ORIGINAL SERVICE failure")
+
+@mock.patch("%s.my_module.plt" % __name__)
+def test_print_graph(mock_plt):
+    """
+    The following test checks that the number of figures has increased.
+    """
+    g = my_module.GeneralGraph()
+    g.load("tests/TOY_graph.csv")
+    g.print_graph(radius=10./math.sqrt(len(g)), title='TOY graph',
+            input_cmap='viridis')
+
+    # Assert plt.show got called once
+    mock_plt.show.assert_called_once()
+
+class Unittests(TestCase):
+
+    def test_clear_non_existing_attribute(self):
+        """
+        The following test the error for trying to delete an attribute of
+        GeneralGraph that does not exist.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph.csv")
+
+        with self.assertRaises(ValueError):
+            g.clear_data('non_existing_attribute')

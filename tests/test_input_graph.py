@@ -300,3 +300,41 @@ class TestInputGraph(TestCase):
 
         self.assertDictEqual(initial_service_dict, g.initial_service,
             msg=" Wrong INITIAL SERVICE in input ")
+
+    def test_initial_sources(self):
+        """
+        Unittest check for sources of GeneralGraph: correct input reading.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph.csv")
+
+        self.assertEqual(['1', '15'], g.sources, msg=" Wrong SOURCES in input ")
+
+    def test_initial_hubs(self):
+        """
+        Unittest check for hubs of GeneralGraph: correct input reading.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph.csv")
+
+        self.assertEqual(['4', '5', '6', '7', '8', '9', '16', '17', '10', '11',
+            '19', '12', '14', '13'], g.hubs, msg=" Wrong HUBS in input ")
+
+    def test_initial_users(self):
+        """
+        Unittest check for users of GeneralGraph: correct input reading.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph.csv")
+
+        self.assertEqual(['18'], g.users, msg=" Wrong USERS in input ")
+
+    def test_initial_switches(self):
+        """
+        Unittest check for switches of GeneralGraph: correct input reading.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph.csv")
+
+        self.assertEqual(['2', '3'], g.switches,
+            msg=" Wrong SWITCHES in input ")
