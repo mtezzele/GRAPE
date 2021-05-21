@@ -318,3 +318,80 @@ class Unittests(TestCase):
 
         with self.assertRaises(ValueError):
             g.clear_data('non_existing_attribute')
+
+    def test_ValueError_global_efficiency(self):
+        """
+        The following test the error for trying to compute global efficiency
+        for a graph of one node.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph_one_node.csv")
+
+        with self.assertRaises(ValueError):
+            g.global_efficiency
+
+    def test_ValueError_nodal_efficiency(self):
+        """
+        The following test the error for trying to compute nodal efficiency
+        for a graph of one node.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph_one_node.csv")
+
+        with self.assertRaises(ValueError):
+            g.nodal_efficiency
+
+    def test_ValueError_closeness_centrality(self):
+        """
+        The following test the error for trying to compute closeness centrality
+        for a graph of one node.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph_one_node.csv")
+
+        with self.assertRaises(ValueError):
+            g.closeness_centrality
+
+    def test_ValueError_degree_centrality(self):
+        """
+        The following test the error for trying to compute degree centrality
+        for a graph of one node.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph_one_node.csv")
+
+        with self.assertRaises(ValueError):
+            g.degree_centrality
+
+    def test_ValueError_indegree_centrality(self):
+        """
+        The following test the error for trying to compute indegree centrality
+        for a graph of one node.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph_one_node.csv")
+
+        with self.assertRaises(ValueError):
+            g.indegree_centrality
+
+    def test_ValueError_outdegree_centrality(self):
+        """
+        The following test the error for trying to compute outdegree centrality
+        for a graph of one node.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph_one_node.csv")
+
+        with self.assertRaises(ValueError):
+            g.outdegree_centrality
+
+    def test_ValueError_print_graph(self):
+        """
+        The following test the error for trying to print the graph with fixed
+        nodes without providing initial positions.
+        """
+        g = GeneralGraph()
+        g.load("tests/TOY_graph.csv")
+
+        with self.assertRaises(ValueError):
+           g.print_graph(fixed_nodes=list(g))
