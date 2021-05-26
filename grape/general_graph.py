@@ -1233,8 +1233,8 @@ class GeneralGraph(nx.DiGraph):
 
     def print_graph(self, radius=None, initial_pos=None, fixed_nodes=None,
         n_iter=500, thresh=0.0001, size=800, border='black', edge_width=1.0,
-        arrow_size=10, fsize=12, fcolor='k', family='sans-serif', title='Graph',
-        input_cmap=None, legend_loc='upper right', legend_ncol=1,
+        arrow_size=10, fsize=12, fcolor='k', ffamily='sans-serif',
+        title='Graph', input_cmap=None, legend_loc='upper right', legend_ncol=1,
         legend_anchor=None, legend_fsize=12, save_to_file=None):
         """
 
@@ -1267,7 +1267,7 @@ class GeneralGraph(nx.DiGraph):
         :type fixed_nodes: list, optional, default to None
         :param n_iter: maximum number of iterations taken in spring layout
             simulation.
-        :type iter: int, optional, default to 500
+        :type n_iter: int, optional, default to 500
         :param thresh: threshold for relative error in node position changes.
             The iteration stops if the error is below this threshold.
         :type thresh: float, optional, default to 0.0001
