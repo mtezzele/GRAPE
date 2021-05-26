@@ -9,6 +9,8 @@ import networkx as nx
 import pandas as pd
 from matplotlib import cm
 from matplotlib.colors import ListedColormap
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -1230,9 +1232,10 @@ class GeneralGraph(nx.DiGraph):
         return computed_service, splitting
 
     def print_graph(self, radius=None, initial_pos=None, fixed_nodes=None,
-        n_iter=500, thresh=0.0001, size=800, border='black', fsize=12,
-        fcolor='k', family='sans-serif', title='Graph', input_cmap=None,
-        save_to_file=None):
+        n_iter=500, thresh=0.0001, size=800, border='black', edge_width=1.0,
+        arrow_size=10, fsize=12, fcolor='k', family='sans-serif', title='Graph',
+        input_cmap=None, legend_loc='upper right', legend_ncol=1,
+        legend_anchor=None, legend_fsize=12, save_to_file=None):
         """
 
         Print the graph.
@@ -1256,7 +1259,7 @@ class GeneralGraph(nx.DiGraph):
         :type radius: float, optional, default to 1/sqrt(n) where n is the
             number of nodes in the graph
         :param initial_pos: initial positions for nodes as a dictionary with
-            node as jeys and values as a coordinate list or tuple. If None,
+            node as keys and values as a coordinate list or tuple. If None,
             then use random initial positions.
         :type initial_pos: dict, optional, default to None
         :param fixed_nodes: nodes to keep fixed at initial position. ValueError
@@ -1272,6 +1275,10 @@ class GeneralGraph(nx.DiGraph):
         :type size: int, optional, default to 800
         :param border: color of node borders.
         :type border: color, optional, default to 'black'
+        :param edge_width: width of edges.
+        :type edge_width: float, optional, default to 1.0
+        :param arrow_size: size of the arrow head head’s length and width.
+        :type arrow_size: int, optional, default to 10
         :param fsize: font size for text labels.
         :type fsize: int, optional, default to 12
         :param fcolor: font color string for labels.
@@ -1280,9 +1287,22 @@ class GeneralGraph(nx.DiGraph):
         :type ffamily: string, optional, default to 'sans-serif'
         :param title: title for figure window.
         :type title: string, optional, defaut to 'Graph'
-        :param cmap: colormap for coloring the different areas with different
-            colors. If None, all nodes are colored as white.
-        :type cmap: Matplotlib colormap, optional, default to None
+        :param input_cmap: colormap for coloring the different areas with
+            different colors. If None, all nodes are colored as white.
+        :type input_cmap: Matplotlib colormap, optional, default to None
+        :param legend_loc: the location of the legend.
+        :type legend_loc: str, optional, default to 'upper right'
+        :param legend_ncol: the number of columns that the legend has.
+        :type legend_ncol: int, optional, default to 1
+        :param legend_anchor: box that is used to position the legend in
+            conjunction with loc.
+        :type legend_anchor: 2-tuple, or 4-tuple of floats, optional,
+            defaults to axes.bbox (if called as a method to Axes.legend)
+            or figure.bbox (if Figure.legend).
+            This argument allows arbitrary placement of the legend
+        :param legend_fsize: the font size of the legend. The value must be
+            numeric, implying the size the absolute font size in points.
+        :type legend_fsize: int, optional, default to 12
         :param save_to_file: name of the file where to save the graph drawing.
             The extension is guesses from the filename.
             Interactive window is rendered in any case.
@@ -1318,6 +1338,16 @@ class GeneralGraph(nx.DiGraph):
                 node_shape=shapes[self.type[node]], node_size=size,
                 edgecolors=border)
 
+        pert_resistant = [node for node in self.perturbation_resistant.keys()
+             if self.perturbation_resistant[node] == 1]
+
+        for node in pert_resistant:
+            col = mymap(area_indices[self.area[node]])
+            col = np.array([col])
+            nx.draw_networkx_nodes(self, pos, nodelist=[node], node_color=col,
+                node_shape=shapes[self.type[node]], node_size=size,
+                edgecolors='red')
+
         or_edges = [(u, v) for (u, v, d) in self.edges(data=True)
             if d['father_condition'] == 'OR']
         and_edges = [(u, v) for (u, v, d) in self.edges(data=True)
@@ -1325,12 +1355,15 @@ class GeneralGraph(nx.DiGraph):
         single_edges = [(u, v) for (u, v, d) in self.edges(data=True)
             if d['father_condition'] == 'SINGLE']
 
-        nx.draw_networkx_edges(self, pos, edgelist=or_edges, width=3, alpha=0.9,
-            edge_color='brown', style='dashed', node_size=size)
-        nx.draw_networkx_edges(self, pos, edgelist=and_edges, width=3,
-            alpha=0.9, edge_color='violet', node_size=size)
-        nx.draw_networkx_edges(self, pos, edgelist=single_edges, width=3,
-            alpha=0.9, edge_color='black', node_size=size)
+        nx.draw_networkx_edges(self, pos, edgelist=or_edges, width=edge_width,
+            arrowsize=arrow_size, alpha=0.9, edge_color='brown', style='dashed',
+            node_size=size)
+        nx.draw_networkx_edges(self, pos, edgelist=and_edges, width=edge_width,
+            arrowsize=arrow_size, alpha=0.9, edge_color='violet',
+            node_size=size)
+        nx.draw_networkx_edges(self, pos, edgelist=single_edges,
+            width=edge_width, arrowsize=arrow_size, alpha=0.9,
+            edge_color='black', node_size=size)
 
         nx.draw_networkx_labels(self, pos, labels=self.mark, font_size=fsize,
             font_color=fcolor)
@@ -1338,6 +1371,43 @@ class GeneralGraph(nx.DiGraph):
         plt.get_current_fig_manager().canvas.set_window_title(title)
         plt.tight_layout()
         plt.axis('off')
+
+        handles = []
+        plt.rcParams.update({"text.usetex": True})
+
+        source_key = mlines.Line2D([], [], color='white', marker='v',
+            markeredgecolor='black', markersize=legend_fsize, label='SOURCE')
+        handles.append(source_key)
+        user_key = mlines.Line2D([], [], color='white', marker='^',
+            markeredgecolor='black', markersize=legend_fsize, label='USER')
+        handles.append(user_key)
+        hub_key = mlines.Line2D([], [], color='white', marker='o',
+            markeredgecolor='black', markersize=legend_fsize, label='HUB')
+        handles.append(hub_key)
+        switch_key = mlines.Line2D([], [], color='white', marker='X',
+            markeredgecolor='black', markersize=legend_fsize, label='SWITCH')
+        handles.append(switch_key)
+        pr_key = mlines.Line2D([], [], color='white', marker='o',
+            markeredgecolor='red', markersize=legend_fsize,
+            label='Perturbation Resistant')
+        handles.append(pr_key)
+
+        single_key = mlines.Line2D([], [], color='white',
+            marker=r'$\rightarrow$', markeredgecolor='black',
+            markersize=legend_fsize, label='SINGLE')
+        handles.append(single_key)
+        or_key = mlines.Line2D([], [], color='white',
+            marker=r'$-\rightarrow$', markeredgecolor='brown',
+            markersize=legend_fsize, label='OR')
+        handles.append(or_key)
+        and_key = mlines.Line2D([], [], color='white',
+            marker=r'$\rightarrow$', markeredgecolor='violet',
+            markersize=legend_fsize, label='AND')
+        handles.append(and_key)
+
+        plt.legend(handles=handles, loc=legend_loc, ncol=legend_ncol,
+            bbox_to_anchor=legend_anchor, fontsize=legend_fsize)        
+
         if save_to_file:
             plt.savefig(save_to_file, orientation='landscape', transparent=True)
         else:
