@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>ParallelGeneralGraph &mdash; GRAPE 1.1.0 documentation</title>
+  <title>ParallelGeneralGraph &mdash; GRAPE 1.2.0 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -1552,6 +1552,18 @@ Nodes must be hashable (and not None) Python objects.</p>
 
 <dl class="method">
 <dt>
+<em class="property">property </em><code class="sig-name descname">hubs</code></dt>
+<dd><p>list of graph hubs.
+:rtype: list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>return</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
 <em class="property">property </em><code class="sig-name descname">in_degree</code></dt>
 <dd><p>An InDegreeView for (node, in_degree) or in_degree for single node.</p>
 <p>The node in_degree is the number of edges pointing to the node.
@@ -2323,6 +2335,69 @@ edge from m to n.</p>
 
 <dl class="method">
 <dt>
+<code class="sig-name descname">print_graph</code><span class="sig-paren">(</span><em class="sig-param">radius=None</em>, <em class="sig-param">initial_pos=None</em>, <em class="sig-param">fixed_nodes=None</em>, <em class="sig-param">n_iter=500</em>, <em class="sig-param">thresh=0.0001</em>, <em class="sig-param">size=800</em>, <em class="sig-param">border='black'</em>, <em class="sig-param">edge_width=1.0</em>, <em class="sig-param">arrow_size=10</em>, <em class="sig-param">fsize=12</em>, <em class="sig-param">fcolor='k'</em>, <em class="sig-param">ffamily='sans-serif'</em>, <em class="sig-param">title='Graph'</em>, <em class="sig-param">input_cmap=None</em>, <em class="sig-param">legend_loc='upper right'</em>, <em class="sig-param">legend_ncol=1</em>, <em class="sig-param">legend_anchor=None</em>, <em class="sig-param">legend_fsize=12</em>, <em class="sig-param">save_to_file=None</em><span class="sig-paren">)</span></dt>
+<dd><p>Print the graph.
+Positions of the nodes are generated from a spring layout simulation,
+if not asked to be fixed during it.
+Initial positions can be specified for the nodes.
+Both initial positions and fixed positions can be specified just for
+a subset of the nodes.
+The shapes of the nodes characterize their type
+(SOURCE/HUB/USER/SWITCH).
+Nodes color is set as white with black borders by default. If an input
+colormap is specified, different areas get colored differently (the
+colormap is evenly spaced in color depending on the total number of
+areas).
+Edges are colored depending on the logic relation specified: black for
+SINGLE edges, magenta for AND edges, brown dashed for OR edges.
+The font size, family and color for labels can be also specified,
+together with the title for the window figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em><em>, </em><em>default to 1/sqrt</em><em>(</em><em>n</em><em>) </em><em>where n is the
+number of nodes in the graph</em>) – optimal distance between nodes.</p></li>
+<li><p><strong>initial_pos</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a><em>, </em><em>optional</em><em>, </em><em>default to None</em>) – initial positions for nodes as a dictionary with
+node as keys and values as a coordinate list or tuple. If None,
+then use random initial positions.</p></li>
+<li><p><strong>fixed_nodes</strong> (<em>list</em><em>, </em><em>optional</em><em>, </em><em>default to None</em>) – nodes to keep fixed at initial position. ValueError
+raised if <cite>fixed_nodes</cite> specified and <cite>initial_pos</cite> not.</p></li>
+<li><p><strong>n_iter</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em><em>, </em><em>default to 500</em>) – maximum number of iterations taken in spring layout
+simulation.</p></li>
+<li><p><strong>thresh</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em><em>, </em><em>default to 0.0001</em>) – threshold for relative error in node position changes.
+The iteration stops if the error is below this threshold.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em><em>, </em><em>default to 800</em>) – size of nodes.</p></li>
+<li><p><strong>border</strong> (<em>color</em><em>, </em><em>optional</em><em>, </em><em>default to 'black'</em>) – color of node borders.</p></li>
+<li><p><strong>edge_width</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em><em>, </em><em>default to 1.0</em>) – width of edges.</p></li>
+<li><p><strong>arrow_size</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em><em>, </em><em>default to 10</em>) – size of the arrow head head’s length and width.</p></li>
+<li><p><strong>fsize</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em><em>, </em><em>default to 12</em>) – font size for text labels.</p></li>
+<li><p><strong>fcolor</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>default to 'k'</em><em> (</em><em>black</em><em>)</em>) – font color string for labels.</p></li>
+<li><p><strong>ffamily</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>default to 'sans-serif'</em>) – font family for labels.</p></li>
+<li><p><strong>title</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>defaut to 'Graph'</em>) – title for figure window.</p></li>
+<li><p><strong>input_cmap</strong> (<em>Matplotlib colormap</em><em>, </em><em>optional</em><em>, </em><em>default to None</em>) – colormap for coloring the different areas with
+different colors. If None, all nodes are colored as white.</p></li>
+<li><p><strong>legend_loc</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em>, </em><em>optional</em><em>, </em><em>default to 'upper right'</em>) – the location of the legend.</p></li>
+<li><p><strong>legend_ncol</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em><em>, </em><em>default to 1</em>) – the number of columns that the legend has.</p></li>
+<li><p><strong>legend_anchor</strong> (<em>2-tuple</em><em>, or </em><em>4-tuple of floats</em><em>, </em><em>optional</em><em>,
+</em><em>defaults to axes.bbox</em><em> (</em><em>if called as a method to Axes.legend</em><em>)
+or </em><em>figure.bbox</em><em> (</em><em>if Figure.legend</em><em>)</em><em>
+This argument allows arbitrary placement of the legend</em>) – box that is used to position the legend in
+conjunction with loc.</p></li>
+<li><p><strong>legend_fsize</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em><em>, </em><em>default to 12</em>) – the font size of the legend. The value must be
+numeric, implying the size the absolute font size in points.</p></li>
+<li><p><strong>save_to_file</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>default to None</em>) – name of the file where to save the graph drawing.
+The extension is guesses from the filename.
+Interactive window is rendered in any case.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p>ValueError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
 <code class="sig-name descname">remove_edge</code><span class="sig-paren">(</span><em class="sig-param">u</em>, <em class="sig-param">v</em><span class="sig-paren">)</span></dt>
 <dd><p>Remove the edge between u and v.</p>
 <dl class="field-list simple">
@@ -2994,7 +3069,7 @@ be slightly different and require tweaks of these examples.</p>
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on May 04, 2021.
+        Last updated on May 26, 2021.
       </span>
 
     </p>

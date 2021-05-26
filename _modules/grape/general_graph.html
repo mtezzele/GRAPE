@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>grape.general_graph &mdash; GRAPE 1.1.0 documentation</title>
+  <title>grape.general_graph &mdash; GRAPE 1.2.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.1.0
+                1.2.0
               </div>
             
           
@@ -168,6 +168,11 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">ListedColormap</span>
+<span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="k">as</span> <span class="nn">mpatches</span>
+<span class="kn">import</span> <span class="nn">matplotlib.lines</span> <span class="k">as</span> <span class="nn">mlines</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
@@ -380,6 +385,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SOURCE&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hubs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: list of graph hubs.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HUB&#39;</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">users</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1375,7 +1390,189 @@
 
                     <span class="n">splitting</span><span class="p">[(</span><span class="n">head</span><span class="p">,</span> <span class="n">tail</span><span class="p">)]</span> <span class="o">+=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">usr_per_node</span><span class="p">[</span><span class="n">head</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">computed_service</span><span class="p">,</span> <span class="n">splitting</span></div></div>
+        <span class="k">return</span> <span class="n">computed_service</span><span class="p">,</span> <span class="n">splitting</span></div>
+
+<div class="viewcode-block" id="GeneralGraph.print_graph"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.print_graph">[docs]</a>    <span class="k">def</span> <span class="nf">print_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fixed_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_iter</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">edge_width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">arrow_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">fcolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">ffamily</span><span class="o">=</span><span class="s1">&#39;sans-serif&#39;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Graph&#39;</span><span class="p">,</span> <span class="n">input_cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend_loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">,</span> <span class="n">legend_ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">legend_anchor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend_fsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">save_to_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Print the graph.</span>
+<span class="sd">        Positions of the nodes are generated from a spring layout simulation,</span>
+<span class="sd">        if not asked to be fixed during it.</span>
+<span class="sd">        Initial positions can be specified for the nodes.</span>
+<span class="sd">        Both initial positions and fixed positions can be specified just for</span>
+<span class="sd">        a subset of the nodes.</span>
+<span class="sd">        The shapes of the nodes characterize their type</span>
+<span class="sd">        (SOURCE/HUB/USER/SWITCH).</span>
+<span class="sd">        Nodes color is set as white with black borders by default. If an input</span>
+<span class="sd">        colormap is specified, different areas get colored differently (the</span>
+<span class="sd">        colormap is evenly spaced in color depending on the total number of</span>
+<span class="sd">        areas).</span>
+<span class="sd">        Edges are colored depending on the logic relation specified: black for</span>
+<span class="sd">        SINGLE edges, magenta for AND edges, brown dashed for OR edges.</span>
+<span class="sd">        The font size, family and color for labels can be also specified,</span>
+<span class="sd">        together with the title for the window figure.</span>
+
+<span class="sd">        :param radius: optimal distance between nodes.</span>
+<span class="sd">        :type radius: float, optional, default to 1/sqrt(n) where n is the</span>
+<span class="sd">            number of nodes in the graph</span>
+<span class="sd">        :param initial_pos: initial positions for nodes as a dictionary with</span>
+<span class="sd">            node as keys and values as a coordinate list or tuple. If None,</span>
+<span class="sd">            then use random initial positions.</span>
+<span class="sd">        :type initial_pos: dict, optional, default to None</span>
+<span class="sd">        :param fixed_nodes: nodes to keep fixed at initial position. ValueError</span>
+<span class="sd">            raised if `fixed_nodes` specified and `initial_pos` not.</span>
+<span class="sd">        :type fixed_nodes: list, optional, default to None</span>
+<span class="sd">        :param n_iter: maximum number of iterations taken in spring layout</span>
+<span class="sd">            simulation.</span>
+<span class="sd">        :type n_iter: int, optional, default to 500</span>
+<span class="sd">        :param thresh: threshold for relative error in node position changes.</span>
+<span class="sd">            The iteration stops if the error is below this threshold.</span>
+<span class="sd">        :type thresh: float, optional, default to 0.0001</span>
+<span class="sd">        :param size: size of nodes.</span>
+<span class="sd">        :type size: int, optional, default to 800</span>
+<span class="sd">        :param border: color of node borders.</span>
+<span class="sd">        :type border: color, optional, default to &#39;black&#39;</span>
+<span class="sd">        :param edge_width: width of edges.</span>
+<span class="sd">        :type edge_width: float, optional, default to 1.0</span>
+<span class="sd">        :param arrow_size: size of the arrow head head’s length and width.</span>
+<span class="sd">        :type arrow_size: int, optional, default to 10</span>
+<span class="sd">        :param fsize: font size for text labels.</span>
+<span class="sd">        :type fsize: int, optional, default to 12</span>
+<span class="sd">        :param fcolor: font color string for labels.</span>
+<span class="sd">        :type fcolor: string, optional, default to &#39;k&#39; (black)</span>
+<span class="sd">        :param ffamily: font family for labels.</span>
+<span class="sd">        :type ffamily: string, optional, default to &#39;sans-serif&#39;</span>
+<span class="sd">        :param title: title for figure window.</span>
+<span class="sd">        :type title: string, optional, defaut to &#39;Graph&#39;</span>
+<span class="sd">        :param input_cmap: colormap for coloring the different areas with</span>
+<span class="sd">            different colors. If None, all nodes are colored as white.</span>
+<span class="sd">        :type input_cmap: Matplotlib colormap, optional, default to None</span>
+<span class="sd">        :param legend_loc: the location of the legend.</span>
+<span class="sd">        :type legend_loc: str, optional, default to &#39;upper right&#39;</span>
+<span class="sd">        :param legend_ncol: the number of columns that the legend has.</span>
+<span class="sd">        :type legend_ncol: int, optional, default to 1</span>
+<span class="sd">        :param legend_anchor: box that is used to position the legend in</span>
+<span class="sd">            conjunction with loc.</span>
+<span class="sd">        :type legend_anchor: 2-tuple, or 4-tuple of floats, optional,</span>
+<span class="sd">            defaults to axes.bbox (if called as a method to Axes.legend)</span>
+<span class="sd">            or figure.bbox (if Figure.legend).</span>
+<span class="sd">            This argument allows arbitrary placement of the legend</span>
+<span class="sd">        :param legend_fsize: the font size of the legend. The value must be</span>
+<span class="sd">            numeric, implying the size the absolute font size in points.</span>
+<span class="sd">        :type legend_fsize: int, optional, default to 12</span>
+<span class="sd">        :param save_to_file: name of the file where to save the graph drawing.</span>
+<span class="sd">            The extension is guesses from the filename.</span>
+<span class="sd">            Interactive window is rendered in any case.</span>
+<span class="sd">        :type save_to_file: string, optional, default to None</span>
+
+
+<span class="sd">        :raises: ValueError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">fixed_nodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">initial_pos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Fixed requested without given initial positions&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">spring_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">initial_pos</span><span class="p">,</span>
+            <span class="n">fixed</span><span class="o">=</span><span class="n">fixed_nodes</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="mi">3113794652</span><span class="p">)</span>
+
+        <span class="n">shapes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SOURCE&#39;</span><span class="p">:</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;USER&#39;</span><span class="p">:</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;HUB&#39;</span><span class="p">:</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;SWITCH&#39;</span><span class="p">:</span> <span class="s1">&#39;X&#39;</span><span class="p">}</span>
+
+        <span class="n">all_areas</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">input_cmap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mymap</span> <span class="o">=</span> <span class="n">ListedColormap</span><span class="p">([</span><span class="s2">&quot;white&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mymap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">input_cmap</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_areas</span><span class="p">))</span>
+        <span class="n">area_indices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_areas</span><span class="p">)):</span>
+            <span class="n">area_indices</span><span class="p">[</span><span class="n">all_areas</span><span class="p">[</span><span class="n">idx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">idx</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">all_areas</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">mymap</span><span class="p">(</span><span class="n">area_indices</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">node</span><span class="p">]])</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">col</span><span class="p">])</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">nodelist</span><span class="o">=</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">node_color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>
+                <span class="n">node_shape</span><span class="o">=</span><span class="n">shapes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="n">node</span><span class="p">]],</span> <span class="n">node_size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">edgecolors</span><span class="o">=</span><span class="n">border</span><span class="p">)</span>
+
+        <span class="n">pert_resistant</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">perturbation_resistant</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">perturbation_resistant</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">pert_resistant</span><span class="p">:</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">mymap</span><span class="p">(</span><span class="n">area_indices</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">node</span><span class="p">]])</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">col</span><span class="p">])</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">nodelist</span><span class="o">=</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">node_color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>
+                <span class="n">node_shape</span><span class="o">=</span><span class="n">shapes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="n">node</span><span class="p">]],</span> <span class="n">node_size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">edgecolors</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+
+        <span class="n">or_edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;father_condition&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;OR&#39;</span><span class="p">]</span>
+        <span class="n">and_edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;father_condition&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AND&#39;</span><span class="p">]</span>
+        <span class="n">single_edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;father_condition&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SINGLE&#39;</span><span class="p">]</span>
+
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">edgelist</span><span class="o">=</span><span class="n">or_edges</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">edge_width</span><span class="p">,</span>
+            <span class="n">arrowsize</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="s1">&#39;brown&#39;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span>
+            <span class="n">node_size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">edgelist</span><span class="o">=</span><span class="n">and_edges</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">edge_width</span><span class="p">,</span>
+            <span class="n">arrowsize</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="s1">&#39;violet&#39;</span><span class="p">,</span>
+            <span class="n">node_size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">edgelist</span><span class="o">=</span><span class="n">single_edges</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">edge_width</span><span class="p">,</span> <span class="n">arrowsize</span><span class="o">=</span><span class="n">arrow_size</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+            <span class="n">edge_color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">node_size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mark</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="n">fsize</span><span class="p">,</span>
+            <span class="n">font_color</span><span class="o">=</span><span class="n">fcolor</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">get_current_fig_manager</span><span class="p">()</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+
+        <span class="n">handles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;text.usetex&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+        <span class="n">source_key</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
+            <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;SOURCE&#39;</span><span class="p">)</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source_key</span><span class="p">)</span>
+        <span class="n">user_key</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;^&#39;</span><span class="p">,</span>
+            <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;USER&#39;</span><span class="p">)</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user_key</span><span class="p">)</span>
+        <span class="n">hub_key</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>
+            <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;HUB&#39;</span><span class="p">)</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hub_key</span><span class="p">)</span>
+        <span class="n">switch_key</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span>
+            <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;SWITCH&#39;</span><span class="p">)</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">switch_key</span><span class="p">)</span>
+        <span class="n">pr_key</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>
+            <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Perturbation Resistant&#39;</span><span class="p">)</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pr_key</span><span class="p">)</span>
+
+        <span class="n">single_key</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\rightarrow$&#39;</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;SINGLE&#39;</span><span class="p">)</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">single_key</span><span class="p">)</span>
+        <span class="n">or_key</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$-\rightarrow$&#39;</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;brown&#39;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;OR&#39;</span><span class="p">)</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">or_key</span><span class="p">)</span>
+        <span class="n">and_key</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\rightarrow$&#39;</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;violet&#39;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;AND&#39;</span><span class="p">)</span>
+        <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">and_key</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="o">=</span><span class="n">handles</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">legend_loc</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="n">legend_ncol</span><span class="p">,</span>
+            <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="n">legend_anchor</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">)</span>        
+
+        <span class="k">if</span> <span class="n">save_to_file</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_to_file</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;landscape&#39;</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>
@@ -1389,7 +1586,7 @@
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on May 04, 2021.
+        Last updated on May 26, 2021.
       </span>
 
     </p>
