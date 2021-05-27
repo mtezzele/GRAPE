@@ -1234,8 +1234,8 @@ class GeneralGraph(nx.DiGraph):
     def print_graph(self, radius=None, initial_pos=None, fixed_nodes=None,
         n_iter=500, thresh=0.0001, size=800, border='black', edge_width=1.0,
         arrow_size=10, fsize=12, fcolor='k', ffamily='sans-serif',
-        title='Graph', input_cmap=None, legend_loc='upper right', legend_ncol=1,
-        legend_anchor=None, legend_fsize=12, save_to_file=None):
+        title='Graph', input_cmap=None, legend=True, legend_loc='upper right',
+        legend_ncol=1, legend_anchor=None, legend_fsize=12, save_to_file=None):
         """
 
         Print the graph.
@@ -1290,6 +1290,8 @@ class GeneralGraph(nx.DiGraph):
         :param input_cmap: colormap for coloring the different areas with
             different colors. If None, all nodes are colored as white.
         :type input_cmap: Matplotlib colormap, optional, default to None
+        :param legend: show the legend on/off.
+        :type legend: bool, optional, default to True
         :param legend_loc: the location of the legend.
         :type legend_loc: str, optional, default to 'upper right'
         :param legend_ncol: the number of columns that the legend has.
@@ -1405,7 +1407,8 @@ class GeneralGraph(nx.DiGraph):
             markersize=legend_fsize, label='AND')
         handles.append(and_key)
 
-        plt.legend(handles=handles, loc=legend_loc, ncol=legend_ncol,
+        if legend:
+            plt.legend(handles=handles, loc=legend_loc, ncol=legend_ncol,
             bbox_to_anchor=legend_anchor, fontsize=legend_fsize)        
 
         if save_to_file:
