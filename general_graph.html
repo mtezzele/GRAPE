@@ -1291,7 +1291,7 @@ efficiency between them and all the other nodes.</p></li>
 
 <dl class="method">
 <dt>
-<code class="sig-name descname">print_graph</code><span class="sig-paren">(</span><em class="sig-param">radius=None</em>, <em class="sig-param">initial_pos=None</em>, <em class="sig-param">fixed_nodes=None</em>, <em class="sig-param">n_iter=500</em>, <em class="sig-param">thresh=0.0001</em>, <em class="sig-param">size=800</em>, <em class="sig-param">border='black'</em>, <em class="sig-param">edge_width=1.0</em>, <em class="sig-param">arrow_size=10</em>, <em class="sig-param">fsize=12</em>, <em class="sig-param">fcolor='k'</em>, <em class="sig-param">ffamily='sans-serif'</em>, <em class="sig-param">title='Graph'</em>, <em class="sig-param">input_cmap=None</em>, <em class="sig-param">legend_loc='upper right'</em>, <em class="sig-param">legend_ncol=1</em>, <em class="sig-param">legend_anchor=None</em>, <em class="sig-param">legend_fsize=12</em>, <em class="sig-param">save_to_file=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.print_graph"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">print_graph</code><span class="sig-paren">(</span><em class="sig-param">radius=None</em>, <em class="sig-param">initial_pos=None</em>, <em class="sig-param">fixed_nodes=None</em>, <em class="sig-param">n_iter=500</em>, <em class="sig-param">thresh=0.0001</em>, <em class="sig-param">size=800</em>, <em class="sig-param">border='black'</em>, <em class="sig-param">edge_width=1.0</em>, <em class="sig-param">arrow_size=10</em>, <em class="sig-param">fsize=12</em>, <em class="sig-param">fcolor='k'</em>, <em class="sig-param">ffamily='sans-serif'</em>, <em class="sig-param">title='Graph'</em>, <em class="sig-param">input_cmap=None</em>, <em class="sig-param">legend=True</em>, <em class="sig-param">legend_loc='upper right'</em>, <em class="sig-param">legend_ncol=1</em>, <em class="sig-param">legend_anchor=None</em>, <em class="sig-param">legend_fsize=12</em>, <em class="sig-param">save_to_file=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grape/general_graph.html#GeneralGraph.print_graph"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Print the graph.
 Positions of the nodes are generated from a spring layout simulation,
 if not asked to be fixed during it.
@@ -1332,6 +1332,7 @@ The iteration stops if the error is below this threshold.</p></li>
 <li><p><strong>title</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>defaut to 'Graph'</em>) – title for figure window.</p></li>
 <li><p><strong>input_cmap</strong> (<em>Matplotlib colormap</em><em>, </em><em>optional</em><em>, </em><em>default to None</em>) – colormap for coloring the different areas with
 different colors. If None, all nodes are colored as white.</p></li>
+<li><p><strong>legend</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em><em>, </em><em>default to True</em>) – show the legend on/off.</p></li>
 <li><p><strong>legend_loc</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em>, </em><em>optional</em><em>, </em><em>default to 'upper right'</em>) – the location of the legend.</p></li>
 <li><p><strong>legend_ncol</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em><em>, </em><em>default to 1</em>) – the number of columns that the legend has.</p></li>
 <li><p><strong>legend_anchor</strong> (<em>2-tuple</em><em>, or </em><em>4-tuple of floats</em><em>, </em><em>optional</em><em>,
@@ -1517,7 +1518,7 @@ and valued by the source-target shortest path.</p></li>
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on May 26, 2021.
+        Last updated on May 27, 2021.
       </span>
 
     </p>

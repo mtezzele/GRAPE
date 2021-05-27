@@ -1395,8 +1395,8 @@
 <div class="viewcode-block" id="GeneralGraph.print_graph"><a class="viewcode-back" href="../../general_graph.html#grape.general_graph.GeneralGraph.print_graph">[docs]</a>    <span class="k">def</span> <span class="nf">print_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fixed_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">n_iter</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">thresh</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">edge_width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">arrow_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">fsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">fcolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">ffamily</span><span class="o">=</span><span class="s1">&#39;sans-serif&#39;</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Graph&#39;</span><span class="p">,</span> <span class="n">input_cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend_loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">,</span> <span class="n">legend_ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">legend_anchor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend_fsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">save_to_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Graph&#39;</span><span class="p">,</span> <span class="n">input_cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">legend_loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">,</span>
+        <span class="n">legend_ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">legend_anchor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">legend_fsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">save_to_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Print the graph.</span>
@@ -1451,6 +1451,8 @@
 <span class="sd">        :param input_cmap: colormap for coloring the different areas with</span>
 <span class="sd">            different colors. If None, all nodes are colored as white.</span>
 <span class="sd">        :type input_cmap: Matplotlib colormap, optional, default to None</span>
+<span class="sd">        :param legend: show the legend on/off.</span>
+<span class="sd">        :type legend: bool, optional, default to True</span>
 <span class="sd">        :param legend_loc: the location of the legend.</span>
 <span class="sd">        :type legend_loc: str, optional, default to &#39;upper right&#39;</span>
 <span class="sd">        :param legend_ncol: the number of columns that the legend has.</span>
@@ -1566,7 +1568,8 @@
             <span class="n">markersize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;AND&#39;</span><span class="p">)</span>
         <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">and_key</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="o">=</span><span class="n">handles</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">legend_loc</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="n">legend_ncol</span><span class="p">,</span>
+        <span class="k">if</span> <span class="n">legend</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="o">=</span><span class="n">handles</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">legend_loc</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="n">legend_ncol</span><span class="p">,</span>
             <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="n">legend_anchor</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">legend_fsize</span><span class="p">)</span>        
 
         <span class="k">if</span> <span class="n">save_to_file</span><span class="p">:</span>
@@ -1586,7 +1589,7 @@
     <p>
         &#169; Copyright 2018-2019, GRAPE contributors.
       <span class="lastupdated">
-        Last updated on May 26, 2021.
+        Last updated on May 27, 2021.
       </span>
 
     </p>
