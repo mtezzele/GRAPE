@@ -1,13 +1,16 @@
 from setuptools import setup, find_packages
-import grape
+
+meta = {}
+with open("grape/meta.py") as fp:
+    exec(fp.read(), meta)
 
 # Package meta-data.
-NAME = grape.__title__
+NAME = meta['__title__']
 DESCRIPTION = 'GRAph Parallel Environment.'
 URL = 'https://github.com/mathLab/GRAPE'
-MAIL = grape.__mail__
-AUTHOR = grape.__author__
-VERSION = grape.__version__
+MAIL = meta['__mail__']
+AUTHOR = meta['__author__']
+VERSION = meta['__version__']
 KEYWORDS = 'risk-analysis graph-theory parallel-programming shortest-path system-analysis fault-diagnostics'
 
 REQUIRED = [
