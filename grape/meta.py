@@ -1,3 +1,8 @@
+def get_current_year():
+    """ Return current year """
+    from datetime import datetime
+    return datetime.now().year
+
 __all__ = [
     '__project__',
     '__title__',
