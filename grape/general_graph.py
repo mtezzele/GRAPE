@@ -1277,7 +1277,7 @@ class GeneralGraph(nx.DiGraph):
         :type border: color, optional, default to 'black'
         :param edge_width: width of edges.
         :type edge_width: float, optional, default to 1.0
-        :param arrow_size: size of the arrow head head’s length and width.
+        :param arrow_size: size of the arrow head’s length and width.
         :type arrow_size: int, optional, default to 10
         :param fsize: font size for text labels.
         :type fsize: int, optional, default to 12
@@ -1310,7 +1310,8 @@ class GeneralGraph(nx.DiGraph):
             Interactive window is rendered in any case.
         :type save_to_file: string, optional, default to None
 
-
+        :return: a dictionary of positions keyed by node.
+        :rtype: dict
         :raises: ValueError
         """
 
@@ -1415,3 +1416,5 @@ class GeneralGraph(nx.DiGraph):
             plt.savefig(save_to_file, orientation='landscape', transparent=True)
         else:
             plt.show()
+        
+        return pos
