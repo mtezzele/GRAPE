@@ -63,7 +63,8 @@ class FaultDiagnosis():
         cols_to_str = ['init_status']
         gephi_nodes_df[cols_to_str] = gephi_nodes_df[cols_to_str].astype(str)
         conversions = {'nan': '', '1.0': '1', '0.0': '0'}
-        gephi_nodes_df['init_status'].replace(to_replace=conversions, inplace=True)
+        gephi_nodes_df['init_status'].replace(to_replace=conversions,
+            inplace=True)
 
         gephi_nodes_df[fields].to_csv('check_import_nodes.csv', index=False)
 
@@ -246,8 +247,7 @@ class FaultDiagnosis():
     
         toolbox.register("evaluate", self.fitness_evaluation)
         toolbox.register("mate", tools.cxUniform, indpb=params['indpb'])
-        toolbox.register("mutate", tools.mutShuffleIndexes,
-            indpb=params['indpb'])
+        toolbox.register("mutate", tools.mutFlipBit, indpb=params['indpb']) 
         toolbox.register("select", tools.selBest)
 
         pop = toolbox.population(n=params['npop'])
