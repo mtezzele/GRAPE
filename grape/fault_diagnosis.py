@@ -295,8 +295,15 @@ class FaultDiagnosis():
     
             # Evaluate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-            fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
-                initial_condition, weights) for ind in invalid_ind]
+
+            if (not parallel) or (len(invalid_ind) < mp.cpu_count()):
+                fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
+                    initial_condition, weights) for ind in invalid_ind]
+            else:
+                res_par = self.fitness_evaluation_parallel(invalid_ind,
+                    perturbed_nodes, initial_condition, weights)
+                res_par.sort(key=lambda x:x[0])
+                fitnesses = [x[2] for x in res_par]
 
             for ind, fit in zip(invalid_ind, list(fitnesses)):
                 ind.fitness.values = fit

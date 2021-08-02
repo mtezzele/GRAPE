@@ -1887,3 +1887,26 @@ class Test_FD(TestCase):
             final_status_after_element_perturbation,
             F.G.final_status,
             msg="FINAL STATUS failure: perturbation of element 1")
+
+    def test_final_status_after_element_perturbation_isolating_gens_parallel(self):
+        """
+        The following test checks final_status attribute after a perturbation.
+        The perturbation here considered is the perturbation of element '1'.
+        In this case, we have no fault resistant nodes.
+        In this test, with respect to the previous one, we require a large
+        population throughout the generations, in order to test also that
+        parallel part of the code.
+        """
+        F = FaultDiagnosis("tests/TOY_graph_nofaultresistant.csv", parallel=True)
+        F.simulate_element_perturbation(["1"], params={'npop': 400, 'ngen': 100,
+            'indpb': 0.6, 'tresh': 0.5, 'nsel': 50}, parallel=True)
+
+        final_status_after_element_perturbation = {
+            '2': 0,
+            '3': 0
+        }
+
+        self.assertDictEqual(
+            final_status_after_element_perturbation,
+            F.G.final_status,
+            msg="FINAL STATUS failure: perturbation of element 1")
