@@ -73,7 +73,7 @@ class FaultDiagnosis():
         self.edges_df.to_csv('check_import_edges.csv', index=False)
 
     def fitness_iteration_parallel(self, out_queue, ichunk, chunk_length,
-        individuals, perturbed_nodes, initial_condition, weights):
+        individuals, perturbed_nodes, initial_condition):
         """
 
         Parallel iteration for fitness evaluation. We append to the
@@ -90,22 +90,17 @@ class FaultDiagnosis():
         :param list perturbed_nodes: nodes(s) involved in the perturbing event.
         :param dict initial_condition: initial status (boolean) for the graph
             switches.
-        :param dict weights: weights for fitness evaluation on individuals.
-            Dict of: {str: float, str: float, str: float}:
-            - 'w1': weight multiplying number of actions (default to 1.0)
-            - 'w2': weight multiplying total final service (default to 1.0)
-            - 'w3': weight multiplying final graph size (default to 1.0)
 
         """
 
         for iter_ind in range(len(individuals)):
             ind_fit = (ichunk*chunk_length + iter_ind, individuals[iter_ind],
                 self.fitness_evaluation(individuals[iter_ind], perturbed_nodes,
-                initial_condition, weights))
+                initial_condition))
             out_queue.put(ind_fit)
 
     def fitness_evaluation_parallel(self, pop, perturbed_nodes,
-        initial_condition, weights):
+        initial_condition):
         """
 
         Wrapper for fitness evaluation. This methods spawns the processes for
@@ -115,11 +110,6 @@ class FaultDiagnosis():
         :param list perturbed_nodes: nodes(s) involved in the perturbing event.
         :param dict initial_condition: initial status (boolean) for the graph
             switches.
-        :param dict weights: weights for fitness evaluation on individuals.
-            Dict of: {str: float, str: float, str: float}:
-            - 'w1': weight multiplying number of actions (default to 1.0)
-            - 'w2': weight multiplying total final service (default to 1.0)
-            - 'w3': weight multiplying final graph size (default to 1.0)
 
         :return: list of tuples constituted by the index of the individual,
             the individual itself, and its fitness
@@ -135,7 +125,7 @@ class FaultDiagnosis():
         processes = [
             mp.Process( target=self.fitness_iteration_parallel,
             args=( out_queue, p, len(ind_chunks[0]), ind_chunks[p],
-                perturbed_nodes, initial_condition, weights ))
+                perturbed_nodes, initial_condition ))
                 for p in range(n_procs) ]
 
         for proc in processes:
@@ -152,8 +142,8 @@ class FaultDiagnosis():
 
         return fitnesses_tuples
 
-    def fitness_evaluation(self, individual, perturbed_nodes, initial_condition,
-        w):
+    def fitness_evaluation(self, individual, perturbed_nodes,
+        initial_condition):
         """
 
         Evaluation of fitness on individual.
@@ -167,11 +157,6 @@ class FaultDiagnosis():
             perturbing event.
         :param dict initial_condition: initial status (boolean) for the graph
             switches.
-        :param dict w: weights for fitness evaluation on individuals.
-            Dict of: {str: float, str: float, str: float}:
-            - 'w1': weight multiplying number of actions (default to 1.0)
-            - 'w2': weight multiplying total final service (default to 1.0)
-            - 'w3': weight multiplying final graph size (default to 1.0)
         """
 
         acts = np.sum(np.not_equal(list(initial_condition.values()),
@@ -201,8 +186,7 @@ class FaultDiagnosis():
 
                 for n in broken_nodes: T.remove_node(n)
 
-        fit = w['w1']*acts - w['w2']*sum(T.service.values()) - w['w3']*len(T)
-        return (fit,)
+        return (acts, sum(T.service.values()), len(T))
 
     def optimizer(self, perturbed_nodes, initial_condition, params, weights,
         parallel):
@@ -233,6 +217,10 @@ class FaultDiagnosis():
 
         logging.getLogger().setLevel(logging.INFO)
 
+        w1 = weights['w1']
+        w2 = weights['w2']
+        w3 = weights['w3']
+
         creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMin)
     
@@ -248,70 +236,84 @@ class FaultDiagnosis():
         toolbox.register("evaluate", self.fitness_evaluation)
         toolbox.register("mate", tools.cxUniform, indpb=params['indpb'])
         toolbox.register("mutate", tools.mutFlipBit, indpb=params['indpb']) 
-        toolbox.register("select", tools.selBest)
 
         pop = toolbox.population(n=params['npop'])
+
         # Evaluate the entire population
-        if not parallel:
+        if (not parallel) or (len(pop) < mp.cpu_count()):
             fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
-                initial_condition, weights) for ind in pop]
+                initial_condition) for ind in pop]
         else:
             res_par = self.fitness_evaluation_parallel(pop, perturbed_nodes,
-                initial_condition, weights)
+                initial_condition)
             res_par.sort(key=lambda x:x[0])
             fitnesses = [x[2] for x in res_par]
 
         for ind, fit in zip(pop, fitnesses):
-            ind.fitness.values = fit
-        fits = [ind.fitness.values[0] for ind in pop]
+            ind.fitness.values = (w1*fit[0] - w2*fit[1] - w3*fit[2],)
 
         # Variable keeping track of the number of generations
         g = 0
     
-        fitnesses = fits
         result = []
         # Begin the evolution
 
+        # Population is made by individuals and fitnesses
+        pop = [list(couple) for couple in zip(pop, fitnesses)]
+        pop.sort(key=lambda x: w1*x[1][0] - w2*x[1][1] - w3*x[1][2])
+
         while g < params['ngen']:
+
             # A new generation
             g = g + 1
 
             # Select the next generation individuals
-            offspring = toolbox.select(pop, params['nsel'])
-            # Clone the selected individuals
-            offspring = list(map(toolbox.clone, offspring))
+            offspring = [x[0] for x in pop[:params['nsel']]]
+            pop = pop[:params['nsel']]
+
+            invalid_ind = []
 
             # Apply crossover and mutation on the offspring
-            for child1, child2 in zip(offspring[::2], offspring[1::2]):
+            for parent1, parent2 in zip(offspring[::2], offspring[1::2]):
                 if random.random() < params['tresh']:
+                    child1 = toolbox.clone(parent1)
+                    child2 = toolbox.clone(parent2)
                     toolbox.mate(child1, child2)
                     del child1.fitness.values
+                    invalid_ind.append(child1)
                     del child2.fitness.values
+                    invalid_ind.append(child2)
     
-            for mutant in offspring:
+            for ind in offspring:
                 if random.random() < params['tresh']:
+                    mutant = toolbox.clone(ind)
                     toolbox.mutate(mutant)
                     del mutant.fitness.values
+                    invalid_ind.append(mutant)
     
             # Evaluate the individuals with an invalid fitness
-            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-
             if (not parallel) or (len(invalid_ind) < mp.cpu_count()):
                 fitnesses = [toolbox.evaluate(ind, perturbed_nodes,
-                    initial_condition, weights) for ind in invalid_ind]
+                    initial_condition) for ind in invalid_ind]
             else:
                 res_par = self.fitness_evaluation_parallel(invalid_ind,
-                    perturbed_nodes, initial_condition, weights)
+                    perturbed_nodes, initial_condition)
                 res_par.sort(key=lambda x:x[0])
                 fitnesses = [x[2] for x in res_par]
 
             for ind, fit in zip(invalid_ind, list(fitnesses)):
-                ind.fitness.values = fit
+                ind.fitness.values = (w1*fit[0] - w2*fit[1] - w3*fit[2],)
 
-            pop[:] = offspring[:] + invalid_ind[:]
+            ind_fit_invalid = [list(couple) for couple in zip(invalid_ind,
+                fitnesses)]
 
-            best = toolbox.select(pop, 1)
-            result.append([best[0], best[0].fitness.values[0]])
+            pop[:] = pop[:] + ind_fit_invalid[:]
+
+            # Sort the population according to fitness
+            pop.sort(key=lambda x: w1*x[1][0] - w2*x[1][1] - w3*x[1][2])
+
+            # Extracting best state
+            result.append(pop[0])
 
         logging.getLogger().setLevel(logging.DEBUG)
 
@@ -508,7 +510,7 @@ class FaultDiagnosis():
             self.G.remove_node(n)
 
     def apply_perturbation(self, perturbed_nodes, params, weights, parallel,
-        kind='element'):
+        verbose, kind='element'):
         """
 
         Perturbation simulator, actually applying the perturbation
@@ -534,6 +536,7 @@ class FaultDiagnosis():
             - 'w3': weight multiplying final graph size (default to 1.0)
         :param bool parallel: flag for parallel fitness evaluation of
             initial population
+        :param bool verbose: flag for verbose printing
         :param str kind: type of simulation, used to label output files,
             default to 'element'
 
@@ -543,10 +546,22 @@ class FaultDiagnosis():
         """
 
         if self.G.switches:
-            res = np.array(self.optimizer(perturbed_nodes, self.G.init_status,
-                params, weights, parallel))
-            best = dict(zip(self.G.init_status.keys(),
-                res[np.argmin(res[:, 1]), 0]))
+
+            res = self.optimizer(perturbed_nodes, self.G.init_status, params,
+                weights, parallel)
+
+            w1 = weights['w1']
+            w2 = weights['w2']
+            w3 = weights['w3']
+
+            if verbose:
+                with open('results_generations.dat', 'w') as f:
+                    for r in res:
+                        f.write(f'{r[0]} {r[1]}')
+                        f.write(f' {w1*r[1][0] - w2*r[1][1] - w3*r[1][2]}\n')
+
+            res.sort(key=lambda x: w1*x[1][0] - w2*x[1][1] - w3*x[1][2])
+            best = dict(zip(self.G.init_status.keys(), res[0][0]))
 
             initial_condition_sw = list(self.G.init_status.values())
             final_condition_sw = list(best.values())
@@ -584,7 +599,11 @@ class FaultDiagnosis():
                         for pre, attrs in init_open_edges[sw].items():
                             self.G.add_edge(pre, sw, **attrs)
 
-            logging.debug(f'BEST: {best}, with fitness: {np.min(res[:, 1])}')
+            print(f'\nBEST: {best}')
+            print(f'# of actions: {res[0][1][0]}')
+            print(f'Total final service: {res[0][1][1]}')
+            print(f'# of survived nodes: {res[0][1][2]}')
+            print(f'Fitness: {w1*res[0][1][0]-w2*res[0][1][1]-w3*res[0][1][2]}')
             self.G.final_status = best
 
         for node in perturbed_nodes:
@@ -602,7 +621,8 @@ class FaultDiagnosis():
 
     def simulate_element_perturbation(self, perturbed_nodes,
         params={'npop': 300, 'ngen': 100, 'indpb': 0.6, 'tresh': 0.5,
-        'nsel': 5}, weights={'w1': 1.0, 'w2': 1.0, 'w3': 1.0}, parallel=False):
+        'nsel': 5}, weights={'w1': 1.0, 'w2': 1.0, 'w3': 1.0}, parallel=False,
+        verbose=True):
         """
 
         Simulate a perturbation of one or multiple nodes.
@@ -627,6 +647,8 @@ class FaultDiagnosis():
         :param parallel: flag for parallel fitness evaluation of
             initial population, default to False
         :type parallel: bool, optional
+        :param verbose: flag for verbose outputi, default to True
+        :type verbose: bool, optional
 
         .. note:: A perturbation, depending on the considered system,
             may spread in all directions starting from the damaged
@@ -644,11 +666,11 @@ class FaultDiagnosis():
                 sys.exit()
 
         self.apply_perturbation(perturbed_nodes, params, weights, parallel,
-            kind='element')
+            verbose, kind='element')
 
     def simulate_area_perturbation(self, perturbed_areas, params={'npop': 300,
         'ngen': 100, 'indpb': 0.6, 'tresh': 0.5, 'nsel': 5}, weights={'w1': 1.0,
-        'w2': 1.0, 'w3': 1.0}, parallel=False):
+        'w2': 1.0, 'w3': 1.0}, parallel=False, verbose=True):
         """
 
         Simulate a perturbation in one or multiple areas.
@@ -695,7 +717,7 @@ class FaultDiagnosis():
                     if idx_area == area: nodes_in_area.append(idx)
 
         self.apply_perturbation(nodes_in_area, params, weights, parallel,
-            kind='area')
+            verbose, kind='area')
 
     def graph_characterization_to_file(self, filename):
         """
