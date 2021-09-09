@@ -1339,7 +1339,7 @@ class GeneralGraph(nx.DiGraph):
             col = np.array([col])
             nx.draw_networkx_nodes(self, pos, nodelist=[node], node_color=col,
                 node_shape=shapes[self.type[node]], node_size=size,
-                edgecolors=border)
+                edgecolors=border, alpha=0.5)
 
         pert_resistant = [node for node in self.perturbation_resistant.keys()
              if self.perturbation_resistant[node] == 1]
@@ -1349,7 +1349,7 @@ class GeneralGraph(nx.DiGraph):
             col = np.array([col])
             nx.draw_networkx_nodes(self, pos, nodelist=[node], node_color=col,
                 node_shape=shapes[self.type[node]], node_size=size,
-                edgecolors='red')
+                edgecolors=border, alpha=1.0)
 
         or_edges = [(u, v) for (u, v, d) in self.edges(data=True)
             if d['father_condition'] == 'OR']
@@ -1378,20 +1378,24 @@ class GeneralGraph(nx.DiGraph):
         handles = []
         plt.rcParams.update({"text.usetex": True})
 
-        source_key = mlines.Line2D([], [], color='white', marker='v',
-            markeredgecolor='black', markersize=legend_fsize, label='SOURCE')
+        source_key = mlines.Line2D([], [], color='black', alpha=0.5, marker='v',
+            markeredgecolor='black', markersize=legend_fsize, linewidth=0.0,
+            label='SOURCE')
         handles.append(source_key)
-        user_key = mlines.Line2D([], [], color='white', marker='^',
-            markeredgecolor='black', markersize=legend_fsize, label='USER')
+        user_key = mlines.Line2D([], [], color='black', alpha=0.5, marker='^',
+            markeredgecolor='black', markersize=legend_fsize, linewidth=0.0,
+            label='USER')
         handles.append(user_key)
-        hub_key = mlines.Line2D([], [], color='white', marker='o',
-            markeredgecolor='black', markersize=legend_fsize, label='HUB')
+        hub_key = mlines.Line2D([], [], color='black', alpha=0.5, marker='o',
+            markeredgecolor='black', markersize=legend_fsize, linewidth=0.0,
+            label='HUB')
         handles.append(hub_key)
-        switch_key = mlines.Line2D([], [], color='white', marker='X',
-            markeredgecolor='black', markersize=legend_fsize, label='SWITCH')
+        switch_key = mlines.Line2D([], [], color='black', alpha=0.5, marker='X',
+            markeredgecolor='black', markersize=legend_fsize, linewidth=0.0,
+            label='SWITCH')
         handles.append(switch_key)
-        pr_key = mlines.Line2D([], [], color='white', marker='o',
-            markeredgecolor='red', markersize=legend_fsize,
+        pr_key = mlines.Line2D([], [], color='black', alpha=1.0, marker='o',
+            markeredgecolor='black', markersize=legend_fsize, linewidth=0.0,
             label='Perturbation Resistant')
         handles.append(pr_key)
 
