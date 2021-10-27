@@ -7,6 +7,7 @@ with open("grape/meta.py") as fp:
 # Package meta-data.
 IMPORTNAME = meta['__title__']
 PIPNAME = meta['__packagename__']
+NAME = meta['__title__']
 DESCRIPTION = 'GRAph Parallel Environment.'
 URL = 'https://github.com/mathLab/GRAPE'
 MAIL = meta['__mail__']

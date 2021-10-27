@@ -17,6 +17,7 @@ __all__ = [
 
 __project__ = 'GRAPE'
 __packagename__ = 'grape-mathlab'
+__project__ = 'GRAPE'
 __title__ = "grape"
 __author__ = "Aurora Maurizio, Martina Teruzzi, Nicola Demo"
 __copyright__ = "Copyright 2019-{}, GRAPE contributors".format(get_current_year())
