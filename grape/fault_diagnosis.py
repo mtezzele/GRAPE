@@ -186,7 +186,18 @@ class FaultDiagnosis():
 
                 for n in broken_nodes: T.remove_node(n)
 
-        return (acts, sum(T.service.values()), len(T))
+        serv_at_usr = {key: T.service[key] for key in T.users}
+        usr_with_serv = {key: serv_at_usr[key] for key in serv_at_usr.keys()
+            if serv_at_usr[key] > 0.0}
+
+        avg_service = sum(T.service.values())
+        if len(usr_with_serv.keys()) != 0:
+            avg_service /= len(usr_with_serv.keys())
+        dist_from_avg =  {k: abs(v - avg_service)
+            for k, v in usr_with_serv.items()}
+        
+        return (acts, sum(T.service.values()), len(T),
+            len(usr_with_serv.keys()), sum(dist_from_avg.values()))
 
     def optimizer(self, perturbed_nodes, initial_condition, params, weights,
         parallel):
@@ -209,17 +220,17 @@ class FaultDiagnosis():
         :param dict weights: weights for fitness evaluation on individuals.
             Dict of: {str: float, str: float, str: float}:
             - 'w1': weight multiplying number of actions (default to 1.0)
-            - 'w2': weight multiplying total final service (default to 1.0)
-            - 'w3': weight multiplying final graph size (default to 1.0)
+            - 'w2': weight multiplying total final service (default to -1.0)
+            - 'w3': weight multiplying final graph size (default to -1.0)
+            - 'w4': weight multiplying number of users with non-zero service
+                (default to -1.0)
+            - 'w5': weight for service balance over users (default to 2.0)
         :param bool parallel: flag for parallel fitness evaluation of
             initial population
         """
 
         logging.getLogger().setLevel(logging.INFO)
-
-        w1 = weights['w1']
-        w2 = weights['w2']
-        w3 = weights['w3']
+        w = np.asarray(list(weights.values()))
 
         creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMin)
@@ -249,8 +260,8 @@ class FaultDiagnosis():
             res_par.sort(key=lambda x:x[0])
             fitnesses = [x[2] for x in res_par]
 
-        for ind, fit in zip(pop, fitnesses):
-            ind.fitness.values = (w1*fit[0] - w2*fit[1] - w3*fit[2],)
+        for ind, f in zip(pop, fitnesses):
+            ind.fitness.values = (np.dot(w, np.asarray(f)),)
 
         # Variable keeping track of the number of generations
         g = 0
@@ -260,7 +271,7 @@ class FaultDiagnosis():
 
         # Population is made by individuals and fitnesses
         pop = [list(couple) for couple in zip(pop, fitnesses)]
-        pop.sort(key=lambda x: w1*x[1][0] - w2*x[1][1] - w3*x[1][2])
+        pop.sort(key=lambda x: np.dot(w, np.asarray(x[1])))
 
         while g < params['ngen']:
 
@@ -301,8 +312,8 @@ class FaultDiagnosis():
                 res_par.sort(key=lambda x:x[0])
                 fitnesses = [x[2] for x in res_par]
 
-            for ind, fit in zip(invalid_ind, list(fitnesses)):
-                ind.fitness.values = (w1*fit[0] - w2*fit[1] - w3*fit[2],)
+            for ind, f in zip(invalid_ind, list(fitnesses)):
+                ind.fitness.values = (np.dot(w, np.asarray(f)),)
 
             ind_fit_invalid = [list(couple) for couple in zip(invalid_ind,
                 fitnesses)]
@@ -310,7 +321,7 @@ class FaultDiagnosis():
             pop[:] = pop[:] + ind_fit_invalid[:]
 
             # Sort the population according to fitness
-            pop.sort(key=lambda x: w1*x[1][0] - w2*x[1][1] - w3*x[1][2])
+            pop.sort(key=lambda x: np.dot(w, np.asarray(x[1])))
 
             # Extracting best state
             result.append(pop[0])
@@ -532,8 +543,11 @@ class FaultDiagnosis():
         :param dict weights: weights for fitness evaluation on individuals.
             Dict of: {str: float, str: float, str: float}:
             - 'w1': weight multiplying number of actions (default to 1.0)
-            - 'w2': weight multiplying total final service (default to 1.0)
-            - 'w3': weight multiplying final graph size (default to 1.0)
+            - 'w2': weight multiplying total final service (default to -1.0)
+            - 'w3': weight multiplying final graph size (default to -1.0)
+            - 'w4': weight multiplying number of users with non-zero service
+                (default to -1.0)
+            - 'w5': weight for service balance over users (default to 2.0)
         :param bool parallel: flag for parallel fitness evaluation of
             initial population
         :param bool verbose: flag for verbose printing
@@ -549,18 +563,16 @@ class FaultDiagnosis():
 
             res = self.optimizer(perturbed_nodes, self.G.init_status, params,
                 weights, parallel)
-
-            w1 = weights['w1']
-            w2 = weights['w2']
-            w3 = weights['w3']
+            w = np.asarray(list(weights.values()))
 
             if verbose:
                 with open('results_generations.dat', 'w') as f:
                     for r in res:
                         f.write(f'{r[0]} {r[1]}')
-                        f.write(f' {w1*r[1][0] - w2*r[1][1] - w3*r[1][2]}\n')
+                        fit = np.dot(w, np.asarray(r[1]))
+                        f.write(f'{fit}\n')
 
-            res.sort(key=lambda x: w1*x[1][0] - w2*x[1][1] - w3*x[1][2])
+            res.sort(key=lambda x: np.dot(w, np.asarray(x[1])))
             best = dict(zip(self.G.init_status.keys(), res[0][0]))
 
             initial_condition_sw = list(self.G.init_status.values())
@@ -572,9 +584,11 @@ class FaultDiagnosis():
         for sw, closed in self.G.init_status.items():
             if not closed:
                 logging.debug(f'Opened switch {sw} in initial configuration')
+                init_open_edges[sw] = {}
                 for pred in list(self.G.predecessors(sw)):
                     # if final config is closed for this switch I memorize it
-                    if flips[sw]: init_open_edges[sw] = {pred: self.G[pred][sw]}
+                    if flips[sw]:
+                        init_open_edges[sw][pred] = self.G[pred][sw]
                     self.G.remove_edge(pred, sw)
 
         self.check_paths_and_measures(prefix='original_')
@@ -600,10 +614,12 @@ class FaultDiagnosis():
                             self.G.add_edge(pre, sw, **attrs)
 
             print(f'\nBEST: {best}')
-            print(f'# of actions: {res[0][1][0]}')
+            print(f'Number of actions: {res[0][1][0]}')
             print(f'Total final service: {res[0][1][1]}')
-            print(f'# of survived nodes: {res[0][1][2]}')
-            print(f'Fitness: {w1*res[0][1][0]-w2*res[0][1][1]-w3*res[0][1][2]}')
+            print(f'Number of survived nodes: {res[0][1][2]}')
+            print(f'Number of users with non-zero service: {res[0][1][3]}')
+            print(f'Distance from average: {res[0][1][4]}')
+            fit = np.dot(w, np.asarray(res[0][1]))
             self.G.final_status = best
 
         for node in perturbed_nodes:
@@ -621,8 +637,8 @@ class FaultDiagnosis():
 
     def simulate_element_perturbation(self, perturbed_nodes,
         params={'npop': 300, 'ngen': 100, 'indpb': 0.6, 'tresh': 0.5,
-        'nsel': 5}, weights={'w1': 1.0, 'w2': 1.0, 'w3': 1.0}, parallel=False,
-        verbose=True):
+        'nsel': 5}, weights={'w1': 1.0, 'w2': -1.0, 'w3': -1.0, 'w4': -1.0,
+        'w5': 2.0}, parallel=False, verbose=True):
         """
 
         Simulate a perturbation of one or multiple nodes.
@@ -641,8 +657,11 @@ class FaultDiagnosis():
         :param weights: weights for fitness evaluation on individuals.
             Dict of: {str: float, str: float, str: float}:
             - 'w1': weight multiplying number of actions (default to 1.0)
-            - 'w2': weight multiplying total final service (default to 1.0)
-            - 'w3': weight multiplying final graph size (default to 1.0)
+            - 'w2': weight multiplying total final service (default to -1.0)
+            - 'w3': weight multiplying final graph size (default to -1.0)
+            - 'w4': weight multiplying number of users with non-zero service
+                (default to -1.0)
+            - 'w5': weight for service balance over users (default to 2.0)
         :type weights: dict, optional
         :param parallel: flag for parallel fitness evaluation of
             initial population, default to False
@@ -669,8 +688,9 @@ class FaultDiagnosis():
             verbose, kind='element')
 
     def simulate_area_perturbation(self, perturbed_areas, params={'npop': 300,
-        'ngen': 100, 'indpb': 0.6, 'tresh': 0.5, 'nsel': 5}, weights={'w1': 1.0,
-        'w2': 1.0, 'w3': 1.0}, parallel=False, verbose=True):
+        'ngen': 100, 'indpb': 0.6, 'tresh': 0.5, 'nsel': 5},
+        weights={'w1': 1.0, 'w2': -1.0, 'w3': -1.0, 'w4': -1.0, 'w5': 2.0},
+        parallel=False, verbose=True):
         """
 
         Simulate a perturbation in one or multiple areas.
@@ -689,8 +709,11 @@ class FaultDiagnosis():
         :param weights: weights for fitness evaluation on individuals.
             Dict of: {str: float, str: float, str: float}:
             - 'w1': weight multiplying number of actions (default to 1.0)
-            - 'w2': weight multiplying total final service (default to 1.0)
-            - 'w3': weight multiplying final graph size (default to 1.0)
+            - 'w2': weight multiplying total final service (default to -1.0)
+            - 'w3': weight multiplying final graph size (default to -1.0)
+            - 'w4': weight multiplying number of users with non-zero service
+                (default to -1.0)
+            - 'w5': weight for service balance over users (default to 2.0)
         :type weights: dict, optional
         :param parallel: flag for parallel fitness evaluation of
             initial population, default to False
